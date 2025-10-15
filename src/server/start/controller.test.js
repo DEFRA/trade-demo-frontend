@@ -1,7 +1,7 @@
 import { createServer } from '../server.js'
 import { statusCodes } from '../common/constants/status-codes.js'
 
-describe('#homeController', () => {
+describe('#startController', () => {
   let server
 
   beforeAll(async () => {
@@ -13,13 +13,15 @@ describe('#homeController', () => {
     await server.stop({ timeout: 0 })
   })
 
-  test('Should provide expected response', async () => {
+  test('Should provide expected response for start page', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
       url: '/'
     })
 
-    expect(result).toEqual(expect.stringContaining('Home |'))
+    expect(result).toEqual(expect.stringContaining('Manage Examples'))
+    expect(result).toEqual(expect.stringContaining('Start now'))
+    expect(result).toEqual(expect.stringContaining('Java Spring Boot backend'))
     expect(statusCode).toBe(statusCodes.ok)
   })
 })

@@ -1,0 +1,37 @@
+{% extends "layouts/page.njk" %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-xl">{{ heading }}</h1>
+
+      <p class="govuk-body">
+        Use this service to create, view, edit, and delete examples
+        in the trade demo backend system.
+      </p>
+
+      <p class="govuk-body">
+        This service demonstrates CDP platform integration with a
+        Java Spring Boot backend.
+      </p>
+
+      <h2 class="govuk-heading-m">Before you start</h2>
+
+      <p class="govuk-body">You can:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>view all existing examples</li>
+        <li>create new examples with name, value, and counter</li>
+        <li>edit existing examples</li>
+        <li>delete examples</li>
+      </ul>
+
+      {{ govukButton({
+        text: "Start now",
+        href: "/examples",
+        isStartButton: true
+      }) }}
+    </div>
+  </div>
+{% endblock %}

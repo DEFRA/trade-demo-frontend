@@ -1,7 +1,21 @@
-version: '3.4'
 services:
 
+  redis:
+    image: redis:7.2.3-alpine3.18
+    ports:
+      - '6379:6379'
+    restart: always
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - cdp-tenant
+
   localstack:
+    profiles: ["mongo", "postgres"]
     image: localstack/localstack:3.0.2
     ports:
       - '4566:4566' # LocalStack Gateway
@@ -14,84 +28,154 @@ services:
       SERVICES: s3,sqs,sns,firehose
       LOCALSTACK_HOST: 127.0.0.1
     volumes:
-      - '${TMPDIR:-/tmp}/localstack:/var/lib/localstack'
+      - localstack-data:/var/lib/localstack
       - ./compose/start-localstack.sh:/etc/localstack/init/ready.d/start-localstack.sh
     healthcheck:
       test: ['CMD', 'curl', 'localhost:4566']
       interval: 5s
+      timeout: 5s
       start_period: 5s
       retries: 3
-    networks:
-      - cdp-tenant
-
-  redis:
-    image: redis:7.2.3-alpine3.18
-    ports:
-      - '6379:6379'
     restart: always
     networks:
       - cdp-tenant
 
+################################################################################
+# MongoDB Backend Stack
+################################################################################
+
   mongodb:
+    profiles: ["mongo"]
     image: mongo:6.0.13
     networks:
       - cdp-tenant
-    ports:
-      - '27017:27017'
     volumes:
       - mongodb-data:/data
     restart: always
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', 'db.adminCommand("ping")']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
-################################################################################
-
-  your-frontend:
-    build: ./
+  trade-demo-backend:
+    profiles: ["mongo"]
+    build:
+      context: ../trade-demo-backend
+      target: development
     ports:
-      - '3000:3000'
-    links:
-      - 'localstack:localstack'
-      - 'redis:redis'
+      - '8085:8085'
     depends_on:
-      localstack:
+      mongodb:
         condition: service_healthy
-      redis:
-        condition: service_started
     env_file:
       - 'compose/aws.env'
     environment:
-      PORT: 3000
-      NODE_ENV: development
-      REDIS_HOST: redis
+      PORT: 8085
+      MONGO_URI: mongodb://mongodb:27017
+      MONGO_DATABASE: trade-demo-backend
+      ENVIRONMENT: local
+      LOG_LEVEL: DEBUG
       LOCALSTACK_ENDPOINT: http://localstack:4566
-      USE_SINGLE_INSTANCE_CACHE: true
+      AWS_REGION: eu-west-2
+
+      # MongoDB local overrides (standalone instance, no SSL)
+      MONGO_READ_PREFERENCE: primary
+      SPRING_DATA_MONGODB_SSL_ENABLED: false
+
+      # Spring profile (dev = exposes debugging actuator endpoints)
+      SPRING_PROFILES_ACTIVE: dev
     networks:
       - cdp-tenant
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8085/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
-  # your-backend:
-  #   image: defradigital/your-backend:${YOUR_BACKEND_VERSION:-latest}
-  #   ports:
-  #     - '3555:3555'
-  #   links:
-  #     - 'localstack:localstack'
-  #     - 'mongodb:mongodb'
-  #   depends_on:
-  #     localstack:
-  #       condition: service_healthy
-  #     mongodb:
-  #       condition: service_started
-  #   env_file:
-  #     - 'compose/aws.env'
-  #   environment:
-  #     PORT: 3555
-  #     NODE_ENV: development
-  #     LOCALSTACK_ENDPOINT: http://localstack:4566
-  #   networks:
-  #     - cdp-tenant
+################################################################################
+# PostgreSQL Backend Stack
+################################################################################
+
+  postgres:
+    profiles: ["postgres"]
+    image: postgres:16-alpine
+    ports:
+      - '5432:5432'
+    networks:
+      - cdp-tenant
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: trade_demo_postgres_backend
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    restart: always
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      start_period: 10s
+      retries: 3
+
+  trade-demo-postgres-backend:
+    profiles: ["postgres"]
+    build:
+      context: ../trade-demo-postgres-backend
+      target: development
+    ports:
+      - '8085:8085'
+      - '5005:5005' # Java debug port
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - 'compose/aws.env'
+    environment:
+      # Server
+      PORT: 8085
+
+      # Service Identity
+      SERVICE_VERSION: 0.0.0-local
+      ENVIRONMENT: local
+
+      # PostgreSQL
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: trade_demo_postgres_backend
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_SSL: false
+      DB_SSL_MODE: disable
+
+      # AWS (via LocalStack)
+      LOCALSTACK_ENDPOINT: http://localstack:4566
+      AWS_REGION: eu-west-2
+
+      # Logging
+      LOG_LEVEL: DEBUG
+
+      # Metrics (disabled locally)
+      ENABLE_METRICS: false
+
+      # Spring profile (dev = exposes debugging actuator endpoints)
+      SPRING_PROFILES_ACTIVE: dev
+    networks:
+      - cdp-tenant
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8085/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 ################################################################################
 
 volumes:
+  localstack-data:
   mongodb-data:
+  postgres-data:
 
 networks:
   cdp-tenant:

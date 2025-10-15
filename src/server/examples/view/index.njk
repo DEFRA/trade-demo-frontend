@@ -1,0 +1,127 @@
+{% extends "layouts/page.njk" %}
+
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+
+{% block beforeContent %}
+  {{ govukBackLink({
+    text: "Back to examples",
+    href: "/examples"
+  }) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% if errorMessage %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: [
+            {
+              text: errorMessage
+            }
+          ]
+        }) }}
+      {% endif %}
+
+      {% if not notFound and not errorMessage %}
+        <h1 class="govuk-heading-l">{{ heading }}</h1>
+
+        {{ govukSummaryList({
+          rows: [
+            {
+              key: {
+                text: "Name"
+              },
+              value: {
+                text: example.name
+              },
+              actions: {
+                items: [
+                  {
+                    href: "/example/" + example.id + "/edit",
+                    text: "Change",
+                    visuallyHiddenText: "name"
+                  }
+                ]
+              }
+            },
+            {
+              key: {
+                text: "Value"
+              },
+              value: {
+                text: example.value
+              },
+              actions: {
+                items: [
+                  {
+                    href: "/example/" + example.id + "/edit",
+                    text: "Change",
+                    visuallyHiddenText: "value"
+                  }
+                ]
+              }
+            },
+            {
+              key: {
+                text: "Counter"
+              },
+              value: {
+                text: example.counter if example.counter is not none and example.counter !== null else "Not provided"
+              },
+              actions: {
+                items: [
+                  {
+                    href: "/example/" + example.id + "/edit",
+                    text: "Change",
+                    visuallyHiddenText: "counter"
+                  }
+                ]
+              }
+            },
+            {
+              key: {
+                text: "ID"
+              },
+              value: {
+                text: example.id
+              }
+            }
+          ]
+        }) }}
+
+        <div class="govuk-button-group govuk-!-margin-top-6">
+          {{ govukButton({
+            text: "Edit example",
+            href: "/example/" + example.id + "/edit"
+          }) }}
+
+          <a class="govuk-link govuk-link--no-visited-state"
+             href="/example/{{ example.id }}/delete">
+            Delete example
+          </a>
+        </div>
+
+        <p class="govuk-body govuk-!-margin-top-6">
+          <a href="/examples" class="govuk-link">Back to all examples</a>
+        </p>
+      {% elif notFound %}
+        <h1 class="govuk-heading-l">{{ heading }}</h1>
+
+        {{ govukInsetText({
+          text: errorMessage
+        }) }}
+
+        <p class="govuk-body">
+          <a href="/examples" class="govuk-link">View all examples</a>
+        </p>
+      {% endif %}
+
+    </div>
+  </div>
+{% endblock %}
