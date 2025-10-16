@@ -1,0 +1,30 @@
+{% extends "layouts/page.njk" %}
+
+{% from "govuk/components/panel/macro.njk" import govukPanel %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {{ govukPanel({
+        titleText: heading,
+        html: "Your example ID<br><strong>" + (exampleId | escape) + "</strong>"
+      }) }}
+
+      <p class="govuk-body">The example has been created successfully.</p>
+
+      <h2 class="govuk-heading-m">What happens next</h2>
+
+      <p class="govuk-body">
+        You can view, edit, or delete this example from the examples list.
+      </p>
+
+      {{ govukButton({
+        text: "View all examples",
+        href: "/examples"
+      }) }}
+
+    </div>
+  </div>
+{% endblock %}

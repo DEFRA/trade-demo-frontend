@@ -13,10 +13,26 @@ ARG PORT_DEBUG
 ENV PORT=${PORT}
 EXPOSE ${PORT} ${PORT_DEBUG}
 
-COPY --chown=node:node --chmod=755 package*.json ./
-RUN npm install
+# Skip husky install in Docker (CI environment)
+ENV HUSKY=0
+
+COPY --chown=node:node --chmod=755 package*.json .npmrc ./
+RUN npm ci --ignore-scripts
 COPY --chown=node:node --chmod=755 . .
-RUN npm run build:frontend
+
+# Frontend assets built on host before Docker build (not in Dockerfile)
+# This matches CDP's GitHub Actions pattern where webpack builds on host
+#
+# Reasons for host build:
+# 1. @defra/cdp-auditing postinstall script hangs in Docker
+#    (see docs/DOCKER_BUILD_INVESTIGATION.md)
+# 2. webpack/sass-embedded hangs due to platform emulation issues
+#    (see docs/WEBPACK_BUILD_INVESTIGATION.md)
+# 3. CDP template uses same pattern in .github/workflows/
+#    (builds on host, uses 'set +e' to ignore Docker build errors)
+#
+# Build command: npm run build:frontend
+# Or use Makefile which handles this automatically: make dev-all
 
 CMD [ "npm", "run", "docker:dev" ]
 

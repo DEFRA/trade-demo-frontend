@@ -1,0 +1,94 @@
+{% extends "layouts/page.njk" %}
+
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block beforeContent %}
+  {{ govukBackLink({
+    text: "Back",
+    href: "/example/create/counter"
+  }) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% if errorList %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: errorList
+        }) }}
+      {% endif %}
+
+      <h1 class="govuk-heading-l">{{ heading }}</h1>
+
+      {{ govukSummaryList({
+        rows: [
+          {
+            key: {
+              text: "Name"
+            },
+            value: {
+              text: name
+            },
+            actions: {
+              items: [
+                {
+                  href: "/example/create/name",
+                  text: "Change",
+                  visuallyHiddenText: "name"
+                }
+              ]
+            }
+          },
+          {
+            key: {
+              text: "Value"
+            },
+            value: {
+              text: value
+            },
+            actions: {
+              items: [
+                {
+                  href: "/example/create/value",
+                  text: "Change",
+                  visuallyHiddenText: "value"
+                }
+              ]
+            }
+          },
+          {
+            key: {
+              text: "Counter"
+            },
+            value: {
+              text: counter if counter is not none and counter !== null else "Not provided"
+            },
+            actions: {
+              items: [
+                {
+                  href: "/example/create/counter",
+                  text: "Change",
+                  visuallyHiddenText: "counter"
+                }
+              ]
+            }
+          }
+        ]
+      }) }}
+
+      <form method="post">
+        <input type="hidden" name="crumb" value="{{ crumb }}" />
+
+        {{ govukButton({
+          text: "Create example"
+        }) }}
+      </form>
+
+    </div>
+  </div>
+{% endblock %}
