@@ -4,12 +4,6 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_trade-demo-frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DEFRA_trade-demo-frontend)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_trade-demo-frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=DEFRA_trade-demo-frontend)
 
-> **Migration Note:** This service was migrated from standalone development
-> to CDP-managed repository on 2025-10-15 (INSC-3). The migration preserved
-> all CDP infrastructure (GitHub Actions, OIDC permissions, ECR access) while
-> replacing the template code with a fully-developed GDS-compliant application.
-> Original template code is preserved in the `template-original-code` branch.
-
 ---
 
 Node.js/Hapi.js frontend demonstrating CDP platform integration with a Java Spring Boot backend.
@@ -102,71 +96,6 @@ Consequently, we need to run the frontend natively on the host machine.
 | Backend (Java) | Docker (amd64 emulated) | JVM bytecode, stable under emulation                       |
 | LocalStack     | Docker (amd64 emulated) | AWS services emulation                                     |
 
-The Core Delivery Platform (CDP) runs on **AWS ECS Fargate** using **amd64 (x86_64) compute**.
-All CDP base images (`defradigital/node-development`) are published as **amd64-only**, matching their production platform.
-
-#### CDP's Platform Architecture
-
-```
-┌─────────────┐    ┌──────────────┐    ┌─────────────┐
-│  Developer  │ -> │ GitHub amd64 │ -> │ ECS Fargate │
-│             │    │   runners    │    │   (amd64)   │
-└─────────────┘    └──────────────┘    └─────────────┘
-```
-
-#### Apple Silicon
-
-Apple Silicon Macs use **arm64 architecture**. Running amd64 Docker containers on arm64 requires **QEMU emulation**,
-which translates x86_64 instructions:
-
-```
-┌──────────────────────────────────────┐
-│  Apple Silicon Mac (arm64)           │
-│  ┌────────────────────────────────┐  │
-│  │  Docker Desktop + QEMU         │  │
-│  │  ┌──────────────────────────┐  │  │
-│  │  │ amd64 Container          │  │  │
-│  │  │ (CDP base image)         │  │  │
-│  │  │  ⚠️ Platform emulation   │  │  │
-│  │  └──────────────────────────┘  │  │
-│  └────────────────────────────────┘  │
-└──────────────────────────────────────┘
-```
-
-The frontend **cannot run in Docker** on Apple Silicon due to platform emulation issues.
-
-- npm install hangs (postinstall scripts spawn processes that hang under QEMU)
-- webpack build hangs (sass-embedded native binaries fail under emulation)
-- File watchers crash (nodemon segfaults with exit code 139)
-- Resource-intensive builds (webpack production mode)
-
-#### Issues Encountered
-
-**Issue #1: npm Install Hangs on Postinstall Scripts**
-
-The `@defra/cdp-auditing` dependency includes a postinstall script that initializes Husky (git hooks).
-Under QEMU emulation, this spawns child processes that hang indefinitely:
-
-```dockerfile
-RUN npm ci  # Hangs at @defra/cdp-auditing postinstall
-```
-
-npm 7+ runs lifecycle scripts in background. Under emulation, stdio handling and
-subprocess management differ from native execution, causing infinite hangs.
-
-**Workaround attempted:**
-
-```dockerfile
-RUN npm ci --ignore-scripts  # Completes (no postinstall)
-```
-
-**Issue #2: Webpack Build Hangs Silently**
-Webpack builds which run sass-embedded and Terser hang with no output:
-
-```dockerfile
-RUN npm run build:frontend  # Hangs silently, no output
-```
-
 ## CDP CI/CD:
 
 CDP's GitHub Actions don't build inside Docker either:
@@ -178,13 +107,6 @@ CDP's GitHub Actions don't build inside Docker either:
 - run: docker build . # ← Copies pre-built assets
   env: set +e # ← Ignore Docker build errors
 ```
-
-### CDP Changes Required
-
-If CDP publishes multi-arch images (`linux/amd64,linux/arm64`), this workaround becomes unnecessary. Until then, the hybrid approach provides the best developer experience on Apple Silicon.
-
-📖 **Full analysis**: [`PLATFORM_ARCHITECTURE.md`](PLATFORM_ARCHITECTURE.md)
-📋 **Investigation notes**: [`docs/DOCKER_BUILD_INVESTIGATION.md`](docs/DOCKER_BUILD_INVESTIGATION.md) | [`docs/WEBPACK_BUILD_INVESTIGATION.md`](docs/WEBPACK_BUILD_INVESTIGATION.md)
 
 ## Troubleshooting
 
@@ -227,31 +149,6 @@ lsof -i :3000
 
 # Try starting again
 make mongo     # or make postgres
-```
-
-### Port conflicts
-
-Ports used by services:
-
-- **3000**: Frontend
-- **8085**: Backend (MongoDB or PostgreSQL)
-- **6379**: Redis
-- **27017**: MongoDB (if using mongo profile)
-- **5432**: PostgreSQL (if using postgres profile)
-- **4566**: LocalStack
-
-```bash
-lsof -i :3000 :8085 :6379 :27017 :5432 :4566
-docker ps
-```
-
-### Health check failures
-
-Verify services are responding:
-
-```bash
-curl http://localhost:3000/health  # Frontend
-curl http://localhost:8085/health  # Backend
 ```
 
 ## Useful Docker Commands
@@ -321,12 +218,6 @@ const examples = await exampleApi.findAll(traceId)
 
 - Backend (either): `http://localhost:8085`
 - Set via `BACKEND_API_URL` environment variable
-
-**Deployed environments:**
-
-- Dev: `https://trade-demo-backend.dev.cdp-int.defra.cloud` or `https://trade-demo-postgres-backend.dev.cdp-int.defra.cloud`
-- Test: `https://trade-demo-backend.test.cdp-int.defra.cloud` or `https://trade-demo-postgres-backend.test.cdp-int.defra.cloud`
-- Prod: `https://trade-demo-backend.cdp-int.defra.cloud` or `https://trade-demo-postgres-backend.cdp-int.defra.cloud`
 
 ### Session Management
 
