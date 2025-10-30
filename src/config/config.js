@@ -227,6 +227,33 @@ export const config = convict({
       default: 'http://localhost:8085',
       env: 'BACKEND_API_URL'
     }
+  },
+  defraId: {
+    oidcDiscoveryUrl: {
+      doc: 'DEFRA ID OIDC discovery URL',
+      format: String,
+      default: null,
+      env: 'DEFRA_ID_OIDC_CONFIGURATION_URL'
+    },
+    clientId: {
+      doc: 'DEFRA ID OAuth client ID',
+      format: String,
+      default: null,
+      env: 'DEFRA_ID_CLIENT_ID'
+    },
+    clientSecret: {
+      doc: 'DEFRA ID OAuth client secret',
+      format: String,
+      default: null,
+      sensitive: true,
+      env: 'DEFRA_ID_CLIENT_SECRET'
+    },
+    serviceId: {
+      doc: 'DEFRA ID service identifier',
+      format: String,
+      default: null,
+      env: 'DEFRA_ID_SERVICE_ID'
+    }
   }
 })
 

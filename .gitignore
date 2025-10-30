@@ -9,4 +9,4 @@ coverage
 .cache
 .envrc
 tsconfig.tsbuildinfo
-.env
+.tool-versions
