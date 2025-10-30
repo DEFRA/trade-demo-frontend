@@ -10,6 +10,7 @@ import { createValue } from './examples/create-value/index.js'
 import { createCounter } from './examples/create-counter/index.js'
 import { createCheck } from './examples/create-check/index.js'
 import { createConfirmation } from './examples/create-confirmation/index.js'
+import { dashboard } from './dashboard/index.js'
 import { about } from './about/index.js'
 import { health } from './health/index.js'
 import { serveStaticFiles } from './common/helpers/serve-static-files.js'
@@ -35,7 +36,8 @@ export const router = {
         createCounter,
         createCheck,
         createConfirmation,
-        about
+        about,
+        dashboard
       ])
 
       // Static assets
