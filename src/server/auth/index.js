@@ -20,10 +20,6 @@ import jwt from '@hapi/jwt'
 import { config } from '../../config/config.js'
 import { getOidcEndpoints } from '../../auth/oidc-well-known-discovery.js'
 import { getRedirectPath } from '../../auth/state.js'
-import {
-  setSessionValue,
-  clearSessionValue
-} from '../common/helpers/session-helpers.js'
 
 /**
  * GET /auth/login
@@ -98,9 +94,12 @@ const callback = {
         loa: claims.loa
       }
 
-      // Store session in Redis (via @hapi/yar)
+      // Store session in Yar (Redis) - server-side source of truth
       request.logger.info('Storing session data in Redis')
-      setSessionValue(request, 'auth', sessionData)
+      request.yar.set('auth', sessionData)
+
+      // Set cookie auth (creates encrypted cookie with minimal data)
+      request.cookieAuth.set({ authenticated: true })
 
       // Redirect to original page or homepage
       const redirect = getRedirectPath(request)
@@ -138,7 +137,12 @@ const logout = {
   method: 'GET',
   path: '/auth/logout',
   async handler(request, h) {
-    clearSessionValue(request, 'auth') // Clear session data from Redis
+    // Clear session from Yar (Redis)
+    request.yar.clear('auth')
+
+    // Clear cookie
+    request.cookieAuth.clear()
+
     const oidcEndpoints = await getOidcEndpoints()
     const postLogoutUri = config.get('appBaseUrl')
     const logoutUrl = `${oidcEndpoints.end_session_endpoint}?post_logout_redirect_uri=${encodeURIComponent(postLogoutUri)}`
@@ -146,7 +150,7 @@ const logout = {
   },
   options: {
     auth: {
-      strategy: 'session-cookie',
+      strategy: 'session',
       mode: 'try'
     },
     description: 'Logout from DEFRA ID',
@@ -156,7 +160,7 @@ const logout = {
 
 export const auth = {
   plugin: {
-    name: 'auth',
+    name: 'auth-routes',
     register(server) {
       server.route([login, callback, logout])
     }

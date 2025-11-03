@@ -16,7 +16,7 @@ export const about = {
           options: {
             ...aboutController.options,
             auth: {
-              strategy: 'session-cookie',
+              strategy: 'session',
               mode: 'try' // Accessible to all, populates user info if authenticated
             }
           }

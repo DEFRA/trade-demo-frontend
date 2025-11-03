@@ -16,12 +16,12 @@
 import { describe, test, expect, beforeAll, afterAll } from 'vitest'
 
 // IMPORTANT: Import mocks FIRST (before server imports)
-import { mockOidcEndpoints } from '../../test/helpers/setup-mocks.js'
+import { mockOidcEndpoints } from '../../../test/helpers/setup-mocks.js'
 
-import { createServer } from '../server/server.js'
-import { statusCodes } from '../server/common/constants/status-codes.js'
-import { createTestUser } from '../test-helpers/defra-id-stub-helper.js'
-import { sessionFromUser } from '../test-helpers/auth-test-helpers.js'
+import { createServer } from '../server.js'
+import { statusCodes } from '../common/constants/status-codes.js'
+import { createTestUser } from '../../test-helpers/defra-id-stub-helper.js'
+import { sessionFromUser } from '../../test-helpers/auth-test-helpers.js'
 
 describe('Auth Flow Integration Tests', () => {
   let server
@@ -43,9 +43,9 @@ describe('Auth Flow Integration Tests', () => {
         url: '/dashboard'
       })
 
-      // Assert: Redirects to login
+      // Assert: Redirects to login with next parameter
       expect(response.statusCode).toBe(statusCodes.movedTemporarily)
-      expect(response.headers.location).toBe('/auth/login')
+      expect(response.headers.location).toBe('/auth/login?next=%2Fdashboard')
     })
 
     test('Should allow access to protected route with valid session', async () => {
@@ -62,7 +62,7 @@ describe('Auth Flow Integration Tests', () => {
         method: 'GET',
         url: '/dashboard',
         auth: {
-          strategy: 'session-cookie',
+          strategy: 'session',
           credentials: session
         }
       })
@@ -142,10 +142,10 @@ describe('Auth Flow Integration Tests', () => {
         url: '/dashboard?login_hint=user@example.com'
       })
 
-      // Assert: Redirects to login with login_hint
+      // Assert: Redirects to login with login_hint and next parameter
       expect(response.statusCode).toBe(statusCodes.movedTemporarily)
       expect(response.headers.location).toBe(
-        '/auth/login?login_hint=user%40example.com'
+        '/auth/login?login_hint=user%40example.com&next=%2Fdashboard%3Flogin_hint%3Duser%40example.com'
       )
     })
   })
@@ -164,13 +164,13 @@ describe('Auth Flow Integration Tests', () => {
       const response1 = await server.inject({
         method: 'GET',
         url: '/dashboard',
-        auth: { strategy: 'session-cookie', credentials: session }
+        auth: { strategy: 'session', credentials: session }
       })
 
       const response2 = await server.inject({
         method: 'GET',
         url: '/dashboard',
-        auth: { strategy: 'session-cookie', credentials: session }
+        auth: { strategy: 'session', credentials: session }
       })
 
       // Assert: Both requests succeed
@@ -189,18 +189,12 @@ describe('Auth Flow Integration Tests', () => {
         url: '/dashboard'
       })
 
-      // Assert: Redirects to login
+      // Assert: Redirects to login with next parameter containing original path
       expect(response.statusCode).toBe(statusCodes.movedTemporarily)
-      expect(response.headers.location).toBe('/auth/login')
+      expect(response.headers.location).toBe('/auth/login?next=%2Fdashboard')
 
-      // Assert: Session cookie created (contains saved path)
-      const cookies = response.headers['set-cookie']
-      const hasSessionCookie = Array.isArray(cookies)
-        ? cookies.some((c) => c.startsWith('session='))
-        : cookies?.startsWith('session=')
-
-      expect(hasSessionCookie).toBe(true)
-      // Note: Redirect path is stored in yar session, verified by callback route
+      // Note: @hapi/cookie's appendNext stores redirect path in 'next' query param
+      // After successful auth, callback handler reads this param to redirect user back
     })
 
     test('Should save redirect path with login_hint preserved', async () => {
@@ -211,15 +205,13 @@ describe('Auth Flow Integration Tests', () => {
         url: `/dashboard?login_hint=${encodeURIComponent(loginHint)}`
       })
 
-      // Assert: Redirects with login_hint
+      // Assert: Redirects with both login_hint and next parameter
       expect(response.statusCode).toBe(statusCodes.movedTemporarily)
       expect(response.headers.location).toBe(
-        `/auth/login?login_hint=${encodeURIComponent(loginHint)}`
+        `/auth/login?login_hint=${encodeURIComponent(loginHint)}&next=%2Fdashboard%3Flogin_hint%3Dsaved%2540example.com`
       )
 
-      // Assert: Session cookie exists
-      const cookies = response.headers['set-cookie']
-      expect(cookies).toBeDefined()
+      // Note: login_hint preserved in redirect URL, next param preserves full original URL
     })
   })
 })

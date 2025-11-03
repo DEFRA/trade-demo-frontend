@@ -230,7 +230,177 @@ This fully separates concerns: **Bell for initial identity**, **Cookie for sessi
 
 ## 8) Adapting to the DEFRA CDP template
 
-Start from the **CDP Node Frontend Template** [10]. Add your two plugins under `src/plugins/` and register them in the template’s server bootstrap. If the template offers a central plugin registration point or manifest, include your plugin entries there. Keep your **Azure AD secrets** in the template’s configuration/secret management approach.
+Start from the **CDP Node Frontend Template** [10]. Add your two plugins under `src/plugins/` and register them in the template's server bootstrap. If the template offers a central plugin registration point or manifest, include your plugin entries there. Keep your **Azure AD secrets** in the template's configuration/secret management approach.
+
+---
+
+## 9) DEFRA Implementation Notes (trade-demo-frontend)
+
+This section documents implementation decisions made for the DEFRA Customer Identity Service (DEFRA ID) integration in the trade-demo-frontend application.
+
+### 9.1 Plugin Architecture Decision
+
+**Question**: Should auth strategies and routes be consolidated into a single plugin or separated?
+
+**Decision**: **Separated** (matches DEFRA production patterns)
+
+**Evidence**:
+
+- **FCP-SFD-Frontend** (production): Separates `plugins/auth.js` (strategies) from `routes/auth-routes.js` (route array)
+- **CDP-DEFRA-ID-Demo** (official): Uses THREE separate plugins (defra-id strategy, session-cookie strategy, auth routes)
+- **Our Implementation**: `src/plugins/auth.js` (strategies) + `src/server/auth/index.js` (routes plugin named 'auth-routes')
+
+**Rationale**:
+
+- Proven pattern used in DEFRA production code
+- Allows testing strategies independently from routes
+- Matches CDP official demo architecture
+- Plugin naming collision avoided by naming routes plugin 'auth-routes'
+
+### 9.2 Session Storage Architecture
+
+**Pattern**: Hybrid @hapi/cookie + Yar (Redis)
+
+**Implementation**:
+
+```javascript
+// @hapi/cookie validates via custom function
+server.auth.strategy('session', 'cookie', {
+  cookie: { name: 'sid', password: '...', isSecure: true },
+  redirectTo: (request) => { /* preserve login_hint */ },
+  appendNext: true, // Automatic redirect path preservation
+
+  validate: async (request, session) => {
+    // Read server-side session from Yar (Redis)
+    const authData = request.yar.get('auth')
+
+    // Handle token expiry and refresh
+    if (tokenExpired && authData.refreshToken) {
+      const newTokens = await refreshTokens(...)
+      request.yar.set('auth', updatedAuth)
+      return { isValid: true, credentials: updatedAuth }
+    }
+
+    return { isValid: true, credentials: authData }
+  }
+})
+```
+
+**Why This Pattern**:
+
+- **Security**: Sensitive data (tokens, relationships, roles) stored server-side in Redis via Yar
+- **Cookie**: Only stores minimal encrypted flag (`{ authenticated: true }`)
+- **Idiomatic**: Uses standard `@hapi/cookie` scheme with custom validate function
+- **Token Refresh**: Automatic refresh in validate hook using `date-fns` for expiry checks
+- **Tracing**: Passes `x-cdp-request-id` header to refresh token calls for distributed tracing
+
+### 9.3 DEFRA ID Specifics
+
+**Provider**: DEFRA Customer Identity Service (OIDC/OAuth2)
+
+**Discovery**: Uses `/.well-known/openid-configuration` endpoint for dynamic configuration
+
+**Strategy Configuration**:
+
+```javascript
+server.auth.strategy('defra-id', 'bell', {
+  provider: 'defra-id', // Custom Bell provider
+  config: {
+    uri: await getOidcEndpoints() // Dynamic discovery
+  },
+  clientId: config.get('oidc.clientId'),
+  clientSecret: config.get('oidc.clientSecret'),
+  password: config.get('oidc.password'),
+  isSecure: config.get('oidc.secure'),
+  scope: ['openid', 'profile', 'email', 'offline_access'],
+  providerParams: {
+    audience: config.get('oidc.audience')
+  }
+})
+```
+
+**Custom Claims**: DEFRA ID tokens include:
+
+- `contactId`: Unique DEFRA contact identifier
+- `relationships`: Organisation enrollments with status
+- `roles`: User roles within organisations
+- `aal`: Authentication Assurance Level
+- `loa`: Level of Assurance
+
+### 9.4 Redirect Path Preservation
+
+**Feature**: `@hapi/cookie` with `appendNext: true`
+
+**Behavior**:
+
+- Unauthenticated request to `/dashboard` → redirects to `/auth/login?next=%2Fdashboard`
+- After successful auth, callback handler reads `next` param and redirects back
+- Preserves query parameters: `/dashboard?login_hint=user@example.com` → `/auth/login?login_hint=...&next=...`
+
+**Custom redirectTo Function**:
+
+```javascript
+redirectTo: (request) => {
+  const loginHint = request.query.login_hint
+  const trimmed = loginHint ? String(loginHint).trim() : ''
+  if (trimmed) {
+    return `/auth/login?login_hint=${encodeURIComponent(trimmed)}`
+  }
+  return '/auth/login'
+}
+```
+
+Preserves `login_hint` parameter for pre-filling DEFRA ID login form.
+
+### 9.5 Route Authentication Modes
+
+**Protected Routes** (mode: 'required' or default):
+
+```javascript
+auth: 'session' // Shorthand for { strategy: 'session', mode: 'required' }
+```
+
+**Public Routes with Optional User Info** (mode: 'try'):
+
+```javascript
+auth: { strategy: 'session', mode: 'try' }
+```
+
+**Examples**:
+
+- `/dashboard` → `auth: 'session'` (protected)
+- `/about` → `auth: { strategy: 'session', mode: 'try' }` (public, user info if logged in)
+- `/auth/logout` → `auth: { strategy: 'session', mode: 'try' }` (works without session)
+
+### 9.6 Testing Approach
+
+**Integration Tests**: Use `server.inject()` with credentials
+
+```javascript
+await server.inject({
+  method: 'GET',
+  url: '/dashboard',
+  auth: {
+    strategy: 'session',
+    credentials: sessionFromUser(testUser)
+  }
+})
+```
+
+**Unit Tests**: Mock Yar, refreshTokens, and OIDC endpoints
+
+- `src/plugins/auth/cookie-validate.test.js` - Validate function tests (9 tests)
+- `src/routes/auth-routes.integration.test.js` - Full auth flow tests (10 tests)
+
+**Coverage**: All changes maintain 82%+ overall coverage
+
+### 9.7 Key Files
+
+- `src/plugins/auth.js` - Strategy registration (defra-id + session)
+- `src/server/auth/index.js` - Auth routes plugin (login, callback, logout)
+- `src/auth/oidc-well-known-discovery.js` - OIDC discovery client
+- `src/auth/refresh-tokens.js` - Token refresh logic with tracing
+- `src/auth/state.js` - Redirect path management
 
 ---
 

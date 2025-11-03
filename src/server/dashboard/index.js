@@ -17,13 +17,10 @@ export const dashboard = {
           ...dashboardController,
           options: {
             ...dashboardController.options,
-            auth: {
-              strategy: 'session-cookie',
-              mode: 'required' // Must be authenticated to access
-            },
+            auth: 'session', // Requires valid session
             description: 'Trade imports dashboard',
             notes:
-              'Protected route - entry point to imports journey. Requires valid session cookie.'
+              'Protected route - entry point to imports journey. Requires valid session.'
           }
         }
       ])

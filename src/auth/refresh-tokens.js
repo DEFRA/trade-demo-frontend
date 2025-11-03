@@ -2,10 +2,9 @@ import { config } from '../config/config.js'
 import { getOidcEndpoints } from './oidc-well-known-discovery.js'
 
 /**
- * Refresh OAuth2 Access Token
+ *  OAuth2 Refresh Access Token
  *
- * Uses the refresh token to obtain a new access token from DEFRA ID.
- * Implements OAuth2 Refresh Token Grant (RFC 6749 Section 6).
+ * Use refresh token to obtain a new access token from DEFRA ID.
  *
  * @param {string} refreshToken - OAuth2 refresh token
  * @param {string} traceId - CDP request trace ID for logging
