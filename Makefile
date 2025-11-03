@@ -5,18 +5,23 @@ help: ## Show available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36mmake %-20s\033[0m %s\n", $$1, $$2}'
 
 start: ## Start MongoDB backend stack (Redis + DEFRA ID stub + LocalStack + MongoDB + Backend)
-	docker compose --profile mongo up redis defra-id-stub localstack mongodb trade-demo-backend -d
-	@echo "MongoDB backend stack started:"
+	@echo "Starting MongoDB backend stack..."
+	docker compose --profile mongo up redis defra-id-stub localstack mongodb trade-demo-backend -d --wait
+	@echo ""
+	@echo "✓ All services ready:"
 	@echo "  - Backend: http://localhost:8085"
 	@echo "  - DEFRA ID stub: http://localhost:3200"
 	@echo "  - Redis: localhost:6379"
+	@echo ""
 	@echo "Starting frontend with hot reload..."
 	@echo "Logs: tail -f frontend.log"
 	export $$(grep -v '^#' .env | grep -v '^$$' | xargs) && npm run dev 2>&1 | tee frontend.log
 
 debug: ## Start MongoDB backend stack in debug mode (debugger pauses on startup)
-	docker compose --profile mongo up redis defra-id-stub localstack mongodb trade-demo-backend -d
-	@echo "MongoDB backend stack started:"
+	@echo "Starting MongoDB backend stack..."
+	docker compose --profile mongo up redis defra-id-stub localstack mongodb trade-demo-backend -d --wait
+	@echo ""
+	@echo "✓ All services ready:"
 	@echo "  - Backend: http://localhost:8085"
 	@echo "  - DEFRA ID stub: http://localhost:3200"
 	@echo "  - Redis: localhost:6379"
