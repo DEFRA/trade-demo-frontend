@@ -19,7 +19,11 @@
 import jwt from '@hapi/jwt'
 import { config } from '../../config/config.js'
 import { getOidcEndpoints } from '../../auth/oidc-well-known-discovery.js'
-import { getRedirectPath } from '../../auth/state.js'
+import {
+  setSessionValue,
+  clearSessionValue,
+  getSessionValue
+} from '../common/helpers/session-helpers.js'
 
 /**
  * GET /auth/login
@@ -94,15 +98,15 @@ const callback = {
         loa: claims.loa
       }
 
-      // Store session in Yar (Redis) - server-side source of truth
-      request.logger.info('Storing session data in Redis')
-      request.yar.set('auth', sessionData)
+      // Store session server-side (Redis in production, memory in dev)
+      request.logger.info('Storing session data')
+      setSessionValue(request, 'auth', sessionData)
 
       // Set cookie auth (creates encrypted cookie with minimal data)
       request.cookieAuth.set({ authenticated: true })
 
-      // Redirect to original page or homepage
-      const redirect = getRedirectPath(request)
+      // Redirect to original page or homepage (clear after reading)
+      const redirect = getSessionValue(request, 'redirectPath', true) || '/'
       request.logger.info(
         { redirect },
         'Redirecting after successful authentication'
@@ -137,8 +141,8 @@ const logout = {
   method: 'GET',
   path: '/auth/logout',
   async handler(request, h) {
-    // Clear session from Yar (Redis)
-    request.yar.clear('auth')
+    // Clear session
+    clearSessionValue(request, 'auth')
 
     // Clear cookie
     request.cookieAuth.clear()
