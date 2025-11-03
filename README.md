@@ -10,6 +10,7 @@ Node.js/Hapi.js frontend demonstrating CDP platform integration with a Java Spri
 
 **What it demonstrates:**
 
+- DEFRA ID OIDC authentication (OAuth2 + OpenID Connect)
 - Direct service-to-service communication with Java backend
 - CDP trace ID propagation (x-cdp-request-id)
 - Server-side session management (Redis)
@@ -24,43 +25,45 @@ Node.js/Hapi.js frontend demonstrating CDP platform integration with a Java Spri
 - Docker and Docker Compose
 - Backend repository: `../trade-demo-backend` (MongoDB) or `../trade-demo-postgres-backend` (PostgreSQL)
 
-### Choose Your Backend
-
-The frontend works with either MongoDB or PostgreSQL backend. Choose one:
+### Start Services
 
 ```bash
-make mongo      # MongoDB backend stack
-make postgres   # PostgreSQL backend stack
+make start              # Start MongoDB backend stack + frontend with hot reload
+make debug              # Start in debug mode (debugger on port 9229)
+make stop               # Stop all services
+make test               # Run unit tests
+make test-integration   # Run all tests including integration
+make logs               # Show Docker logs
+make ps                 # Show service status
+make help               # Show all commands
 ```
 
-Both commands start:
+`make start` launches:
 
-- **Docker**: Redis, LocalStack, Database, Backend (Java on port 8085)
+- **Docker**: Redis, DEFRA ID stub (port 3200), LocalStack, MongoDB, Backend (port 8085)
 - **Native**: Frontend with hot reload (port 3000)
 
 Access at http://localhost:3000
 
-### Other Commands
+The first time you run the app, you'll need to register a test user:
 
 ```bash
-make down       # Stop all services and remove volumes
-make logs       # Show logs from running services
-make ps         # Show service status
-make help       # Show all commands
+make register-user
 ```
 
 ## Development Workflow
 
 ### Local Development (without Docker)
 
-If you prefer to run the backend outside Docker:
+If you prefer to run services individually:
 
 ```bash
-# Start just Redis for sessions
-docker compose up -d
+# Start infrastructure services
+docker compose up redis defra-id-stub -d
 
 # Start your chosen backend from its repository
 cd ../trade-demo-backend && npm run dev           # MongoDB
+# OR
 cd ../trade-demo-postgres-backend && mvn spring-boot:run  # PostgreSQL
 
 # Start frontend
@@ -68,7 +71,10 @@ npm install
 npm run dev  # Runs on http://localhost:3000
 ```
 
-The frontend expects backend at `http://localhost:8085` by default. Override with `BACKEND_API_URL` environment variable if needed.
+The frontend expects:
+
+- Backend at `http://localhost:8085` (override with `BACKEND_API_URL`)
+- DEFRA ID stub at `http://localhost:3200` (override with `DEFRA_ID_OIDC_CONFIGURATION_URL`)
 
 ### Testing
 
@@ -113,24 +119,20 @@ CDP's GitHub Actions don't build inside Docker either:
 ### Docker Compose won't start
 
 ```bash
-# Check backend repos exist
-ls ../trade-demo-backend          # MongoDB backend
-ls ../trade-demo-postgres-backend # PostgreSQL backend
+# Check backend repo exists
+ls ../trade-demo-backend          # MongoDB backend required for default stack
 
 # View service status
 docker compose ps
 
-# Check logs (example for MongoDB stack)
+# Check logs
 docker compose logs -f redis
+docker compose logs -f defra-id-stub
 docker compose logs -f mongodb
 docker compose logs -f trade-demo-backend
 
-# Or for PostgreSQL stack
-docker compose logs -f postgres
-docker compose logs -f trade-demo-postgres-backend
-
 # Clean restart
-make down && make mongo     # or make postgres
+make stop && make start
 ```
 
 ### Frontend won't start
@@ -148,42 +150,63 @@ npm run build:frontend
 lsof -i :3000
 
 # Try starting again
-make mongo     # or make postgres
+make start
+```
+
+### Authentication issues
+
+If you can't log in:
+
+```bash
+# Register a test user with DEFRA ID stub
+make register-user
+
+# Check DEFRA ID stub is running
+curl http://localhost:3200/cdp-defra-id-stub/.well-known/openid-configuration
+
+# Check environment variables
+grep DEFRA_ID .env
 ```
 
 ## Useful Docker Commands
 
 ```bash
-# Start backend stacks
-docker compose --profile mongo up -d           # MongoDB backend stack
-docker compose --profile postgres up -d        # PostgreSQL backend stack
+# Start MongoDB backend stack (default)
+docker compose --profile mongo up -d
+
+# Start specific services
+docker compose up redis defra-id-stub -d       # Just infrastructure
+docker compose up redis defra-id-stub mongodb trade-demo-backend -d  # Full stack
 
 # View service logs
 docker compose logs -f                         # All running services
-docker compose logs -f trade-demo-backend      # MongoDB backend
-docker compose logs -f trade-demo-postgres-backend  # PostgreSQL backend
+docker compose logs -f defra-id-stub           # DEFRA ID stub
+docker compose logs -f trade-demo-backend      # Backend
 docker compose logs -f redis                   # Redis only
 
 # Rebuild specific service
 docker compose --profile mongo up --build trade-demo-backend
-docker compose --profile postgres up --build trade-demo-postgres-backend
 
 # Access container shells
-docker compose exec trade-demo-backend sh               # MongoDB backend
-docker compose exec trade-demo-postgres-backend sh      # PostgreSQL backend
-docker compose exec mongodb mongosh                     # MongoDB shell
-docker compose exec postgres psql -U postgres -d trade_demo_postgres_backend  # PostgreSQL shell
+docker compose exec trade-demo-backend sh      # Backend shell
+docker compose exec mongodb mongosh            # MongoDB shell
+docker compose exec redis redis-cli            # Redis shell
 
 # Stop and remove everything including volumes
-docker compose --profile mongo --profile postgres down -v
+docker compose down -v
 ```
 
 ## Environment Variables
 
 ### Required
 
-- `SESSION_COOKIE_PASSWORD` - Min 32 characters
+- `SESSION_COOKIE_PASSWORD` - Min 32 characters for cookie encryption
 - `BACKEND_API_URL` - Backend service URL
+- `DEFRA_ID_OIDC_CONFIGURATION_URL` - DEFRA ID OIDC discovery endpoint
+- `DEFRA_ID_CLIENT_ID` - OAuth2 client ID
+- `DEFRA_ID_CLIENT_SECRET` - OAuth2 client secret
+- `DEFRA_ID_SERVICE_ID` - DEFRA ID service identifier
+- `APP_BASE_URL` - Application base URL for OAuth callbacks
 
 ### Optional
 
@@ -191,17 +214,67 @@ docker compose --profile mongo --profile postgres down -v
 - `SESSION_CACHE_ENGINE` - `redis` or `memory` (default: memory in dev)
 - `REDIS_HOST` - Redis server (default: 127.0.0.1)
 - `LOG_LEVEL` - Logging level (default: info)
+- `DEFRA_ID_TOKEN_REFRESH_BUFFER_MINUTES` - Token refresh buffer in minutes (default: 1)
 
 ### Example `.env`
 
 ```bash
+# Session
 SESSION_COOKIE_PASSWORD=the-password-must-be-at-least-32-characters-long
-BACKEND_API_URL=http://trade-demo-backend:8085
 SESSION_CACHE_ENGINE=memory
+
+# Backend
+BACKEND_API_URL=http://localhost:8085
+
+# DEFRA ID (using local stub)
+DEFRA_ID_OIDC_CONFIGURATION_URL=http://localhost:3200/cdp-defra-id-stub/.well-known/openid-configuration
+DEFRA_ID_CLIENT_ID=test-client
+DEFRA_ID_CLIENT_SECRET=test-secret
+DEFRA_ID_SERVICE_ID=test-service
+APP_BASE_URL=http://localhost:3000
+
+# Logging
 LOG_LEVEL=debug
 ```
 
 ## Architecture
+
+### Authentication (DEFRA ID OIDC)
+
+Implements OAuth2/OpenID Connect authentication using idiomatic Hapi.js patterns:
+
+**Plugin Architecture:**
+
+- `src/plugins/auth.js` - Registers authentication strategies (Bell + Cookie)
+- `src/server/auth/index.js` - Defines auth routes (login, callback, logout)
+- `src/plugins/auth/defra-id-strategy.js` - Bell strategy configuration
+- `src/auth/oidc-well-known-discovery.js` - OIDC endpoint discovery
+- `src/auth/refresh-tokens.js` - Token refresh logic
+
+**Authentication Flow:**
+
+1. User accesses protected route (e.g., `/dashboard`)
+2. @hapi/cookie redirects to `/auth/login` (preserves original URL in `next` parameter)
+3. `/auth/login` redirects to DEFRA ID OAuth authorization endpoint
+4. User authenticates with DEFRA ID
+5. DEFRA ID redirects to `/auth/callback` with authorization code
+6. Callback exchanges code for tokens, stores in Yar (Redis)
+7. User redirected to original URL (from `next` parameter)
+
+**Session Management:**
+
+- **@hapi/cookie**: Validates requests, manages browser cookies
+- **Yar (Redis)**: Server-side storage for tokens and user data
+- **Custom validate function**: Reads from Yar, automatically refreshes expired tokens
+- **Token refresh**: Happens transparently with configurable buffer (default: 1 minute before expiry)
+
+**Key Patterns:**
+
+- Separation of authentication strategies (infrastructure) and routes (application logic)
+- Hybrid cookie + server-side session (security best practice)
+- Automatic token refresh in validate hook (transparent to application)
+- Redirect path preservation using @hapi/cookie's `appendNext`
+- Login hint preservation for cross-system SSO
 
 ### Backend Integration
 

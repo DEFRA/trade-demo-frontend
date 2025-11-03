@@ -297,6 +297,12 @@ export const config = convict({
       format: String,
       default: null,
       env: 'DEFRA_ID_SERVICE_ID'
+    },
+    tokenRefreshBufferMinutes: {
+      doc: 'Minutes before token expiry to trigger refresh (prevents race conditions)',
+      format: Number,
+      default: 1,
+      env: 'DEFRA_ID_TOKEN_REFRESH_BUFFER_MINUTES'
     }
   }
 })

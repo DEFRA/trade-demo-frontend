@@ -64,7 +64,7 @@ export const auth = {
          * and automatically refreshes expired access tokens
          *
          * @param {Object} request - Hapi request object
-         * @param {Object} session - Cookie session data (minimal, from @hapi/cookie)
+         * @param {Object} session - Cookie session data
          * @returns {Promise<Object>} Validation result with credentials
          */
         validate: async (request, session) => {
@@ -75,9 +75,10 @@ export const auth = {
             return { isValid: false }
           }
 
-          // Check if access token has expired (with 1-minute buffer)
+          // Check if access token has expired (with configurable buffer to prevent race conditions)
+          const bufferMinutes = config.get('defraId.tokenRefreshBufferMinutes')
           const tokenExpired = isPast(
-            subMinutes(parseISO(authData.expiresAt), 1)
+            subMinutes(parseISO(authData.expiresAt), bufferMinutes)
           )
 
           if (tokenExpired && authData.refreshToken) {
