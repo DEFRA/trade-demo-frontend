@@ -1,4 +1,4 @@
-.PHONY: help start debug stop logs ps
+.PHONY: help start debug test test-integration test-watch register-user stop logs ps
 
 help: ## Show available commands
 	@echo "Available commands:"
@@ -27,11 +27,17 @@ debug: ## Start MongoDB backend stack in debug mode (debugger pauses on startup)
 	@echo ""
 	export $$(grep -v '^#' .env | grep -v '^$$' | xargs) && npm run dev:debug
 
-test: ## Run tests
+test: ## Run unit tests only
 	npm test
+
+test-integration: ## Run all tests (unit + integration) with DEFRA ID stub
+	npm run test:integration
 
 test-watch: ## Run tests in watch mode
 	npm run test:watch
+
+register-user: ## Register a test user with DEFRA ID stub (required before first login)
+	@./scripts/register-test-user.sh
 
 stop: ## Stop all services and remove volumes
 	@echo "Stopping Docker services..."
@@ -47,3 +53,5 @@ logs: ## Show logs from all running services
 
 ps: ## Show status of all services
 	docker compose ps
+
+

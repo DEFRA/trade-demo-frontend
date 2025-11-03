@@ -8,12 +8,14 @@ export const createName = {
         {
           method: 'GET',
           path: '/example/create/name',
-          ...createNameController.get
+          ...createNameController.get,
+          options: { ...createNameController.get.options, auth: false }
         },
         {
           method: 'POST',
           path: '/example/create/name',
-          ...createNameController.post
+          ...createNameController.post,
+          options: { ...createNameController.post.options, auth: false }
         }
       ])
     }

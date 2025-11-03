@@ -5,6 +5,7 @@
 .public
 node_modules
 npm-debug.log
+*.log
 coverage
 .cache
 .envrc

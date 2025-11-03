@@ -8,12 +8,20 @@ export const edit = {
         {
           method: 'GET',
           path: '/example/{id}/edit',
-          ...editController.get
+          ...editController.get,
+          options: {
+            ...editController.get.options,
+            auth: false
+          }
         },
         {
           method: 'POST',
           path: '/example/{id}/edit',
-          ...editController.post
+          ...editController.post,
+          options: {
+            ...editController.post.options,
+            auth: false
+          }
         }
       ])
     }

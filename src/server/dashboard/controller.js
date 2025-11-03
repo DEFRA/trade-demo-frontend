@@ -8,7 +8,7 @@
  * @see src/server/auth/controller.js for session creation
  */
 
-import { getOidcEndpoints } from '../common/helpers/oidc-well-known-discovery.js'
+import { getOidcEndpoints } from '../../auth/oidc-well-known-discovery.js'
 
 /**
  * Factory function to create dashboard controller with injected dependencies

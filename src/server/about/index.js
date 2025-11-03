@@ -12,7 +12,14 @@ export const about = {
         {
           method: 'GET',
           path: '/about',
-          ...aboutController
+          ...aboutController,
+          options: {
+            ...aboutController.options,
+            auth: {
+              strategy: 'session-cookie',
+              mode: 'try' // Accessible to all, populates user info if authenticated
+            }
+          }
         }
       ])
     }

@@ -9,9 +9,28 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
 const fourHoursMs = 14400000
 const oneWeekMs = 604800000
 
-const isProduction = process.env.NODE_ENV === 'production'
+const isLocal = process.env.NODE_ENV !== 'production'
+const isPlatform = !isLocal // Deployed to CDP platform
 const isTest = process.env.NODE_ENV === 'test'
-const isDevelopment = process.env.NODE_ENV === 'development'
+
+// Environment-based configuration values
+// All local vs platform decisions are made here in one place
+const logFormat = isLocal ? 'pino-pretty' : 'ecs'
+const logRedact = isLocal
+  ? []
+  : ['req.headers.authorization', 'req.headers.cookie', 'res.headers']
+const secureContextEnabled = isPlatform
+const metricsEnabled = isPlatform
+const sessionCacheEngine = isLocal ? 'memory' : 'redis'
+const sessionCookieSecure = isPlatform
+const redisSingleInstance = isLocal
+const redisTLS = isPlatform
+const nunjucksWatch = isLocal
+const nunjucksNoCache = isLocal
+const csrfEnabled = !isTest
+const csrfCookieSecure = isPlatform
+const authForceHttps = isPlatform
+const authSecure = isPlatform
 
 convict.addFormats(convictFormatWithValidator)
 
@@ -46,6 +65,12 @@ export const config = convict({
     format: String,
     default: 'trade-demo-frontend'
   },
+  appBaseUrl: {
+    doc: 'Application base URL for OAuth callbacks',
+    format: String,
+    default: 'http://localhost:3000',
+    env: 'APP_BASE_URL'
+  },
   root: {
     doc: 'Project root',
     format: String,
@@ -57,20 +82,15 @@ export const config = convict({
     default: '/public',
     env: 'ASSET_PATH'
   },
-  isProduction: {
-    doc: 'If this application running in the production environment',
+  isLocal: {
+    doc: 'If this application is running locally (vs deployed to CDP platform)',
     format: Boolean,
-    default: isProduction
+    default: isLocal
   },
-  isDevelopment: {
-    doc: 'If this application running in the development environment',
+  isPlatform: {
+    doc: 'If this application is deployed to CDP platform (vs running locally)',
     format: Boolean,
-    default: isDevelopment
-  },
-  isTest: {
-    doc: 'If this application running in the test environment',
-    format: Boolean,
-    default: isTest
+    default: isPlatform
   },
   log: {
     enabled: {
@@ -88,15 +108,13 @@ export const config = convict({
     format: {
       doc: 'Format to output logs in.',
       format: ['ecs', 'pino-pretty'],
-      default: isProduction ? 'ecs' : 'pino-pretty',
+      default: logFormat,
       env: 'LOG_FORMAT'
     },
     redact: {
       doc: 'Log paths to redact',
       format: Array,
-      default: isProduction
-        ? ['req.headers.authorization', 'req.headers.cookie', 'res.headers']
-        : []
+      default: logRedact
     }
   },
   httpProxy: {
@@ -109,13 +127,13 @@ export const config = convict({
   isSecureContextEnabled: {
     doc: 'Enable Secure Context',
     format: Boolean,
-    default: isProduction,
+    default: secureContextEnabled,
     env: 'ENABLE_SECURE_CONTEXT'
   },
   isMetricsEnabled: {
     doc: 'Enable metrics reporting',
     format: Boolean,
-    default: isProduction,
+    default: metricsEnabled,
     env: 'ENABLE_METRICS'
   },
   session: {
@@ -123,7 +141,7 @@ export const config = convict({
       engine: {
         doc: 'backend cache is written to',
         format: ['redis', 'memory'],
-        default: isProduction ? 'redis' : 'memory',
+        default: sessionCacheEngine,
         env: 'SESSION_CACHE_ENGINE'
       },
       name: {
@@ -156,7 +174,7 @@ export const config = convict({
       secure: {
         doc: 'set secure flag on cookie',
         format: Boolean,
-        default: isProduction,
+        default: sessionCookieSecure,
         env: 'SESSION_COOKIE_SECURE'
       }
     }
@@ -190,13 +208,13 @@ export const config = convict({
     useSingleInstanceCache: {
       doc: 'Connect to a single instance of redis instead of a cluster.',
       format: Boolean,
-      default: !isProduction,
+      default: redisSingleInstance,
       env: 'USE_SINGLE_INSTANCE_CACHE'
     },
     useTLS: {
       doc: 'Connect to redis using TLS',
       format: Boolean,
-      default: isProduction,
+      default: redisTLS,
       env: 'REDIS_TLS'
     }
   },
@@ -204,12 +222,38 @@ export const config = convict({
     watch: {
       doc: 'Reload templates when they are changed.',
       format: Boolean,
-      default: isDevelopment
+      default: nunjucksWatch
     },
     noCache: {
       doc: 'Use a cache and recompile templates each time',
       format: Boolean,
-      default: isDevelopment
+      default: nunjucksNoCache
+    }
+  },
+  csrf: {
+    enabled: {
+      doc: 'Enable CSRF protection (disabled during test runs)',
+      format: Boolean,
+      default: csrfEnabled
+    },
+    cookie: {
+      secure: {
+        doc: 'Set secure flag on CSRF cookie',
+        format: Boolean,
+        default: csrfCookieSecure
+      }
+    }
+  },
+  auth: {
+    forceHttps: {
+      doc: 'Force HTTPS in OAuth flows',
+      format: Boolean,
+      default: authForceHttps
+    },
+    secure: {
+      doc: 'Use secure cookies in OAuth flows',
+      format: Boolean,
+      default: authSecure
     }
   },
   tracing: {

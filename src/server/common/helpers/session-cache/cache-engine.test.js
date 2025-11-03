@@ -56,13 +56,13 @@ describe('#getCacheEngine', () => {
 
   describe('When In memory cache engine has been requested in Production', () => {
     beforeEach(() => {
-      config.set('isProduction', true)
+      config.set('isLocal', false)
       getCacheEngine()
     })
 
     test('Should log Production warning message', () => {
       expect(mockLoggerError).toHaveBeenCalledWith(
-        'Catbox Memory is for local development only, it should not be used in production!'
+        'Catbox Memory is for local development only, it should not be used in deployed environments!'
       )
     })
 

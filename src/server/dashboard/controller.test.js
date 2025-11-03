@@ -7,12 +7,12 @@ import {
 
 describe('Dashboard Controller', () => {
   let mockRequest
-  let mockH
+  let mockViewRenderer
   let controller
 
   beforeEach(() => {
     mockRequest = {}
-    mockH = {
+    mockViewRenderer = {
       view: vi.fn()
     }
     // Inject both fake functions from controller
@@ -23,9 +23,9 @@ describe('Dashboard Controller', () => {
   })
 
   test('Should render dashboard view with user data', async () => {
-    await controller.handler(mockRequest, mockH)
+    await controller.handler(mockRequest, mockViewRenderer)
 
-    expect(mockH.view).toHaveBeenCalledWith(
+    expect(mockViewRenderer.view).toHaveBeenCalledWith(
       'dashboard/index',
       expect.objectContaining({
         pageTitle: 'Dashboard',
@@ -40,9 +40,9 @@ describe('Dashboard Controller', () => {
   })
 
   test('Should show imports link flag', async () => {
-    await controller.handler(mockRequest, mockH)
+    await controller.handler(mockRequest, mockViewRenderer)
 
-    expect(mockH.view).toHaveBeenCalledWith(
+    expect(mockViewRenderer.view).toHaveBeenCalledWith(
       'dashboard/index',
       expect.objectContaining({
         showImportsLink: true
@@ -51,18 +51,18 @@ describe('Dashboard Controller', () => {
   })
 
   test('Should call view with correct template name', async () => {
-    await controller.handler(mockRequest, mockH)
+    await controller.handler(mockRequest, mockViewRenderer)
 
-    expect(mockH.view).toHaveBeenCalledWith(
+    expect(mockViewRenderer.view).toHaveBeenCalledWith(
       'dashboard/index',
       expect.any(Object)
     )
   })
 
   test('Should pass OIDC endpoints to view when fetch succeeds', async () => {
-    await controller.handler(mockRequest, mockH)
+    await controller.handler(mockRequest, mockViewRenderer)
 
-    expect(mockH.view).toHaveBeenCalledWith(
+    expect(mockViewRenderer.view).toHaveBeenCalledWith(
       'dashboard/index',
       expect.objectContaining({
         oidcEndpoints: {
@@ -87,9 +87,9 @@ describe('Dashboard Controller', () => {
       mockGetOidcEndpoints
     )
 
-    await testController.handler(mockRequest, mockH)
+    await testController.handler(mockRequest, mockViewRenderer)
 
-    expect(mockH.view).toHaveBeenCalledWith(
+    expect(mockViewRenderer.view).toHaveBeenCalledWith(
       'dashboard/index',
       expect.objectContaining({
         oidcEndpoints: null,

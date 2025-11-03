@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { config } from '../../../config/config.js'
+import { config } from '../config/config.js'
 
 // Mock fetch globally
 global.fetch = vi.fn()

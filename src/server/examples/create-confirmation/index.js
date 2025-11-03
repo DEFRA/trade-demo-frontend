@@ -8,7 +8,8 @@ export const createConfirmation = {
         {
           method: 'GET',
           path: '/example/create/confirmation',
-          ...createConfirmationController
+          ...createConfirmationController,
+          options: { ...createConfirmationController.options, auth: false }
         }
       ])
     }

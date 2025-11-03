@@ -16,6 +16,11 @@ export const dashboard = {
           path: '/dashboard',
           ...dashboardController,
           options: {
+            ...dashboardController.options,
+            auth: {
+              strategy: 'session-cookie',
+              mode: 'required' // Must be authenticated to access
+            },
             description: 'Trade imports dashboard',
             notes:
               'Protected route - entry point to imports journey. Requires valid session cookie.'

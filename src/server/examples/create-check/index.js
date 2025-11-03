@@ -8,12 +8,14 @@ export const createCheck = {
         {
           method: 'GET',
           path: '/example/create/check',
-          ...createCheckController.get
+          ...createCheckController.get,
+          options: { ...createCheckController.get.options, auth: false }
         },
         {
           method: 'POST',
           path: '/example/create/check',
-          ...createCheckController.post
+          ...createCheckController.post,
+          options: { ...createCheckController.post.options, auth: false }
         }
       ])
     }

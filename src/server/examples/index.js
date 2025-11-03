@@ -13,7 +13,11 @@ export const examples = {
         {
           method: 'GET',
           path: '/examples',
-          ...examplesController.list
+          ...examplesController.list,
+          options: {
+            ...examplesController.list.options,
+            auth: false // Public demo route
+          }
         }
       ])
     }

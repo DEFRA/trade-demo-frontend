@@ -8,12 +8,14 @@ export const deleteExample = {
         {
           method: 'GET',
           path: '/example/{id}/delete',
-          ...deleteController.get
+          ...deleteController.get,
+          options: { ...deleteController.get.options, auth: false }
         },
         {
           method: 'POST',
           path: '/example/{id}/delete',
-          ...deleteController.post
+          ...deleteController.post,
+          options: { ...deleteController.post.options, auth: false }
         }
       ])
     }
