@@ -1,13 +1,15 @@
 /**
  * Dashboard Controller
  *
- * Entry point to the trade imports journey - eventually will require authentication.
- * For the moment just provides hard coded user data...
+ * Entry point to the trade imports journey - requires authentication.
+ * Displays user data from Redis session after OIDC authentication.
  *
  * @see src/server/dashboard/index.js for route registration
  * @see src/server/auth/controller.js for session creation
  */
 
+import { format } from 'date-fns'
+import { getSessionValue } from '../common/helpers/session-helpers.js'
 import { getOidcEndpoints } from '../../auth/oidc-well-known-discovery.js'
 
 /**
@@ -17,7 +19,7 @@ import { getOidcEndpoints } from '../../auth/oidc-well-known-discovery.js'
  * @returns {Object} Controller with async handler method
  */
 export const createDashboardController = function (
-  getSessionValue = getFakeSessionValue,
+  getSessionValue = getFakeSessionValue, // fake implementation for development/testing
   getEndpoints = getFakeOidcEndpoints
 ) {
   return {
@@ -39,13 +41,32 @@ export const createDashboardController = function (
         oidcError = error.message
       }
 
+      // Format expiration date if present
+      let formattedExpiresAt = null
+      if (authData?.expiresAt) {
+        try {
+          formattedExpiresAt = format(
+            new Date(authData.expiresAt),
+            "MMMM d, yyyy 'at' h:mm a"
+          )
+        } catch (error) {
+          // If date parsing fails, leave as null
+          formattedExpiresAt = null
+        }
+      }
+
       return h.view('dashboard/index', {
         pageTitle: 'Dashboard',
         heading: 'Trade Imports Dashboard',
         user: {
-          displayName: authData.displayName,
-          email: authData.email,
-          contactId: authData.contactId
+          displayName: authData?.displayName,
+          email: authData?.email,
+          contactId: authData?.contactId,
+          roles: authData?.roles,
+          relationships: authData?.relationships,
+          aal: authData?.aal,
+          loa: authData?.loa,
+          expiresAt: formattedExpiresAt
         },
         showImportsLink: true,
         oidcEndpoints,
@@ -83,11 +104,8 @@ export async function getFakeOidcEndpoints() {
   }
 }
 
-// Default export uses fake session but real OIDC discovery
-// When full authentication is implemented, replace getFakeSessionValue with:
-// import { getSessionValue } from '../common/helpers/session-helpers.js'
-// export const dashboardController = createDashboardController(getSessionValue, getOidcEndpoints)
+// Production export uses real session from Redis
 export const dashboardController = createDashboardController(
-  getFakeSessionValue,
+  getSessionValue,
   getOidcEndpoints
 )

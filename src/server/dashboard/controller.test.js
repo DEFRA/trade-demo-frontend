@@ -30,11 +30,11 @@ describe('Dashboard Controller', () => {
       expect.objectContaining({
         pageTitle: 'Dashboard',
         heading: 'Trade Imports Dashboard',
-        user: {
+        user: expect.objectContaining({
           displayName: 'Importer H Coded',
           email: 'hard@coded.com',
           contactId: '00000000000'
-        }
+        })
       })
     )
   })
