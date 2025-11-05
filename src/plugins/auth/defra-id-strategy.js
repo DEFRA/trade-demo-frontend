@@ -26,6 +26,8 @@ export function getDefraIdStrategy(config, oidcEndpoints) {
       auth: oidcEndpoints.authorization_endpoint,
       token: oidcEndpoints.token_endpoint,
       scope: ['openid', 'profile', 'email', 'offline_access'],
+      // PKCE (pkce: 'S256') is optional for DEFRA ID stub. Not used by cdp-defra-id-demo.
+      // Uncomment to enable: prevents code interception, adds code_challenge/code_verifier to flow.
 
       /**
        * Extract user profile from ID token
@@ -52,7 +54,10 @@ export function getDefraIdStrategy(config, oidcEndpoints) {
     clientId: config.get('defraId.clientId'),
     clientSecret: config.get('defraId.clientSecret'),
     forceHttps: config.get('auth.forceHttps'),
-    isSecure: config.get('auth.secure'),
+    // isSecure: false = cookie sent over HTTP or HTTPS. Single config for local HTTP and CDP HTTPS.
+    isSecure: config.get('auth.cookie.secure'),
+    // isSameSite: 'Strict' = cookie only sent to same-site. If callback fails, try 'Lax' (cross-site redirect).
+    isSameSite: config.get('auth.cookie.sameSite'),
 
     // CRITICAL: DEFRA-specific parameter required for authentication
     providerParams: (request) => {
@@ -70,11 +75,6 @@ export function getDefraIdStrategy(config, oidcEndpoints) {
       }
 
       return params
-    },
-
-    // Enable PKCE (Proof Key for Code Exchange) for enhanced security
-    config: {
-      usePKCE: true
     }
   }
 }

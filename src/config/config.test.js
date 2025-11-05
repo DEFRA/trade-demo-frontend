@@ -25,7 +25,9 @@ const configMatrix = {
   'csrf.enabled': [true, false, true], // TEST mode disables CSRF
   'csrf.cookie.secure': [false, false, true],
   'auth.forceHttps': [false, false, true],
-  'auth.secure': [false, false, true]
+  'auth.secure': [false, false, true],
+  'auth.cookie.secure': [false, false, false], // Always false (HTTP local, HTTP post-ALB)
+  'auth.cookie.sameSite': ['Strict', 'Strict', 'Strict'] // Match Bell default and cdp-defra-id-demo
 }
 
 describe('Config Comparison Matrix', () => {

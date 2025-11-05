@@ -31,6 +31,13 @@ const csrfEnabled = !isTest
 const csrfCookieSecure = isPlatform
 const authForceHttps = isPlatform
 const authSecure = isPlatform
+// Bell OAuth state cookie - temporary cookie during OAuth redirect flow (app → DEFRA ID → callback)
+// isSecure: false = cookie sent over HTTP or HTTPS. Required for local HTTP, works in CDP HTTPS.
+// Single config for all environments. Matches cdp-defra-id-demo pattern.
+const authCookieSecure = false
+// isSameSite: 'Strict' = cookie only sent to same-site requests. Matches Bell default and cdp-defra-id-demo.
+// If "Missing defra-id request token cookie" error in CDP, try 'Lax' (indicates cross-site redirect).
+const authCookieSameSite = 'Strict'
 
 convict.addFormats(convictFormatWithValidator)
 
@@ -254,6 +261,20 @@ export const config = convict({
       doc: 'Use secure cookies in OAuth flows',
       format: Boolean,
       default: authSecure
+    },
+    cookie: {
+      secure: {
+        doc: 'Set secure flag on Bell OAuth state cookie (must be false for CDP platform)',
+        format: Boolean,
+        default: authCookieSecure,
+        env: 'AUTH_COOKIE_SECURE'
+      },
+      sameSite: {
+        doc: 'SameSite attribute for Bell OAuth state cookie',
+        format: ['Strict', 'Lax', 'None'],
+        default: authCookieSameSite,
+        env: 'AUTH_COOKIE_SAME_SITE'
+      }
     }
   },
   tracing: {

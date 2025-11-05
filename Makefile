@@ -1,4 +1,4 @@
-.PHONY: help start debug test test-integration test-watch register-user stop logs ps
+.PHONY: help start debug test test-integration test-watch register-user register-cdp-user stop logs ps
 
 help: ## Show available commands
 	@echo "Available commands:"
@@ -41,8 +41,9 @@ test-integration: ## Run all tests (unit + integration) with DEFRA ID stub
 test-watch: ## Run tests in watch mode
 	npm run test:watch
 
-register-user: ## Register a test user with DEFRA ID stub (required before first login)
-	@./scripts/register-test-user.sh
+register-user: ## Register a test user with local DEFRA ID stub (required before first login)
+	@echo "Registering test user with local DEFRA ID stub..."
+	@./scripts/register-test-user.sh | jq '.'
 
 stop: ## Stop all services and remove volumes
 	@echo "Stopping Docker services..."
