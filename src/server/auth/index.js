@@ -21,8 +21,7 @@ import { config } from '../../config/config.js'
 import { getOidcEndpoints } from '../../auth/oidc-well-known-discovery.js'
 import {
   setSessionValue,
-  clearSessionValue,
-  getSessionValue
+  clearSessionValue
 } from '../common/helpers/session-helpers.js'
 
 /**
@@ -106,7 +105,8 @@ const callback = {
       request.cookieAuth.set({ authenticated: true })
 
       // Redirect to original page or homepage (clear after reading)
-      const redirect = getSessionValue(request, 'redirectPath', true) || '/'
+      const nextUrl = credentials.query?.next
+      const redirect = nextUrl ? decodeURIComponent(nextUrl) : '/'
       request.logger.info(
         { redirect },
         'Redirecting after successful authentication'
