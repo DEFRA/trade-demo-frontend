@@ -13,7 +13,14 @@ export const start = {
         {
           method: 'GET',
           path: '/',
-          ...startController
+          ...startController,
+          options: {
+            ...startController.options,
+            auth: {
+              strategy: 'session',
+              mode: 'try' // Accessible to all, populates user info if authenticated
+            }
+          }
         }
       ])
     }

@@ -1,10 +1,10 @@
-import { config } from '../../../config/config.js'
+import { config } from '../config/config.js'
 
 let cachedOidcEndpoints = null
 
 /**
  * Fetch OIDC endpoints from Defra ID discovery endpoint
- * Caches the result to avoid repeated HTTP calls
+ * Caches the result
  * @returns {Promise<Object>} OIDC endpoints
  */
 async function getOidcEndpoints() {

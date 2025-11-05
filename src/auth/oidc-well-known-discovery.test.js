@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { config } from '../../../config/config.js'
+import { config } from '../config/config.js'
 
 // Mock fetch globally
 global.fetch = vi.fn()
@@ -36,6 +36,7 @@ describe('OIDC Discovery', () => {
     expect(endpoints).toEqual(mockEndpoints)
     expect(global.fetch).toHaveBeenCalledTimes(1)
     // Verify fetch was called with the actual configured URL from .env
+    // DEFRA_ID_OIDC_CONFIGURATION_URL=http://localhost:3200/...
     expect(global.fetch).toHaveBeenCalledWith(
       config.get('defraId.oidcDiscoveryUrl')
     )

@@ -8,7 +8,11 @@ export const view = {
         {
           method: 'GET',
           path: '/example/{id}',
-          ...viewController
+          ...viewController,
+          options: {
+            ...viewController.options,
+            auth: false
+          }
         }
       ])
     }

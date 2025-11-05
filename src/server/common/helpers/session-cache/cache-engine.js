@@ -14,9 +14,9 @@ export function getCacheEngine(engine) {
     return new CatboxRedis({ client: redisClient })
   }
 
-  if (config.get('isProduction')) {
+  if (!config.get('isLocal')) {
     logger.error(
-      'Catbox Memory is for local development only, it should not be used in production!'
+      'Catbox Memory is for local development only, it should not be used in deployed environments!'
     )
   }
 

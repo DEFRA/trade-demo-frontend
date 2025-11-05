@@ -8,12 +8,14 @@ export const createCounter = {
         {
           method: 'GET',
           path: '/example/create/counter',
-          ...createCounterController.get
+          ...createCounterController.get,
+          options: { ...createCounterController.get.options, auth: false }
         },
         {
           method: 'POST',
           path: '/example/create/counter',
-          ...createCounterController.post
+          ...createCounterController.post,
+          options: { ...createCounterController.post.options, auth: false }
         }
       ])
     }

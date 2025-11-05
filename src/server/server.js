@@ -1,23 +1,15 @@
 import path from 'path'
 import hapi from '@hapi/hapi'
-import Scooter from '@hapi/scooter'
-import Crumb from '@hapi/crumb'
 
-import { router } from './router.js'
+import { plugins } from '../plugins/index.js'
 import { config } from '../config/config.js'
-import { pulse } from './common/helpers/pulse.js'
 import { catchAll } from './common/helpers/errors.js'
-import { nunjucksConfig } from '../config/nunjucks/nunjucks.js'
 import { setupProxy } from './common/helpers/proxy/setup-proxy.js'
-import { requestTracing } from './common/helpers/request-tracing.js'
-import { requestLogger } from './common/helpers/logging/request-logger.js'
-import { sessionCache } from './common/helpers/session-cache/session-cache.js'
 import { getCacheEngine } from './common/helpers/session-cache/cache-engine.js'
-import { secureContext } from '@defra/hapi-secure-context'
-import { contentSecurityPolicy } from './common/helpers/content-security-policy.js'
 
 export async function createServer() {
   setupProxy()
+
   const server = hapi.server({
     host: config.get('host'),
     port: config.get('port'),
@@ -54,40 +46,9 @@ export async function createServer() {
       strictHeader: false
     }
   })
-  await server.register([
-    requestLogger,
-    requestTracing,
-    secureContext,
-    pulse,
-    sessionCache,
-    nunjucksConfig,
-    {
-      plugin: Crumb,
-      options: {
-        cookieOptions: {
-          isSecure: config.get('isProduction'),
-          isHttpOnly: true,
-          isSameSite: 'Strict'
-        },
-        skip: (request) => {
-          // Skip CSRF in test environment
-          if (config.get('isTest')) {
-            return true
-          }
-
-          // Skip CSRF for health check and static assets
-          return (
-            request.path.startsWith('/health') ||
-            request.path.startsWith('/assets') ||
-            request.path.startsWith('/public')
-          )
-        }
-      }
-    },
-    Scooter,
-    contentSecurityPolicy,
-    router // Register all the controllers/routes defined in src/server/router.js
-  ])
+  // Register all plugins in correct order
+  // See src/plugins/index.js for plugin registration order and documentation
+  await server.register(plugins)
 
   server.ext('onPreResponse', catchAll)
 

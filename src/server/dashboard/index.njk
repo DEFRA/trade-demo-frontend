@@ -6,17 +6,55 @@
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-xl">{{ heading }}</h1>
 
-      <p class="govuk-body">
-        You are logged in as: <strong>{{ user.email }}</strong>
-      </p>
+      <h2 class="govuk-heading-m">Your Profile</h2>
 
-      <p class="govuk-body">
-        Display name: {{ user.displayName }}
-      </p>
+      {% if user.email %}
+        <p class="govuk-body">
+          <strong>Email:</strong> {{ user.email }}
+        </p>
+      {% endif %}
 
-      <p class="govuk-body">
-        Contact ID: {{ user.contactId }}
-      </p>
+      {% if user.displayName %}
+        <p class="govuk-body">
+          <strong>Display name:</strong> {{ user.displayName }}
+        </p>
+      {% endif %}
+
+      {% if user.contactId %}
+        <p class="govuk-body">
+          <strong>Contact ID:</strong> {{ user.contactId }}
+        </p>
+      {% endif %}
+
+      {% if user.roles and user.roles.length > 0 %}
+        <p class="govuk-body">
+          <strong>Roles:</strong> {{ user.roles | join(', ') }}
+        </p>
+      {% endif %}
+
+      {% if user.relationships and user.relationships.length > 0 %}
+        <p class="govuk-body">
+          <strong>Relationships:</strong> {{ user.relationships | join(', ') }}
+        </p>
+      {% endif %}
+
+      {% if user.aal %}
+        <p class="govuk-body">
+          <strong>Authentication Assurance Level:</strong> {{ user.aal }}
+        </p>
+      {% endif %}
+
+      {% if user.loa %}
+        <p class="govuk-body">
+          <strong>Level of Assurance:</strong> {{ user.loa }}
+        </p>
+      {% endif %}
+
+      {% if user.expiresAt %}
+        <p class="govuk-body">
+          <strong>Session expires:</strong> {{ user.expiresAt }}
+        </p>
+      {% endif %}
 
       <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 

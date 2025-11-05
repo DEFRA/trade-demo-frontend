@@ -11,6 +11,7 @@ import fetch from 'node-fetch'
 import { config } from '../../../config/config.js'
 
 const baseUrl = config.get('backendApi.baseUrl')
+const tracingHeader = config.get('tracing.header')
 
 /**
  * Create an error object from a failed response
@@ -40,7 +41,7 @@ export const exampleApi = {
     const response = await fetch(`${baseUrl}/example`, {
       method: 'GET',
       headers: {
-        'x-cdp-request-id': traceId
+        [tracingHeader]: traceId
       }
     })
 
@@ -61,7 +62,7 @@ export const exampleApi = {
     const response = await fetch(`${baseUrl}/example/${id}`, {
       method: 'GET',
       headers: {
-        'x-cdp-request-id': traceId
+        [tracingHeader]: traceId
       }
     })
 
@@ -83,7 +84,7 @@ export const exampleApi = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-cdp-request-id': traceId
+        [tracingHeader]: traceId
       },
       body: JSON.stringify(data)
     })
@@ -107,7 +108,7 @@ export const exampleApi = {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'x-cdp-request-id': traceId
+        [tracingHeader]: traceId
       },
       body: JSON.stringify(data)
     })
@@ -129,7 +130,7 @@ export const exampleApi = {
     const response = await fetch(`${baseUrl}/example/${id}`, {
       method: 'DELETE',
       headers: {
-        'x-cdp-request-id': traceId
+        [tracingHeader]: traceId
       }
     })
 

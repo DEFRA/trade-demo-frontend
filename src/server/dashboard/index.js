@@ -16,9 +16,11 @@ export const dashboard = {
           path: '/dashboard',
           ...dashboardController,
           options: {
+            ...dashboardController.options,
+            auth: 'session', // Requires valid session, implemented by hapi-auth-cookie, configured in src/server/auth.js
             description: 'Trade imports dashboard',
             notes:
-              'Protected route - entry point to imports journey. Requires valid session cookie.'
+              'Protected route - entry point to imports journey. Requires valid session.'
           }
         }
       ])

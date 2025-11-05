@@ -8,12 +8,14 @@ export const createValue = {
         {
           method: 'GET',
           path: '/example/create/value',
-          ...createValueController.get
+          ...createValueController.get,
+          options: { ...createValueController.get.options, auth: false }
         },
         {
           method: 'POST',
           path: '/example/create/value',
-          ...createValueController.post
+          ...createValueController.post,
+          options: { ...createValueController.post.options, auth: false }
         }
       ])
     }

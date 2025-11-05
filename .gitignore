@@ -5,8 +5,12 @@
 .public
 node_modules
 npm-debug.log
+*.log
 coverage
 .cache
 .envrc
 tsconfig.tsbuildinfo
 .tool-versions
+
+# Local research/notes (not for commit)
+hapi-oidc-cookie-architecture.md
