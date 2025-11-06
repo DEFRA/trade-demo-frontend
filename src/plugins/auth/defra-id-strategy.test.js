@@ -12,7 +12,9 @@ describe('DEFRA ID Strategy Configuration', () => {
         'defraId.clientSecret': 'test-client-secret',
         'defraId.serviceId': 'test-service-id',
         'auth.forceHttps': false,
-        'auth.secure': false
+        'auth.secure': false,
+        'auth.cookie.secure': false,
+        'auth.cookie.sameSite': 'Strict'
       }
       return values[key]
     })
@@ -28,13 +30,16 @@ describe('DEFRA ID Strategy Configuration', () => {
       expect(strategy).toHaveProperty('clientId')
       expect(strategy).toHaveProperty('clientSecret')
       expect(strategy).toHaveProperty('providerParams')
-      expect(strategy).toHaveProperty('config')
+      expect(strategy).toHaveProperty('isSecure')
+      expect(strategy).toHaveProperty('isSameSite')
     })
 
-    test('Should configure PKCE for security', () => {
+    test('Should configure Bell cookie security settings', () => {
       const strategy = getDefraIdStrategy(mockConfig, mockOidcEndpoints)
 
-      expect(strategy.config.usePKCE).toBe(true)
+      // Match cdp-defra-id-demo pattern: isSecure false, isSameSite Strict
+      expect(strategy.isSecure).toBe(false)
+      expect(strategy.isSameSite).toBe('Strict')
     })
 
     test('Should use OIDC endpoints from discovery', () => {

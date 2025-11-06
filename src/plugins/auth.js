@@ -36,6 +36,17 @@ export const auth = {
         )
       }
 
+      server.log(['info', 'auth'], {
+        msg: 'Registering authentication strategies',
+        oidcDiscoveryUrl,
+        clientId,
+        serviceId,
+        cookieSettings: {
+          isSecure: config.get('auth.cookie.secure'),
+          isSameSite: config.get('auth.cookie.sameSite')
+        }
+      })
+
       await server.register([Bell, Cookie, jwt])
 
       // Configure 'session' strategy using @hapi/cookie with custom validate
@@ -124,6 +135,15 @@ export const auth = {
         'bell',
         getDefraIdStrategy(config, oidcEndpoints)
       )
+
+      server.log(['info', 'auth'], {
+        msg: 'Authentication strategies registered successfully',
+        strategies: ['session', 'defra-id'],
+        oidcEndpoints: {
+          auth: oidcEndpoints.authorization_endpoint,
+          token: oidcEndpoints.token_endpoint
+        }
+      })
     }
   }
 }

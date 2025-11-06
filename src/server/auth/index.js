@@ -38,6 +38,9 @@ const login = {
     // Bell intercepts requests to this route and handles OAuth2 redirect
     // This fallback handler only executes if Bell encounters an error
     // or during unit testing when Bell is not active
+    request.logger.info(
+      'OAuth login initiated (fallback handler - Bell should intercept)'
+    )
     return h.redirect('/')
   },
   options: {
@@ -61,13 +64,26 @@ const callback = {
   path: '/auth/callback',
   async handler(request, h) {
     try {
-      request.logger.info('OAuth callback started')
+      // Debug: Log callback entry with query params and cookie state
+      request.logger.info(
+        {
+          query: request.query,
+          hasCookie: !!request.state['bell-defra-id'],
+          cookieKeys: Object.keys(request.state || {}),
+          isAuthenticated: request.auth.isAuthenticated
+        },
+        'OAuth callback received'
+      )
 
       // Bell has already validated tokens and made them available in request.auth
       const { credentials } = request.auth
       request.logger.info(
-        { isAuthenticated: request.auth.isAuthenticated },
-        'Bell authentication status'
+        {
+          isAuthenticated: request.auth.isAuthenticated,
+          hasAccessToken: !!credentials?.token,
+          hasRefreshToken: !!credentials?.refreshToken
+        },
+        'Bell authentication completed'
       )
 
       // Decode ID token to access DEFRA-specific claims
