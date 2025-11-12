@@ -17,11 +17,11 @@
   }
 
   &__user {
-    @include govuk-font($size: 16);
     display: inline-flex;
     align-items: center;
     gap: govuk-spacing(1);
     color: govuk-colour("black");
+    @include govuk-font($size: 16);
   }
 
   &__user-icon {
@@ -40,7 +40,7 @@
   }
 
   &__link {
-    @include govuk-font($size: 16);
     white-space: nowrap;
+    @include govuk-font($size: 16);
   }
 }

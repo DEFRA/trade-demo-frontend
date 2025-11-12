@@ -1,0 +1,35 @@
+{% extends "layouts/page.njk" %}
+
+{% from "govuk/components/panel/macro.njk" import govukPanel %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {{ govukPanel({
+        titleText: heading,
+        html: "Your CHED reference:<br><strong>" + chedReference + "</strong>"
+      }) }}
+
+      <h2 class="govuk-heading-m">What happens next</h2>
+
+      <p class="govuk-body">Your notification has been sent to the Border Control Post.</p>
+
+      <p class="govuk-body">You will receive updates about:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>inspection requirements</li>
+        <li>documentary checks</li>
+        <li>physical inspection scheduling</li>
+      </ul>
+
+      <p class="govuk-body">
+        Keep a note of your CHED reference: <strong>{{ chedReference }}</strong>
+      </p>
+
+      <p class="govuk-body">
+        <a href="/import/consignment/origin" class="govuk-link">Submit another notification</a>
+      </p>
+
+    </div>
+  </div>
+{% endblock %}

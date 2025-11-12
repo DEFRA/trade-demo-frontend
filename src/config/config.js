@@ -38,6 +38,9 @@ const authCookieSecure = false
 // isSameSite: 'Strict' = cookie only sent to same-site requests. Matches Bell default and cdp-defra-id-demo.
 // If "Missing defra-id request token cookie" error in CDP, try 'Lax' (indicates cross-site redirect).
 const authCookieSameSite = 'Strict'
+// Session cookie sameSite - required for CDP platform to maintain session across page navigations
+// 'Lax' allows session cookie to be sent during top-level navigation (e.g., OAuth redirects)
+const sessionCookieSameSite = 'Lax'
 
 convict.addFormats(convictFormatWithValidator)
 
@@ -183,6 +186,12 @@ export const config = convict({
         format: Boolean,
         default: sessionCookieSecure,
         env: 'SESSION_COOKIE_SECURE'
+      },
+      sameSite: {
+        doc: 'SameSite attribute for session cookie (Lax required for CDP platform)',
+        format: ['Strict', 'Lax', 'None'],
+        default: sessionCookieSameSite,
+        env: 'SESSION_COOKIE_SAME_SITE'
       }
     }
   },

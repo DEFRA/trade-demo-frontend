@@ -71,8 +71,8 @@ export const consignmentPurposeController = {
         setSessionValue(request, 'internal-market-purpose', '')
       }
 
-      // Redirect to next step (commodity selection - existing route)
-      return h.redirect('/import/commodity')
+      // Redirect to review screen
+      return h.redirect('/import/review')
     }
   }
 }

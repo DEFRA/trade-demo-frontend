@@ -5,6 +5,8 @@
 
 import { consignmentOriginController } from './controllers/consignment-origin.js'
 import { consignmentPurposeController } from './controllers/consignment-purpose.js'
+import { reviewController } from './controllers/review.js'
+import { confirmationController } from './controllers/confirmation.js'
 
 export const importJourney = {
   plugin: {
@@ -47,6 +49,37 @@ export const importJourney = {
           ...consignmentPurposeController.post,
           options: {
             ...consignmentPurposeController.post.options,
+            auth: 'session'
+          }
+        },
+
+        // Screen 3: Review and submit
+        {
+          method: 'GET',
+          path: '/import/review',
+          ...reviewController.get,
+          options: {
+            ...reviewController.get.options,
+            auth: 'session'
+          }
+        },
+        {
+          method: 'POST',
+          path: '/import/review',
+          ...reviewController.post,
+          options: {
+            ...reviewController.post.options,
+            auth: 'session'
+          }
+        },
+
+        // Screen 4: Confirmation
+        {
+          method: 'GET',
+          path: '/import/confirmation',
+          ...confirmationController.get,
+          options: {
+            ...confirmationController.get.options,
             auth: 'session'
           }
         }
