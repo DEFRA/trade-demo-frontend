@@ -1,103 +1,22 @@
 {% extends "layouts/page.njk" %}
-{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
 
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-xl">{{ heading }}</h1>
 
-      <h2 class="govuk-heading-m">Your Profile</h2>
-
-      {% if user.email %}
-        <p class="govuk-body">
-          <strong>Email:</strong> {{ user.email }}
-        </p>
-      {% endif %}
-
-      {% if user.displayName %}
-        <p class="govuk-body">
-          <strong>Display name:</strong> {{ user.displayName }}
-        </p>
-      {% endif %}
-
-      {% if user.contactId %}
-        <p class="govuk-body">
-          <strong>Contact ID:</strong> {{ user.contactId }}
-        </p>
-      {% endif %}
-
-      {% if user.roles and user.roles.length > 0 %}
-        <p class="govuk-body">
-          <strong>Roles:</strong> {{ user.roles | join(', ') }}
-        </p>
-      {% endif %}
-
-      {% if user.relationships and user.relationships.length > 0 %}
-        <p class="govuk-body">
-          <strong>Relationships:</strong> {{ user.relationships | join(', ') }}
-        </p>
-      {% endif %}
-
-      {% if user.aal %}
-        <p class="govuk-body">
-          <strong>Authentication Assurance Level:</strong> {{ user.aal }}
-        </p>
-      {% endif %}
-
-      {% if user.loa %}
-        <p class="govuk-body">
-          <strong>Level of Assurance:</strong> {{ user.loa }}
-        </p>
-      {% endif %}
-
-      {% if user.expiresAt %}
-        <p class="govuk-body">
-          <strong>Session expires:</strong> {{ user.expiresAt }}
-        </p>
-      {% endif %}
-
-      <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+      <h2 class="govuk-heading-m">Import Live Animals</h2>
 
       <p class="govuk-body">
-        <a href="/auth/logout" class="govuk-link">Sign out</a>
+        Start a new import journey for the importing of live animals entering Great Britain from the EU.
       </p>
 
-      <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-
-      {% if oidcError %}
-        {{ govukDetails({
-          summaryText: "OIDC Configuration (Error)",
-          html: "<p class='govuk-body'>Failed to fetch OIDC configuration: <strong>" + oidcError + "</strong></p>"
-        }) }}
-      {% elif oidcEndpoints %}
-        {{ govukDetails({
-          summaryText: "OIDC Configuration",
-          html: "
-            <dl class='govuk-summary-list'>
-              <div class='govuk-summary-list__row'>
-                <dt class='govuk-summary-list__key'>Issuer</dt>
-                <dd class='govuk-summary-list__value'>" + oidcEndpoints.issuer + "</dd>
-              </div>
-              <div class='govuk-summary-list__row'>
-                <dt class='govuk-summary-list__key'>Authorization Endpoint</dt>
-                <dd class='govuk-summary-list__value'><code>" + oidcEndpoints.authorization_endpoint + "</code></dd>
-              </div>
-              <div class='govuk-summary-list__row'>
-                <dt class='govuk-summary-list__key'>Token Endpoint</dt>
-                <dd class='govuk-summary-list__value'><code>" + oidcEndpoints.token_endpoint + "</code></dd>
-              </div>
-              <div class='govuk-summary-list__row'>
-                <dt class='govuk-summary-list__key'>End Session Endpoint</dt>
-                <dd class='govuk-summary-list__value'><code>" + oidcEndpoints.end_session_endpoint + "</code></dd>
-              </div>
-              <div class='govuk-summary-list__row'>
-                <dt class='govuk-summary-list__key'>JWKS URI</dt>
-                <dd class='govuk-summary-list__value'><code>" + oidcEndpoints.jwks_uri + "</code></dd>
-              </div>
-            </dl>
-          "
-        }) }}
-      {% endif %}
+      {{ govukButton({
+        text: "New Import",
+        href: "/import/commodity",
+        isStartButton: true
+      }) }}
     </div>
   </div>
 {% endblock %}

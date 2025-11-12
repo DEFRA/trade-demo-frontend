@@ -93,7 +93,15 @@ const callback = {
       const decoded = jwt.token.decode(idToken)
       const claims = decoded.decoded.payload
       request.logger.info(
-        { contactId: claims.contactId, email: claims.email },
+        {
+          contactId: claims.contactId,
+          email: claims.email,
+          given_name: claims.given_name,
+          family_name: claims.family_name,
+          name: claims.name,
+          preferred_username: claims.preferred_username,
+          allClaims: Object.keys(claims)
+        },
         'Token claims extracted'
       )
 

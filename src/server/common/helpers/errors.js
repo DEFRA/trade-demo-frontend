@@ -1,4 +1,5 @@
 import { statusCodes } from '../constants/status-codes.js'
+import { context } from '../../../config/nunjucks/context/context.js'
 
 function statusCodeMessage(statusCode) {
   switch (statusCode) {
@@ -29,8 +30,12 @@ export function catchAll(request, h) {
     request.logger.error(response?.stack)
   }
 
+  // Get full context (serviceName, serviceUrl, breadcrumbs, getAssetPath, etc.)
+  const fullContext = context(request)
+
   return h
     .view('error/index', {
+      ...fullContext,
       pageTitle: errorMessage,
       heading: statusCode,
       message: errorMessage

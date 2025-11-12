@@ -66,7 +66,10 @@ describe('context and cache', () => {
             }
           ],
           serviceName: 'trade-demo-frontend',
-          serviceUrl: '/'
+          serviceUrl: '/',
+          userSession: {
+            isAuthenticated: false
+          }
         })
       })
 
@@ -160,7 +163,10 @@ describe('context and cache', () => {
             }
           ],
           serviceName: 'trade-demo-frontend',
-          serviceUrl: '/'
+          serviceUrl: '/',
+          userSession: {
+            isAuthenticated: false
+          }
         })
       })
     })

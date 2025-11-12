@@ -4,6 +4,7 @@ import { start } from '../server/start/index.js'
 import { about } from '../server/about/index.js'
 import { health } from '../server/health/index.js'
 import { dashboard } from '../server/dashboard/index.js'
+import { account } from '../server/account/index.js'
 import { auth } from '../server/auth/index.js'
 import { serveStaticFiles } from '../server/common/helpers/serve-static-files.js'
 
@@ -33,6 +34,7 @@ export const router = {
       // Authentication routes
       await server.register([auth])
       await server.register([dashboard])
+      await server.register([account])
       await server.register([start, about])
 
       // Static assets
