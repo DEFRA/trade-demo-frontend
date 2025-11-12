@@ -1,4 +1,4 @@
-.PHONY: help start debug test test-integration test-watch register-user register-cdp-user stop logs ps
+.PHONY: help start debug test test-integration test-watch register-user register-cdp-user stop restart restart-frontend logs ps
 
 help: ## Show available commands
 	@echo "Available commands:"
@@ -54,10 +54,19 @@ stop: ## Stop all services and remove volumes
 	@pkill -f "nodemon.*src" 2>/dev/null || true
 	@echo "All services stopped."
 
+restart: ## Restart frontend with fresh logs
+	@echo "Restarting frontend..."
+	@lsof -ti :3000 | xargs kill -9 2>/dev/null || true
+	@pkill -f "npm run dev" 2>/dev/null || true
+	@pkill -f "nodemon.*src" 2>/dev/null || true
+	@sleep 1
+	@echo "" > frontend.log
+	@echo "Starting frontend with fresh log..."
+	@echo "View logs: tail -f frontend.log"
+	@export $$(grep -v '^#' .env | grep -v '^$$' | xargs) && npm run dev 2>&1 | tee frontend.log
+
 logs: ## Show logs from all running services
 	docker compose logs -f
 
 ps: ## Show status of all services
 	docker compose ps
-
-

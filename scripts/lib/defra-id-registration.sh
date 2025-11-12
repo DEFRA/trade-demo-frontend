@@ -36,31 +36,44 @@ print_result_json() {
   local email="$3"
   local name="$4"
   local login_url="$5"
-  local additional_fields="${6:-{}}"
+  local additional_fields="$6"
+
+  # Default to empty object if not provided
+  if [ -z "$additional_fields" ]; then
+    additional_fields="{}"
+  fi
 
   if [ "$success" = "true" ]; then
-    cat <<EOF
-{
-  "success": true,
-  "httpCode": ${HTTP_CODE},
-  "user": {
-    "id": "${user_id}",
-    "email": "${email}",
-    "name": "${name}"
-  },
-  "loginUrl": "${login_url}",
-  "additional": ${additional_fields}
-}
-EOF
+    # Use jq to build JSON properly, avoiding quote/escape issues
+    jq -n \
+      --argjson success true \
+      --arg httpCode "${HTTP_CODE:-0}" \
+      --arg userId "${user_id}" \
+      --arg email "${email}" \
+      --arg name "${name}" \
+      --arg loginUrl "${login_url}" \
+      --argjson additional "${additional_fields}" \
+      '{
+        success: $success,
+        httpCode: ($httpCode | tonumber),
+        user: {
+          id: $userId,
+          email: $email,
+          name: $name
+        },
+        loginUrl: $loginUrl,
+        additional: $additional
+      }'
   else
-    # Escape quotes in response body for JSON
-    local escaped_body=$(echo "$RESPONSE_BODY" | sed 's/"/\\"/g' | tr -d '\n')
-    cat <<EOF
-{
-  "success": false,
-  "httpCode": ${HTTP_CODE},
-  "error": "${escaped_body}"
-}
-EOF
+    # Use jq for error response too
+    jq -n \
+      --argjson success false \
+      --arg httpCode "${HTTP_CODE:-0}" \
+      --arg error "${RESPONSE_BODY}" \
+      '{
+        success: $success,
+        httpCode: ($httpCode | tonumber),
+        error: $error
+      }'
   fi
 }

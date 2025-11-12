@@ -1,0 +1,181 @@
+{
+  "id": 207486,
+  "referenceNumber": "DRAFT.GB.2025.1207486",
+  "version": 0,
+  "lastUpdated": "2025-11-11T12:21:29.323Z",
+  "lastUpdatedBy": {
+    "displayName": "Kai Atkinson",
+    "userId": "c9606501-44fe-ea11-a813-000d3aaa467a"
+  },
+  "type": "CVEDA",
+  "status": "DRAFT",
+  "isHighRiskEuImport": true,
+  "partOne": {
+    "personResponsible": {
+      "name": "Kai Atkinson",
+      "companyId": "0de0606e-46fe-ea11-a813-000d3aaa467a",
+      "companyName": "Kai Inc.",
+      "address": ["UNCANNY COMICS", "3 TARRING ROAD", "WORTHING", "BN11 4SS"],
+      "country": "GB",
+      "tracesID": 1001,
+      "phone": "0123456788",
+      "email": "kaiatkinson@jourrapide.com",
+      "contactId": "c9606501-44fe-ea11-a813-000d3aaa467a"
+    },
+    "consignor": {
+      "id": "8f2fac7f-e1c2-4d4a-832c-cce29afbf9d3",
+      "type": "exporter",
+      "status": "nonapproved",
+      "companyName": "Astra Rosales",
+      "address": {
+        "addressLine1": "43 East Hague Extension",
+        "addressLine2": "Delectus sit odio p",
+        "addressLine3": "Laborum Odio tempor",
+        "city": "Quas occaecat ut ear",
+        "postalZipCode": "30055",
+        "countryISOCode": "CH",
+        "telephone": "01783 772587",
+        "email": "revoje@mailinator.net"
+      },
+      "tracesId": 10056664
+    },
+    "consignee": {
+      "id": "94898d01-fc90-45f8-97d9-be6391aab2c6",
+      "type": "destination",
+      "status": "nonapproved",
+      "companyName": "Linus George Ltd",
+      "address": {
+        "addressLine1": "558 Oak Street",
+        "addressLine2": "Ut aperiam in volupt",
+        "addressLine3": "Nisi tempore aliqua",
+        "city": "Eligendi et beatae p",
+        "postalZipCode": "24271",
+        "countryISOCode": "CH",
+        "telephone": "01783 983022",
+        "email": "momazycy@mailinator.net"
+      },
+      "tracesId": 10056663
+    },
+    "importer": {
+      "id": "94898d01-fc90-45f8-97d9-be6391aab2c6",
+      "type": "importer",
+      "status": "nonapproved",
+      "companyName": "Linus George Ltd",
+      "address": {
+        "addressLine1": "558 Oak Street",
+        "addressLine2": "Ut aperiam in volupt",
+        "addressLine3": "Nisi tempore aliqua",
+        "city": "Eligendi et beatae p",
+        "postalZipCode": "24271",
+        "countryISOCode": "CH",
+        "telephone": "01783 983022",
+        "email": "momazycy@mailinator.net"
+      },
+      "tracesId": 10056663
+    },
+    "placeOfDestination": {
+      "id": "94898d01-fc90-45f8-97d9-be6391aab2c6",
+      "type": "destination",
+      "status": "nonapproved",
+      "companyName": "Linus George Ltd",
+      "address": {
+        "addressLine1": "558 Oak Street",
+        "addressLine2": "Ut aperiam in volupt",
+        "addressLine3": "Nisi tempore aliqua",
+        "city": "Eligendi et beatae p",
+        "postalZipCode": "24271",
+        "countryISOCode": "CH",
+        "telephone": "01783 983022",
+        "email": "momazycy@mailinator.net"
+      },
+      "tracesId": 10056663
+    },
+    "cphNumber": "cph-123",
+    "commodities": {
+      "numberOfPackages": 1,
+      "numberOfAnimals": 12,
+      "commodityComplement": [
+        {
+          "commodityID": "0102",
+          "commodityDescription": "Live bovine animals",
+          "complementID": 1,
+          "complementName": "Bos taurus",
+          "speciesID": "1148346",
+          "speciesName": "Bos taurus",
+          "speciesTypeName": "Domestic",
+          "speciesType": "16",
+          "speciesClass": "749313",
+          "speciesNomination": "Bos taurus"
+        }
+      ],
+      "complementParameterSet": [
+        {
+          "uniqueComplementID": "0d9172a7-813f-48ab-8e1a-5d428c206fc1",
+          "complementID": 1,
+          "speciesID": "1148346",
+          "keyDataPair": [
+            {
+              "key": "number_package",
+              "data": "1"
+            },
+            {
+              "key": "number_animal",
+              "data": "12"
+            }
+          ]
+        }
+      ],
+      "includeNonAblactedAnimals": false,
+      "countryOfOrigin": "FR",
+      "animalsCertifiedAs": "Breeding"
+    },
+    "purpose": {
+      "internalMarketPurpose": "Production",
+      "purposeGroup": "For Import"
+    },
+    "pointOfEntry": "GBAPHA1A",
+    "arrivalDate": "2025-11-12",
+    "arrivalTime": "22:00:00",
+    "transporter": {
+      "id": "b8625677-e7cd-4a8e-95bd-9d5a6c91a0c3",
+      "type": "commercial transporter",
+      "status": "approved",
+      "companyName": "ALISTAIR WILSON",
+      "individualName": "N/A",
+      "approvalNumber": "UK/INVER/T1/00091851",
+      "address": {
+        "addressLine1": "AUCHENBLAE",
+        "addressLine2": "INVER SHIN",
+        "addressLine3": "LAIRG",
+        "city": "SUTHERLAND",
+        "postalZipCode": "IV27 4ET",
+        "countryISOCode": "GB"
+      },
+      "tracesId": 10146433
+    },
+    "meansOfTransport": {
+      "id": "flight-number",
+      "type": "Aeroplane",
+      "document": "doc-ref-123"
+    },
+    "meansOfTransportFromEntryPoint": {
+      "id": "flight number",
+      "type": "Aeroplane",
+      "document": "document reference"
+    },
+    "departureDate": "2025-11-12",
+    "departureTime": "03:03:00",
+    "estimatedJourneyTimeInMinutes": 300,
+    "veterinaryInformation": {},
+    "importerLocalReferenceNumber": "internal-ref-123",
+    "complexCommoditySelected": true,
+    "portOfEntry": "GBLGW",
+    "isGVMSRoute": false,
+    "provideCtcMrn": "NO",
+    "storeTransporterContact": "NO"
+  },
+  "etag": "000000000037F994",
+  "riskDecisionLockingTime": "2025-11-12T20:00:00Z",
+  "isRiskDecisionLocked": false,
+  "chedTypeVersion": 2
+}

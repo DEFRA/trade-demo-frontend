@@ -17,6 +17,11 @@ Node.js/Hapi.js frontend demonstrating CDP platform integration with a Java Spri
 - GOV.UK Design System multi-step forms
 - CRUD operations with client-side search
 
+## Documentation
+
+- [architecture.md](docs/architecture.md)
+- [oauth-oidc.md](docs/oauth-oidc.md)
+
 ## Quick Start
 
 ### Prerequisites

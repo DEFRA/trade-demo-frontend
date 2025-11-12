@@ -1,0 +1,203 @@
+@startuml Live Animal Import Domain Model
+
+!define AGGREGATE_ROOT #FFD700
+!define ENTITY #87CEEB
+!define VALUE_OBJECT #90EE90
+!define ENUM #FFB6C1
+
+skinparam class {
+  BackgroundColor<<AggregateRoot>> AGGREGATE_ROOT
+  BackgroundColor<<Entity>> ENTITY
+  BackgroundColor<<ValueObject>> VALUE_OBJECT
+  BackgroundColor<<Enum>> ENUM
+  BorderColor Black
+  ArrowColor Black
+}
+
+skinparam stereotypeCBackgroundColor LightYellow
+
+' ==================== Aggregate Root ====================
+
+class LiveAnimalImportNotification <<AggregateRoot>> {
+  + id: string
+  + status: Status
+  + chedReference: string
+  + createdAt: Date
+  + updatedAt: Date
+  + consignment: AnimalConsignment
+  + movement: Movement
+  + parties: ConsignmentParties
+}
+
+' ==================== Entities ====================
+
+class AnimalConsignment <<Entity>> {
+  + animals: AnimalGroup
+  + countryOfOrigin: CountryCode
+  + certificationPurpose: CertificationPurpose
+}
+
+class Movement <<Entity>> {
+  + origin: Location
+  + destination: Location
+  + borderControlPost: BorderControlPost
+  + transport: TransportDetails
+  + timing: JourneyTiming
+}
+
+class ConsignmentParties <<Entity>> {
+  + personResponsible: Party
+  + consignor: Party
+  + consignee: Party
+  + importer: Party
+}
+
+' ==================== Value Objects ====================
+
+class AnimalGroup <<ValueObject>> {
+  + species: Species
+  + numberOfAnimals: number
+  + numberOfPackages: number
+  + commodityCode: string
+}
+
+class Species <<ValueObject>> {
+  + scientificName: string
+  + commonName: string
+}
+
+class Location <<ValueObject>> {
+  + address: Address
+  + country: CountryCode
+}
+
+class Address <<ValueObject>> {
+  + lines: string[]
+  + city: string
+  + postalCode: string
+}
+
+class BorderControlPost <<ValueObject>> {
+  + code: string
+  + name: string
+  + portCode: string
+  + acceptedTransportModes: TransportMode[]
+}
+
+class TransportDetails <<ValueObject>> {
+  + mode: TransportMode
+  + identifier: string
+  + documentReference: string
+  + transporterCompany: string
+}
+
+class JourneyTiming <<ValueObject>> {
+  + estimatedArrival: DateTime
+  + estimatedDeparture: DateTime
+  + journeyDurationMinutes: number
+}
+
+class DateTime <<ValueObject>> {
+  + date: string
+  + time: string
+}
+
+class Party <<ValueObject>> {
+  + companyName: string
+  + contactName: string
+  + address: Address
+  + country: CountryCode
+  + email: string
+  + phone: string
+}
+
+' ==================== Enumerations ====================
+
+enum Status <<Enum>> {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum CertificationPurpose <<Enum>> {
+  BREEDING
+  PRODUCTION
+  SLAUGHTER
+  OTHER
+}
+
+enum TransportMode <<Enum>> {
+  AIR
+  SEA
+  RAIL
+  ROAD
+}
+
+enum CountryCode <<Enum>> {
+  GB
+  FR
+  DE
+  ES
+  IT
+  ...
+}
+
+' ==================== Relationships ====================
+
+' Aggregate Root compositions
+LiveAnimalImportNotification "1" *-- "1" AnimalConsignment : contains
+LiveAnimalImportNotification "1" *-- "1" Movement : contains
+LiveAnimalImportNotification "1" *-- "1" ConsignmentParties : contains
+LiveAnimalImportNotification "1" -- "1" Status : has
+
+' AnimalConsignment compositions
+AnimalConsignment "1" *-- "1" AnimalGroup : contains
+AnimalConsignment "1" -- "1" CertificationPurpose : has
+AnimalConsignment "1" -- "1" CountryCode : originatesFrom
+
+' AnimalGroup compositions
+AnimalGroup "1" *-- "1" Species : contains
+
+' Movement compositions
+Movement "1" *-- "1" Location : origin
+Movement "1" *-- "1" Location : destination
+Movement "1" *-- "1" BorderControlPost : enters via
+Movement "1" *-- "1" TransportDetails : uses
+Movement "1" *-- "1" JourneyTiming : scheduled
+
+' Location composition
+Location "1" *-- "1" Address : at
+Location "1" -- "1" CountryCode : in
+
+' TransportDetails associations
+TransportDetails "1" -- "1" TransportMode : uses
+BorderControlPost "1" -- "*" TransportMode : accepts
+
+' JourneyTiming composition
+JourneyTiming "1" *-- "1" DateTime : estimatedArrival
+JourneyTiming "1" *-- "0..1" DateTime : estimatedDeparture
+
+' ConsignmentParties compositions
+ConsignmentParties "1" *-- "1" Party : personResponsible
+ConsignmentParties "1" *-- "1" Party : consignor
+ConsignmentParties "1" *-- "1" Party : consignee
+ConsignmentParties "1" *-- "0..1" Party : importer
+
+' Party composition
+Party "1" *-- "1" Address : locatedAt
+Party "1" -- "1" CountryCode : basedIn
+
+' ==================== Notes ====================
+
+note right of LiveAnimalImportNotification
+  **Aggregate Root**
+  Represents the entire import
+  notification journey.
+
+  Enforces domain invariants:
+  - All required fields present
+  - Valid BCP for transport mode
+  - Arrival date in future
+end note
+@enduml
