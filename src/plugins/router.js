@@ -6,6 +6,7 @@ import { health } from '../server/health/index.js'
 import { dashboard } from '../server/dashboard/index.js'
 import { account } from '../server/account/index.js'
 import { auth } from '../server/auth/index.js'
+import { importJourney } from '../server/import/index.js'
 import { serveStaticFiles } from '../server/common/helpers/serve-static-files.js'
 
 /**
@@ -35,6 +36,7 @@ export const router = {
       await server.register([auth])
       await server.register([dashboard])
       await server.register([account])
+      await server.register([importJourney])
       await server.register([start, about])
 
       // Static assets

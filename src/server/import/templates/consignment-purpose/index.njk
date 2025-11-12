@@ -1,0 +1,90 @@
+{% extends "layouts/page.njk" %}
+
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block beforeContent %}
+  {{ govukBackLink({
+    text: "Back",
+    href: "/import/consignment/origin"
+  }) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% if errorList %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: errorList
+        }) }}
+      {% endif %}
+
+      <form method="post" novalidate>
+        <input type="hidden" name="crumb" value="{{ crumb }}" />
+
+        {{ govukRadios({
+          name: "purpose",
+          fieldset: {
+            legend: {
+              text: heading,
+              classes: "govuk-fieldset__legend--l",
+              isPageHeading: true
+            }
+          },
+          hint: {
+            text: "Select the main reason the animals are being brought into Great Britain"
+          },
+          items: [
+            {
+              value: "internalmarket",
+              text: "For import into Great Britain or Northern Ireland",
+              checked: purpose == "internalmarket",
+              conditional: {
+                html: govukSelect({
+                  name: "internal-market-purpose",
+                  id: "internal-market-purpose",
+                  label: {
+                    text: "What are the animals for?"
+                  },
+                  value: internalMarketPurpose,
+                  items: [
+                    { value: "", text: "Select a purpose" },
+                    { value: "commercial", text: "Commercial" },
+                    { value: "rescue", text: "Rescue" },
+                    { value: "breeding", text: "Breeding" },
+                    { value: "research", text: "Research" },
+                    { value: "racing", text: "Racing" },
+                    { value: "companion", text: "Companion animals" },
+                    { value: "production", text: "Production" },
+                    { value: "slaughter", text: "Slaughter" },
+                    { value: "fattening", text: "Fattening" },
+                    { value: "restocking", text: "Restocking" }
+                  ]
+                })
+              }
+            },
+            {
+              value: "re-entry",
+              text: "Re-entry after temporary export from Great Britain",
+              hint: {
+                text: "Animals that were temporarily exported and are now returning"
+              },
+              checked: purpose == "re-entry"
+            }
+          ],
+          errorMessage: formError
+        }) }}
+
+        {{ govukButton({
+          text: "Save and continue"
+        }) }}
+      </form>
+
+    </div>
+  </div>
+{% endblock %}
