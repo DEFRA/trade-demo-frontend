@@ -1,15 +1,6 @@
 import inert from '@hapi/inert'
 
 import { start } from '../server/start/index.js'
-import { examples } from '../server/examples/index.js'
-import { view } from '../server/examples/view/index.js'
-import { edit } from '../server/examples/edit/index.js'
-import { deleteExample } from '../server/examples/delete/index.js'
-import { createName } from '../server/examples/create-name/index.js'
-import { createValue } from '../server/examples/create-value/index.js'
-import { createCounter } from '../server/examples/create-counter/index.js'
-import { createCheck } from '../server/examples/create-check/index.js'
-import { createConfirmation } from '../server/examples/create-confirmation/index.js'
 import { about } from '../server/about/index.js'
 import { health } from '../server/health/index.js'
 import { dashboard } from '../server/dashboard/index.js'
@@ -42,19 +33,7 @@ export const router = {
       // Authentication routes
       await server.register([auth])
       await server.register([dashboard])
-      await server.register([
-        start,
-        examples,
-        view,
-        edit,
-        deleteExample,
-        createName,
-        createValue,
-        createCounter,
-        createCheck,
-        createConfirmation,
-        about
-      ])
+      await server.register([start, about])
 
       // Static assets
       await server.register([serveStaticFiles])
