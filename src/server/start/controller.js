@@ -6,8 +6,8 @@
 export const startController = {
   handler(_request, h) {
     return h.view('start/index', {
-      pageTitle: 'Manage Examples',
-      heading: 'Manage Examples'
+      pageTitle: 'CDP Import Notifications',
+      heading: 'CDP Import Notifications'
     })
   }
 }

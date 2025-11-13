@@ -28,7 +28,7 @@ function createError(response) {
 }
 
 /**
- * Example API client
+ * API client
  * Provides CRUD operations for the Example entity
  */
 export const exampleApi = {

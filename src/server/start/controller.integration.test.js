@@ -19,8 +19,8 @@ describe('#startController', () => {
       url: '/'
     })
 
-    expect(result).toEqual(expect.stringContaining('Manage Examples'))
-    expect(result).toEqual(expect.stringContaining('Start now'))
+    expect(result).toEqual(expect.stringContaining('CDP Import Notifications'))
+    expect(result).toEqual(expect.stringContaining('Start'))
     expect(result).toEqual(expect.stringContaining('Java Spring Boot backend'))
     expect(statusCode).toBe(statusCodes.ok)
   })
