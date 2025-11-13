@@ -51,6 +51,11 @@ The directory structure follows Hapi's plugin philosophy of composable, single-p
 - **src/plugins/** = Infrastructure plugins (strategies, session, CSRF, router)
 - **src/server/** = Feature plugins (routes organized by domain)
 
+Think of it like this:
+
+- plugins/ = Operating system layer (auth, sessions, routing infrastructure)
+- server/ = Applications layer (import journey app, dashboard app, examples app)
+
 This separation allows feature plugins to be minimal, focused on business logic, while infrastructure plugins handle cross-cutting concerns.
 
 ### We have TWO separate auth plugins:
@@ -76,15 +81,6 @@ server.auth.strategy('session', 'cookie', options) // Configures a STRATEGY usin
 A **scheme** is the plugin that provides the authentication mechanism. A **strategy** is a named, configured instance of that scheme that routes can reference.
 
 The `'auth-routes'` plugin then uses these strategies in its route definitions (e.g., `auth: { strategy: 'defra-id' }`).
-
-## Infrastructure vs Features
-
-The directory structure follows Hapi's plugin philosophy of composable, single-purpose modules:
-
-- **src/plugins/** = Infrastructure plugins (strategies, session, CSRF, router)
-- **src/server/** = Feature plugins (routes organized by domain)
-
-This separation allows feature plugins to remain thin, focused on business logic, while infrastructure plugins handle cross-cutting concerns.
 
 ## Directory Structure & Component Responsibilities
 
@@ -350,6 +346,8 @@ cache: {
 
 **Alternative considered:** Full JWT validation with JWKS. Rejected as unnecessary for server-side OAuth flow where tokens never transit through untrusted parties.
 
+TODO: Revisit this decision after implementing role-based access control.
+
 ### Why Refresh in Cookie Validate Hook?
 
 **Decision:** Token refresh happens in Cookie strategy's `validate` function
@@ -412,8 +410,6 @@ When implementing role-based access control:
 - Permissions are authorization (what you can do), not authentication (who you are)
 - Keeps authentication and authorization concerns separate
 - Matches DEFRA production pattern (cdp-portal-frontend fetches user permissions in validate hook)
-
-See PERMISSIONS-IMPLEMENTATION.md for detailed implementation guide.
 
 ## Key Files Reference
 

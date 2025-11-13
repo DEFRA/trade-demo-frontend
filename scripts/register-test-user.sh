@@ -12,23 +12,23 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/lib/defra-id-registration.sh"
 
 STUB_URL="http://localhost:3200"
-USER_ID="86a7607c-a1e7-41e5-a0b6-a41680d05a2a"
-USER_EMAIL="test@example.com"
-USER_NAME="BenTest UserLast"
+USER_ID="c9606501-44fe-ea11-a813-000d3aaa467a"
+USER_EMAIL="kaiatkinson@jourrapide.com"
+USER_NAME="Kai Atkinson"
 LOGIN_URL="http://localhost:3000/dashboard"
 
 USER_JSON='{
-  "userId": "86a7607c-a1e7-41e5-a0b6-a41680d05a2a",
-  "email": "test@example.com",
-  "firstName": "BenTest",
-  "lastName": "UserLast",
+  "userId": "c9606501-44fe-ea11-a813-000d3aaa467a",
+  "email": "kaiatkinson@jourrapide.com",
+  "firstName": "Kai",
+  "lastName": "Atkinson",
   "loa": "1",
   "aal": "1",
   "enrolmentCount": 1,
   "enrolmentRequestCount": 1,
   "relationships": [
     {
-      "organisationName": "Test Imports Organisation",
+      "organisationName": "Kai Inc.",
       "relationshipRole": "Employee",
       "roleName": "Admin",
       "roleStatus": "1"
@@ -40,11 +40,13 @@ RESPONSE=$(register_user "$STUB_URL" "$USER_JSON")
 parse_response "$RESPONSE"
 
 if is_success; then
-  ADDITIONAL_JSON='{
-    "environment": "local",
-    "loa": "1",
-    "organizations": ["Test Imports Organisation"]
-  }'
+  # Build additional JSON using jq to avoid quoting issues (compact output)
+  ADDITIONAL_JSON=$(jq -nc \
+    --arg env "local" \
+    --arg loa "1" \
+    --arg org "Kai Inc." \
+    '{environment: $env, loa: $loa, organizations: [$org]}')
+
   print_result_json "true" "$USER_ID" "$USER_EMAIL" "$USER_NAME" "$LOGIN_URL" "$ADDITIONAL_JSON"
   exit 0
 else

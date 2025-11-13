@@ -25,8 +25,12 @@ export function setSessionValue(request, key, value) {
  * @returns {*} The stored value, or null if not found
  */
 export function getSessionValue(request, key, clear = false) {
-  if (request.yar) {
-    return request.yar.get(key, clear)
+  if (request.yar && typeof request.yar.get === 'function') {
+    try {
+      return request.yar.get(key, clear)
+    } catch {
+      return null
+    }
   }
   return null
 }

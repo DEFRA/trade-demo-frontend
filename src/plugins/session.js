@@ -33,6 +33,7 @@ export const session = {
       password: config.get('session.cookie.password'),
       ttl: config.get('session.cookie.ttl'),
       isSecure: config.get('session.cookie.secure'),
+      isSameSite: config.get('session.cookie.sameSite'),
       clearInvalid: true
     }
   }

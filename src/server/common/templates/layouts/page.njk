@@ -6,6 +6,7 @@
 
 {# Import custom components globally #}
 {% from "heading/macro.njk" import appHeading %}
+{% from "service-header/macro.njk" import appServiceHeader %}
 
 {% set mainClasses = "app-main-wrapper" %}
 
@@ -25,8 +26,12 @@
   }) }}
 
   {{ govukServiceNavigation({
-    navigation: navigation
+    navigation: navigation,
+    containerClasses: "govuk-width-container"
   }) }}
+
+  {# CDP Portal service-header pattern for user information #}
+  {{ appServiceHeader({ userSession: userSession }) }}
 {% endblock %}
 
 {% block pageTitle %}

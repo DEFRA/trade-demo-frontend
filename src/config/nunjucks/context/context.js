@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs'
 import { config } from '../../config.js'
 import { buildNavigation } from './build-navigation.js'
 import { createLogger } from '../../../server/common/helpers/logging/logger.js'
+import { getSessionValue } from '../../../server/common/helpers/session-helpers.js'
 
 const logger = createLogger()
 const assetPath = config.get('assetPath')
@@ -23,12 +24,24 @@ export function context(request) {
     }
   }
 
+  // Get authenticated user data from session (if logged in)
+  const authData = getSessionValue(request, 'auth')
+
   return {
     assetPath: `${assetPath}/assets`,
     serviceName: config.get('serviceName'),
     serviceUrl: '/',
     breadcrumbs: [],
-    navigation: buildNavigation(request),
+    navigation: buildNavigation(request, authData),
+    userSession: authData
+      ? {
+          isAuthenticated: true,
+          displayName: authData.displayName || authData.email || 'User',
+          email: authData.email
+        }
+      : {
+          isAuthenticated: false
+        },
     getAssetPath(asset) {
       const webpackAssetPath = webpackManifest?.[asset]
       return `${assetPath}/${webpackAssetPath ?? asset}`

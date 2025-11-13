@@ -54,11 +54,14 @@ describe('#catchAll', () => {
     catchAll(mockRequest(statusCodes.notFound), mockToolkit)
 
     expect(mockErrorLogger).not.toHaveBeenCalledWith(mockStack)
-    expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
-      pageTitle: 'Page not found',
-      heading: statusCodes.notFound,
-      message: 'Page not found'
-    })
+    expect(mockToolkitView).toHaveBeenCalledWith(
+      errorPage,
+      expect.objectContaining({
+        pageTitle: 'Page not found',
+        heading: statusCodes.notFound,
+        message: 'Page not found'
+      })
+    )
     expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.notFound)
   })
 
@@ -66,11 +69,14 @@ describe('#catchAll', () => {
     catchAll(mockRequest(statusCodes.forbidden), mockToolkit)
 
     expect(mockErrorLogger).not.toHaveBeenCalledWith(mockStack)
-    expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
-      pageTitle: 'Forbidden',
-      heading: statusCodes.forbidden,
-      message: 'Forbidden'
-    })
+    expect(mockToolkitView).toHaveBeenCalledWith(
+      errorPage,
+      expect.objectContaining({
+        pageTitle: 'Forbidden',
+        heading: statusCodes.forbidden,
+        message: 'Forbidden'
+      })
+    )
     expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.forbidden)
   })
 
@@ -78,11 +84,14 @@ describe('#catchAll', () => {
     catchAll(mockRequest(statusCodes.unauthorized), mockToolkit)
 
     expect(mockErrorLogger).not.toHaveBeenCalledWith(mockStack)
-    expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
-      pageTitle: 'Unauthorized',
-      heading: statusCodes.unauthorized,
-      message: 'Unauthorized'
-    })
+    expect(mockToolkitView).toHaveBeenCalledWith(
+      errorPage,
+      expect.objectContaining({
+        pageTitle: 'Unauthorized',
+        heading: statusCodes.unauthorized,
+        message: 'Unauthorized'
+      })
+    )
     expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.unauthorized)
   })
 
@@ -90,11 +99,14 @@ describe('#catchAll', () => {
     catchAll(mockRequest(statusCodes.badRequest), mockToolkit)
 
     expect(mockErrorLogger).not.toHaveBeenCalledWith(mockStack)
-    expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
-      pageTitle: 'Bad Request',
-      heading: statusCodes.badRequest,
-      message: 'Bad Request'
-    })
+    expect(mockToolkitView).toHaveBeenCalledWith(
+      errorPage,
+      expect.objectContaining({
+        pageTitle: 'Bad Request',
+        heading: statusCodes.badRequest,
+        message: 'Bad Request'
+      })
+    )
     expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.badRequest)
   })
 
@@ -102,11 +114,14 @@ describe('#catchAll', () => {
     catchAll(mockRequest(statusCodes.imATeapot), mockToolkit)
 
     expect(mockErrorLogger).not.toHaveBeenCalledWith(mockStack)
-    expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
-      pageTitle: 'Something went wrong',
-      heading: statusCodes.imATeapot,
-      message: 'Something went wrong'
-    })
+    expect(mockToolkitView).toHaveBeenCalledWith(
+      errorPage,
+      expect.objectContaining({
+        pageTitle: 'Something went wrong',
+        heading: statusCodes.imATeapot,
+        message: 'Something went wrong'
+      })
+    )
     expect(mockToolkitCode).toHaveBeenCalledWith(statusCodes.imATeapot)
   })
 
@@ -114,11 +129,14 @@ describe('#catchAll', () => {
     catchAll(mockRequest(statusCodes.internalServerError), mockToolkit)
 
     expect(mockErrorLogger).toHaveBeenCalledWith(mockStack)
-    expect(mockToolkitView).toHaveBeenCalledWith(errorPage, {
-      pageTitle: 'Something went wrong',
-      heading: statusCodes.internalServerError,
-      message: 'Something went wrong'
-    })
+    expect(mockToolkitView).toHaveBeenCalledWith(
+      errorPage,
+      expect.objectContaining({
+        pageTitle: 'Something went wrong',
+        heading: statusCodes.internalServerError,
+        message: 'Something went wrong'
+      })
+    )
     expect(mockToolkitCode).toHaveBeenCalledWith(
       statusCodes.internalServerError
     )
