@@ -16,7 +16,7 @@ const configMatrix = {
   ],
   isSecureContextEnabled: [false, false, true],
   isMetricsEnabled: [false, false, true],
-  'session.cache.engine': ['memory', 'memory', 'redis'],
+  'session.cache.engine': ['redis', 'memory', 'redis'], // Redis for local dev (Docker), memory for unit tests, Redis for platform
   'session.cookie.secure': [false, false, true],
   'redis.useSingleInstanceCache': [true, true, false],
   'redis.useTLS': [false, false, true],

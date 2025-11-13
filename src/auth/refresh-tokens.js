@@ -8,12 +8,20 @@ import { getOidcEndpoints } from './oidc-well-known-discovery.js'
  *
  * @param {string} refreshToken - OAuth2 refresh token
  * @param {string} traceId - CDP request trace ID for logging
+ * @param {Object} logger - Hapi logger instance (optional)
  * @returns {Promise<Object>} New token response { access_token, refresh_token, expires_in }
  * @throws {Error} If token refresh fails
  */
-export async function refreshTokens(refreshToken, traceId) {
+export async function refreshTokens(refreshToken, traceId, logger) {
   const oidcEndpoints = await getOidcEndpoints()
   const tokenEndpoint = oidcEndpoints.token_endpoint
+
+  if (logger) {
+    logger.info(
+      { traceId, tokenEndpoint },
+      'Attempting to refresh access token'
+    )
+  }
 
   const params = new URLSearchParams({
     grant_type: 'refresh_token',
@@ -35,10 +43,22 @@ export async function refreshTokens(refreshToken, traceId) {
 
   if (!response.ok) {
     const errorText = await response.text()
+    if (logger) {
+      logger.error(
+        { status: response.status, statusText: response.statusText },
+        'Token refresh failed'
+      )
+    }
     throw new Error(
       `Token refresh failed: ${response.status} ${response.statusText} - ${errorText}`
     )
   }
 
-  return await response.json()
+  const tokens = await response.json()
+
+  if (logger) {
+    logger.info({ expiresIn: tokens.expires_in }, 'Token refresh successful')
+  }
+
+  return tokens
 }

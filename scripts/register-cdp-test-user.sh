@@ -13,37 +13,25 @@ source "${SCRIPT_DIR}/lib/defra-id-registration.sh"
 
 ENVIRONMENT=${1:-dev}
 STUB_URL="https://cdp-defra-id-stub.${ENVIRONMENT}.cdp-int.defra.cloud"
-USER_ID="a8f3c2d1-9b5e-4a7c-8d6f-1e2a3b4c5d6e"
-USER_EMAIL="sarah.trader@acme-imports.example.com"
-USER_NAME="Sarah Trader"
+USER_ID="c9606501-44fe-ea11-a813-000d3aaa467a"
+USER_EMAIL="kaiatkinson@jourrapide.com"
+USER_NAME="Kai Atkinson"
 LOGIN_URL="https://trade-demo-frontend.${ENVIRONMENT}.cdp-int.defra.cloud/dashboard"
 
 USER_JSON='{
-  "userId": "a8f3c2d1-9b5e-4a7c-8d6f-1e2a3b4c5d6e",
-  "email": "sarah.trader@acme-imports.example.com",
-  "firstName": "Sarah",
-  "lastName": "Trader",
-  "loa": "2",
-  "aal": "2",
-  "enrolmentCount": 3,
+  "userId": "c9606501-44fe-ea11-a813-000d3aaa467a",
+  "email": "kaiatkinson@jourrapide.com",
+  "firstName": "Kai",
+  "lastName": "Atkinson",
+  "loa": "1",
+  "aal": "1",
+  "enrolmentCount": 1,
   "enrolmentRequestCount": 1,
   "relationships": [
     {
-      "organisationName": "ACME International Imports Ltd",
+      "organisationName": "Kai Inc.",
       "relationshipRole": "Employee",
-      "roleName": "Trade Compliance Manager",
-      "roleStatus": "1"
-    },
-    {
-      "organisationName": "British Chamber of Commerce",
-      "relationshipRole": "Member",
-      "roleName": "Authorised Representative",
-      "roleStatus": "1"
-    },
-    {
-      "organisationName": "UK Border Agency",
-      "relationshipRole": "Registered Trader",
-      "roleName": "Import Manager",
+      "roleName": "Admin",
       "roleStatus": "1"
     }
   ]
@@ -53,25 +41,12 @@ RESPONSE=$(register_user "$STUB_URL" "$USER_JSON")
 parse_response "$RESPONSE"
 
 if is_success; then
-  ADDITIONAL_JSON=$(cat <<EOF
-{
-  "environment": "${ENVIRONMENT}",
-  "loa": "2",
-  "aal": "2",
-  "organizations": [
-    "ACME International Imports Ltd",
-    "British Chamber of Commerce",
-    "UK Border Agency"
-  ],
-  "roles": [
-    "Trade Compliance Manager",
-    "Authorised Representative",
-    "Import Manager"
-  ],
-  "expireUrl": "${STUB_URL}/cdp-defra-id-stub/API/register/${USER_ID}/expire"
-}
-EOF
-)
+  ADDITIONAL_JSON=$(jq -nc \
+    --arg env "$ENVIRONMENT" \
+    --arg loa "1" \
+    --arg org "Kai Inc." \
+    --arg expireUrl "${STUB_URL}/cdp-defra-id-stub/API/register/${USER_ID}/expire" \
+    '{environment: $env, loa: $loa, organizations: [$org], expireUrl: $expireUrl}')
   print_result_json "true" "$USER_ID" "$USER_EMAIL" "$USER_NAME" "$LOGIN_URL" "$ADDITIONAL_JSON"
   exit 0
 else

@@ -128,6 +128,16 @@ const callback = {
       // Set cookie auth (creates encrypted cookie with minimal data)
       request.cookieAuth.set({ authenticated: true })
 
+      request.logger.info(
+        {
+          contactId: claims.contactId,
+          email: claims.email,
+          displayName: sessionData.displayName,
+          expiresAt: sessionData.expiresAt
+        },
+        'Session cookie created for user'
+      )
+
       // Redirect to original page or homepage (clear after reading)
       const nextUrl = credentials.query?.next
       const redirect = nextUrl ? decodeURIComponent(nextUrl) : '/'
@@ -165,11 +175,24 @@ const logout = {
   method: 'GET',
   path: '/auth/logout',
   async handler(request, h) {
+    // Log user details before clearing session
+    const authData = request.yar.get('auth')
+    const userInfo = authData
+      ? { contactId: authData.contactId, email: authData.email }
+      : { message: 'No active session' }
+
+    request.logger.info(userInfo, 'User logout initiated')
+
     // Clear session
     clearSessionValue(request, 'auth')
 
     // Clear cookie
     request.cookieAuth.clear()
+
+    request.logger.info(
+      userInfo,
+      'Session cookie cleared, redirecting to DEFRA ID logout'
+    )
 
     const oidcEndpoints = await getOidcEndpoints()
     const postLogoutUri = config.get('appBaseUrl')
