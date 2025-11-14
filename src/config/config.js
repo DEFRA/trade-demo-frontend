@@ -21,7 +21,7 @@ const logRedact = isLocal
   : ['req.headers.authorization', 'req.headers.cookie', 'res.headers']
 const secureContextEnabled = isPlatform
 const metricsEnabled = isPlatform
-const sessionCacheEngine = isLocal ? 'memory' : 'redis'
+const sessionCacheEngine = isTest ? 'memory' : 'redis'
 const sessionCookieSecure = isPlatform
 const redisSingleInstance = isLocal
 const redisTLS = isPlatform

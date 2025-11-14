@@ -45,6 +45,10 @@ register-user: ## Register a test user with local DEFRA ID stub (required before
 	@echo "Registering test user with local DEFRA ID stub..."
 	@./scripts/register-test-user.sh | jq '.'
 
+register-cdp-user: ## Register Kai with CDP deployed DEFRA ID stub [dev|test|perf]
+	@echo "Registering Kai with CDP DEFRA ID stub (environment: $${ENV:-dev})..."
+	@./scripts/register-cdp-test-user.sh $${ENV:-dev} | jq '.'
+
 stop: ## Stop all services and remove volumes
 	@echo "Stopping Docker services..."
 	@docker compose --profile mongo --profile postgres down -v

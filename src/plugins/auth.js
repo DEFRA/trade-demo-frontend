@@ -83,6 +83,10 @@ export const auth = {
           const authData = request.yar.get('auth')
 
           if (!authData) {
+            request.logger.info(
+              { path: request.path, hasCookie: !!session },
+              'Session cookie invalid: no auth data in server session'
+            )
             return { isValid: false }
           }
 
@@ -91,6 +95,18 @@ export const auth = {
           const tokenExpired = isPast(
             subMinutes(parseISO(authData.expiresAt), bufferMinutes)
           )
+
+          if (tokenExpired) {
+            request.logger.info(
+              {
+                contactId: authData.contactId,
+                email: authData.email,
+                expiresAt: authData.expiresAt,
+                hasRefreshToken: !!authData.refreshToken
+              },
+              'Access token expired'
+            )
+          }
 
           if (tokenExpired && authData.refreshToken) {
             try {
@@ -101,7 +117,8 @@ export const auth = {
               // Attempt to refresh the access token
               const newTokens = await refreshTokens(
                 authData.refreshToken,
-                traceId
+                traceId,
+                request.logger
               )
 
               // Update Yar session with new tokens
@@ -115,13 +132,34 @@ export const auth = {
               }
               request.yar.set('auth', updatedAuth)
 
+              request.logger.info(
+                {
+                  contactId: authData.contactId,
+                  email: authData.email,
+                  newExpiresAt: updatedAuth.expiresAt
+                },
+                'Session cookie refreshed with new tokens'
+              )
+
               return { isValid: true, credentials: updatedAuth }
             } catch (error) {
               // Token refresh failed - clear session
+              request.logger.warn(
+                { err: error, contactId: authData.contactId },
+                'Token refresh failed, session cookie invalidated'
+              )
               request.yar.clear('auth')
               return { isValid: false }
             }
           }
+
+          request.logger.debug(
+            {
+              contactId: authData.contactId,
+              expiresAt: authData.expiresAt
+            },
+            'Session cookie validated successfully'
+          )
 
           return { isValid: true, credentials: authData }
         }

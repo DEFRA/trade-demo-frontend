@@ -11,6 +11,3 @@ coverage
 .envrc
 tsconfig.tsbuildinfo
 .tool-versions
-
-# Local research/notes (not for commit)
-hapi-oidc-cookie-architecture.md
