@@ -22,6 +22,10 @@ export const reviewController = {
     handler(request, h) {
       // Guard: ensure required fields from previous steps are set
       const originCountry = getSessionValue(request, 'origin-country')
+      const commodityCodeDetails = getSessionValue(
+        request,
+        'commodity-code-details'
+      )
       const purpose = getSessionValue(request, 'purpose')
 
       if (!originCountry || !purpose) {
@@ -31,10 +35,15 @@ export const reviewController = {
       // Load all journey data from session
       const sessionData = {
         'origin-country': originCountry,
+        'commodity-code-details': commodityCodeDetails,
         purpose,
         'internal-market-purpose': getSessionValue(
           request,
           'internal-market-purpose'
+        ),
+        'commodity-selected-species': getSessionValue(
+          request,
+          'commodity-selected-species'
         )
       }
 

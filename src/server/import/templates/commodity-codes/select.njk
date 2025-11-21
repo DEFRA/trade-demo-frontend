@@ -1,0 +1,133 @@
+{% extends "layouts/page.njk" %}
+
+{% from "govuk/components/tabs/macro.njk" import govukTabs %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/accordion/macro.njk" import govukAccordion %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block beforeContent %}
+  {{ govukBackLink({
+    text: "Back",
+    href: "/import/commodity/codes"
+  }) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% if errorList %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: errorList
+        }) }}
+      {% endif %}
+
+      <input type="hidden" name="crumb" value="{{ crumb }}"/>
+
+      <span class="govuk-caption-xl">Description of the goods</span>
+      <h1 class="govuk-heading-xl">Commodity</h1>
+
+      <table class="govuk-table">
+        <caption class="govuk-table__caption govuk-table__caption--m">Commodities</caption>
+        <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th scope="col" class="govuk-table__header">Commodity code</th>
+          <th scope="col" class="govuk-table__header">Description</th>
+        </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+        {% for commodity in commodityCodeDetails %}
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell">{{ commodity.code }}</td>
+            <td class="govuk-table__cell">{{ commodity.description }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+
+      {% if action === 'edit' %}
+      <form action="/import/commodity/codes/build" method="get" novalidate>
+        <input type="hidden" name="crumb" value="{{ crumb }}"/>
+        <div class="govuk-form-group">
+          {% for commodity in commodityCodeDetails %}
+            <table class="govuk-table">
+              <caption class="govuk-table__caption govuk-table__caption--m">{{ commodity.description }}</caption>
+              <thead class="govuk-table__head">
+              <tr class="govuk-table__row">
+                <th scope="col" class="govuk-table__header">Species and type</th>
+                <th scope="col" class="govuk-table__header">Number of animals</th>
+                <th scope="col" class="govuk-table__header">Number of packages such as crates, bags or boxes (when
+                  required)
+                </th>
+              </tr>
+              </thead>
+              <tbody class="govuk-table__body">
+              {% for species in speciesLst %}
+                <tr class="govuk-table__row">
+                  <td class="govuk-table__cell">{{ species.text }}</td>
+                  <td class="govuk-table__cell">
+                    <input class="govuk-input" id="{{ species.value }}-noOfAnimalsId"
+                           name="{{ species.value }}-noOfAnimals" type="text" value="{{ species.noOfAnimals }}">
+                  </td>
+                  <td class="govuk-table__cell">
+                    <input class="govuk-input" id="{{ species.value }}-noOfPacksId" name="{{ species.value }}-noOfPacks"
+                           type="text" value="{{ species.noOfPacks }}">
+                  </td>
+                </tr>
+              {% endfor %}
+              <tr>
+                <td class="govuk-table__header">Subtotal</td>
+                <td class="govuk-table__cell">{{ totalAnimals }}</td>
+                <td class="govuk-table__cell">{{ totalPacks }}</td>
+              </tr>
+              </tbody>
+            </table>
+          {% endfor %}
+          <button type="submit" class="govuk-button" data-module="govuk-button">
+            Save and continue
+          </button>
+        </div>
+      </form>
+      {% else %}
+        <form action="/import/commodity/codes/select" method="get" novalidate>
+          <input type="hidden" name="crumb" value="{{ crumb }}"/>
+          <div class="govuk-form-group">
+            <fieldset class="govuk-fieldset" aria-describedby="waste-hint">
+              <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+                <h1 class="govuk-fieldset__heading">
+                  Select species of commodity
+                </h1>
+              </legend>
+              <div id="waste-hint" class="govuk-hint">
+                Select all that apply.
+              </div>
+              <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                {% for species in speciesLst %}
+                  <div class="govuk-checkboxes__item">
+                    <input class="govuk-checkboxes__input" id="{{ species.text }}-checkbox" name="species"
+                           type="checkbox" value="{{ species.value }}" {% if isChecked %}checked{% endif %}>
+                    <label class="govuk-label govuk-checkboxes__label" for="{{ species.eppoCode }}-checkbox">
+                      {{ species.text }}
+                    </label>
+                  </div>
+                {% endfor %}
+              </div>
+            </fieldset>
+          </div>
+          <button class="govuk-button" data-module="govuk-button">
+            Save and continue
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

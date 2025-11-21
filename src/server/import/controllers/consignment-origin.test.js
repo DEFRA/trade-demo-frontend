@@ -90,7 +90,7 @@ describe('consignmentOriginController', () => {
         'origin-country',
         'FR'
       )
-      expect(mockH.redirect).toHaveBeenCalledWith('/import/consignment/purpose')
+      expect(mockH.redirect).toHaveBeenCalledWith('/import/commodity/codes')
     })
 
     test('Should trim whitespace from country code', () => {

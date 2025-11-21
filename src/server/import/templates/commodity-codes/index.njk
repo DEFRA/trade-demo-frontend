@@ -1,0 +1,152 @@
+{% extends "layouts/page.njk" %}
+
+{% from "govuk/components/tabs/macro.njk" import govukTabs %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/accordion/macro.njk" import govukAccordion %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block beforeContent %}
+  {{ govukBackLink({
+    text: "Back",
+    href: "/import/consignment/origin"
+  }) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {% if errorList %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: errorList
+        }) }}
+      {% endif %}
+
+      <form action="/import/commodity/codes/search" method="get" novalidate>
+        <input type="hidden" name="crumb" value="{{ crumb }}"/>
+
+        <span class="govuk-caption-xl">Description of the goods</span>
+        <h1 class="govuk-heading-xl">Commodity</h1>
+
+        <div>
+          <details class="govuk-details">
+            <summary class="govuk-details__summary">
+              <span class="govuk-details__summary-text">
+                If you need help with finding an animal
+              </span>
+            </summary>
+            <div class="govuk-details__text">
+              You can:
+              <ul>
+                <li>use the Species search to find an animal using its scientific (Latin) species name</li>
+                <li><a href='https://www.gov.uk/trade-tariff' class='govuk-link--no-visited-state' target='_blank'
+                       rel='noopener noreferrer'> look up commodity codes for animals using the Trade Tariff tool (opens
+                    in new tab)</a></li>
+              </ul>
+            </div>
+          </details>
+        </div>
+
+        <div class="search-panel govuk-!-margin-bottom-6">
+          <div class="govuk-form-group">
+            <fieldset class="govuk-fieldset">
+              <div class="govuk-tabs" data-module="govuk-tabs">
+                <h2 class="govuk-tabs__title">
+                  Contents
+                </h2>
+                <ul class="govuk-tabs__list">
+                  <li class="govuk-tabs__list-item govuk-tabs__list-item--{{ commoditySearchTab }}">
+                    <a class="govuk-tabs__tab"  href="/import/commodity/codes?tab=commodities-search">
+                      Commodity code search
+                    </a>
+                  </li>
+                  <li class="govuk-tabs__list-item govuk-tabs__list-item--{{ speciesSearchTab }}">
+                    <a class="govuk-tabs__tab" href="/import/commodity/codes?tab=species-search">
+                      Species search
+                    </a>
+                  </li>
+                </ul>
+                <div class="govuk-tabs__panel govuk-tabs__panel--{{ commoditySearchTab }}" id="commodity-code-search">
+                  <h2 class="govuk-heading-m">Search commodities</h2>
+                  <div class="govuk-form-group">
+                    <div id="more-detail-hint" class="govuk-hint">
+                      Enter commodity code
+                    </div>
+                    <input class="govuk-input" id="commodity-code" name="commodity-code" type="text">
+                  </div>
+                  <div>
+                    <button type="submit" class="govuk-button" data-module="govuk-button">
+                      Search
+                    </button>
+                  </div>
+                  <!-- commodity codes tree -->
+                  <div>
+                    {% if commodityCodesTree %}
+                      <div>
+                        <fieldset class="govuk-fieldset">
+                          <h1 class="govuk-label-wrapper">
+                            <label class="govuk-label govuk-label--m" for="event-name">
+                              Find the commodity in the commodity tree
+                            </label>
+                          </h1>
+                          <div class="search-panel">
+                            <div class="commodity-selection-breadcrumb">
+                              <a class="govuk-link all-sections-link" href="{{formActionAllCommodities}}">
+                                All commodities
+                              </a>
+
+                              <div class="commodity-list">
+                                {% for commodity in commodityCodesTree %}
+                                  <ul>
+                                    <table>
+                                      <tr>
+                                        <td class="govuk-item">
+                                          <a class="govuk-link" href="/import/commodity/codes/{{ commodity.code }}/child" aria-label="{{ commodity.code }}" aria-current="page">
+                                            {{ commodity.code }}
+                                          </a>
+                                        </td>
+                                        <td>
+                                          <a class="govuk-link" href="/import/commodity/codes/{{ commodity.code }}/child" aria-label="{{ commodity.code }}" aria-current="page">
+                                            <small>{{ commodity.description }}</small>
+                                          </a>
+                                        </td>
+                                      </tr>
+                                    </table>
+                                  </ul>
+                                {% endfor %}
+                              </div>
+                            </div>
+                          </div>
+                        </fieldset>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Species search tab -->
+                <div class="govuk-tabs__panel govuk-tabs__panel--{{ speciesSearchTab }}" id="species-search">
+                  <h2 class="govuk-heading-m">Species search</h2>
+                  <div class="govuk-form-group">
+                    <div id="more-detail-hint" class="govuk-hint">
+                      Enter species code
+                    </div>
+                    <input class="govuk-input" id="species-code" name="species-code" type="text">
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+{% endblock %}
