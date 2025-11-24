@@ -121,7 +121,9 @@ export const commodityCodesController = {
       }
 
       const selectedSpeciesLst = []
-      const selectedSpecies = request.query['species']
+      const selectedSpecies = Array.isArray(request.query['species'])
+        ? request.query['species']
+        : [request.query['species']]
       const speciesLst = sessionData['commodity-code-species']
       selectedSpecies.forEach((code) => {
         selectedSpeciesLst.push(

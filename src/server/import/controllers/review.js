@@ -91,6 +91,11 @@ export const reviewController = {
       setSessionValue(request, 'origin-country', '')
       setSessionValue(request, 'purpose', '')
       setSessionValue(request, 'internal-market-purpose', '')
+      setSessionValue(request, 'internal-market-purpose', '')
+      // clear commodity code details
+      setSessionValue(request, 'commodity-codes', '')
+      setSessionValue(request, 'commodity-code-details', '')
+      setSessionValue(request, 'commodity-selected-species', '')
 
       // Store CHED reference in session for confirmation page
       setSessionValue(request, 'chedReference', chedReference)
