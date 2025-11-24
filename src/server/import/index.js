@@ -5,6 +5,7 @@
 
 import { consignmentOriginController } from './controllers/consignment-origin.js'
 import { consignmentPurposeController } from './controllers/consignment-purpose.js'
+import { commodityCodesController } from './controllers/commodity-codes.js'
 import { reviewController } from './controllers/review.js'
 import { confirmationController } from './controllers/confirmation.js'
 
@@ -33,7 +34,54 @@ export const importJourney = {
           }
         },
 
-        // Screen 2: Purpose of import
+        // Screen 2: Search for commodity codes
+        {
+          method: 'GET',
+          path: '/import/commodity/codes',
+          ...commodityCodesController.get,
+          options: {
+            ...commodityCodesController.get.options,
+            auth: 'session'
+          }
+        },
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/search',
+          ...commodityCodesController.search,
+          options: {
+            ...commodityCodesController.search.options,
+            auth: 'session'
+          }
+        },
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/select',
+          ...commodityCodesController.select,
+          options: {
+            ...commodityCodesController.select.options,
+            auth: 'session'
+          }
+        },
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/build',
+          ...commodityCodesController.build,
+          options: {
+            ...commodityCodesController.build.options,
+            auth: 'session'
+          }
+        },
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/{parentCode}/child',
+          ...commodityCodesController.tree,
+          options: {
+            ...commodityCodesController.tree.options,
+            auth: 'session'
+          }
+        },
+
+        // Screen 3: Purpose of import
         {
           method: 'GET',
           path: '/import/consignment/purpose',
@@ -53,7 +101,7 @@ export const importJourney = {
           }
         },
 
-        // Screen 3: Review and submit
+        // Screen 4: Review and submit
         {
           method: 'GET',
           path: '/import/review',

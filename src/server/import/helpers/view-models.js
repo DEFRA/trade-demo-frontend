@@ -1,4 +1,6 @@
+import _ from 'lodash'
 import { formatValidationErrors } from './validation-helpers.js'
+import { commodityCodeApi } from '../integration/commodity-code-api-client.js'
 
 /**
  * Build view model for origin screen
@@ -25,6 +27,70 @@ export function buildOriginViewModel(sessionData = {}, validationError = null) {
   }
 
   return viewModel
+}
+
+export async function buildCommodityCodeViewModel(
+  commodityCode,
+  traceId,
+  request,
+  sessionData = {},
+  validationError = null
+) {
+  const commodityCodesResponse = Object.values(
+    await commodityCodeApi.findCommodityByCode(commodityCode, traceId)
+  )
+  const commodityCategoryResponse = await commodityCodeApi.getCommodityCategory(
+    commodityCode,
+    traceId
+  )
+
+  const commodityCategory = JSON.parse(
+    _.get(commodityCategoryResponse, 'data', '')
+  )
+
+  if (!commodityCategory.species.length > 0) {
+    request.payload.hasSpecies = true
+  }
+  const speciesLst = _.uniqBy(commodityCategory.species, 'text')
+  speciesLst.forEach((s) => {
+    s.selected = false
+  })
+
+  return {
+    commodityCodeDetails: commodityCodesResponse,
+    speciesLst,
+    isChecked: false
+  }
+}
+
+export async function getCommodityCodeTree(
+  commodityCode,
+  traceId,
+  request,
+  sessionData = {}
+) {
+  const commodityCodeTree = await commodityCodeApi.getTopLevelCommodityTree(
+    commodityCode,
+    traceId
+  )
+
+  return Object.values(commodityCodeTree)
+}
+
+export async function getCommodityCodeChildNode(
+  parentCode,
+  traceId,
+  request,
+  sessionData = {}
+) {
+  const commodityCodeNodeDetails = await commodityCodeApi.getByParentCode(
+    'CVEDA',
+    parentCode,
+    request,
+    sessionData
+  )
+
+  return Object.values(commodityCodeNodeDetails)
 }
 
 /**
@@ -87,6 +153,37 @@ export function buildReviewViewModel(sessionData = {}, validationError = null) {
             href: '/import/consignment/origin',
             text: 'Change',
             visuallyHiddenText: 'country of origin'
+          }
+        ]
+      }
+    })
+  }
+
+  // Commodity codes
+  if (sessionData['commodity-code-details']) {
+    const speciesLst = sessionData['commodity-selected-species']
+
+    // check if commodity code flow is complete
+    let isComplete = false
+    if (speciesLst) {
+      speciesLst.forEach((species) => {
+        isComplete = !(!species.noOfAnimals || !species.noOfPacks)
+      })
+    }
+
+    summaryRows.push({
+      key: {
+        text: 'Commodity'
+      },
+      value: {
+        text: ''
+      },
+      actions: {
+        items: [
+          {
+            href: '/import/commodity/codes',
+            text: isComplete ? 'Change' : 'To do',
+            visuallyHiddenText: 'commodity codes'
           }
         ]
       }

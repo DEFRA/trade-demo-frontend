@@ -306,26 +306,27 @@ export const config = convict({
     oidcDiscoveryUrl: {
       doc: 'DEFRA ID OIDC discovery URL',
       format: String,
-      default: null,
+      default:
+        'http://localhost:3200/cdp-defra-id-stub/.well-known/openid-configuration',
       env: 'DEFRA_ID_OIDC_CONFIGURATION_URL'
     },
     clientId: {
       doc: 'DEFRA ID OAuth client ID',
       format: String,
-      default: null,
+      default: 'b8c5e0bd-8223-4908-a5aa-c9c1d7cddaac',
       env: 'DEFRA_ID_CLIENT_ID'
     },
     clientSecret: {
       doc: 'DEFRA ID OAuth client secret',
       format: String,
-      default: null,
+      default: 'test_value',
       sensitive: true,
       env: 'DEFRA_ID_CLIENT_SECRET'
     },
     serviceId: {
       doc: 'DEFRA ID service identifier',
       format: String,
-      default: null,
+      default: 'aeaa0a80-15f3-48b2-8bd7-0e02874b3d32',
       env: 'DEFRA_ID_SERVICE_ID'
     },
     tokenRefreshBufferMinutes: {
@@ -333,6 +334,22 @@ export const config = convict({
       format: Number,
       default: 1,
       env: 'DEFRA_ID_TOKEN_REFRESH_BUFFER_MINUTES'
+    }
+  },
+  services: {
+    commodityCode: {
+      baseUrl: {
+        doc: 'Backend API base URL',
+        format: String,
+        default:
+          'https://ephemeral-protected.api.dev.cdp-int.defra.cloud/trade-commodity-codes',
+        env: 'COMMODITY_CODE_API_URL'
+      },
+      auth: {
+        doc: 'Backend API auth header',
+        format: String,
+        default: 'TuHiSuP8ltJg2obc9KgW3FU8Zv9ircWn'
+      }
     }
   }
 })

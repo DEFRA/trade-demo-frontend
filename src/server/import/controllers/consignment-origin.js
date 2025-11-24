@@ -39,7 +39,7 @@ export const consignmentOriginController = {
       setSessionValue(request, 'origin-country', originCountry.trim())
 
       // Redirect to next step (purpose screen)
-      return h.redirect('/import/consignment/purpose')
+      return h.redirect('/import/commodity/codes')
     }
   }
 }

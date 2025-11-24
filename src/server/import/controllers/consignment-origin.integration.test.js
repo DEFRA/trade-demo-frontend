@@ -92,7 +92,7 @@ describe('consignmentOriginController integration', () => {
       })
 
       expect(response.statusCode).toBe(statusCodes.movedTemporarily)
-      expect(response.headers.location).toBe('/import/consignment/purpose')
+      expect(response.headers.location).toBe('/import/commodity/codes')
     })
 
     test('Should trim whitespace from country code', async () => {
@@ -109,7 +109,7 @@ describe('consignmentOriginController integration', () => {
       })
 
       expect(response.statusCode).toBe(statusCodes.movedTemporarily)
-      expect(response.headers.location).toBe('/import/consignment/purpose')
+      expect(response.headers.location).toBe('/import/commodity/codes')
     })
 
     test('Should show error when country is empty', async () => {
