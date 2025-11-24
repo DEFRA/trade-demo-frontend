@@ -58,20 +58,21 @@ export const commodityCodesController = {
         return h.view('import/templates/commodity-codes/select', viewModel)
       }
 
-      const viewModel = buildCommodityCodeViewModel(
-        sessionData['commodity-code'],
+      let commoditySearchTab = 'selected'
+      let speciesSearchTab = 'hidden'
+      if (request.query['tab'] === 'species-search') {
+        commoditySearchTab = 'hidden'
+        speciesSearchTab = 'selected'
+      }
+
+      const viewModel = {
+        commoditySearchTab,
+        speciesSearchTab,
+        commodityCodesTree: getSessionValue(request, 'commodity-codes-tree'),
         traceId,
         request,
         sessionData
-      )
-      if (request.query['tab'] === 'species-search') {
-        viewModel.commoditySearchTab = 'hidden'
-        viewModel.speciesSearchTab = 'selected'
-      } else {
-        viewModel.commoditySearchTab = 'selected'
-        viewModel.speciesSearchTab = 'hidden'
       }
-      viewModel.commodityCodesTree = sessionData['commodity-codes-tree']
       return h.view('import/templates/commodity-codes/index', viewModel)
     }
   },
@@ -186,19 +187,30 @@ export const commodityCodesController = {
       }
 
       const parentCode = request.params.parentCode
-      const viewModel = await getCommodityCodeChildNode(
+      const commodityCodeNodeDetails = await getCommodityCodeChildNode(
         parentCode,
         traceId,
         sessionData
       )
+      let commoditySearchTab = 'Selected'
+      let speciesSearchTab = 'hidden'
       if (request.query['tab'] === 'species-search') {
-        viewModel.commoditySearchTab = 'hidden'
-        viewModel.speciesSearchTab = 'selected'
+        commoditySearchTab = 'hidden'
+        speciesSearchTab = 'selected'
       } else {
-        viewModel.commoditySearchTab = 'selected'
-        viewModel.speciesSearchTab = 'hidden'
+        commoditySearchTab = 'selected'
+        speciesSearchTab = 'hidden'
       }
-      viewModel.commodityCodesTree = sessionData['commodity-codes-tree']
+
+      const viewModel = {
+        commodityCodesTree: sessionData['commodity-codes-tree'],
+        commodityCodeNodeDetails,
+        commoditySearchTab,
+        speciesSearchTab,
+        traceId,
+        request,
+        sessionData
+      }
       return h.view('import/templates/commodity-codes/index', viewModel)
     }
   }

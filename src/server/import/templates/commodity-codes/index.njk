@@ -88,47 +88,46 @@
                     </button>
                   </div>
                   <!-- commodity codes tree -->
+                  {% if commoditySearchTab == 'selected' %}
                   <div>
-                    {% if commodityCodesTree %}
-                      <div>
-                        <fieldset class="govuk-fieldset">
-                          <h1 class="govuk-label-wrapper">
-                            <label class="govuk-label govuk-label--m" for="event-name">
-                              Find the commodity in the commodity tree
-                            </label>
-                          </h1>
-                          <div class="search-panel">
-                            <div class="commodity-selection-breadcrumb">
-                              <a class="govuk-link all-sections-link" href="{{formActionAllCommodities}}">
-                                All commodities
-                              </a>
+                    <h1 class="govuk-label-wrapper">
+                      <label class="govuk-label govuk-label--m" for="event-name">
+                        Find the commodity in the commodity tree
+                      </label>
+                    </h1>
 
-                              <div class="commodity-list">
-                                {% for commodity in commodityCodesTree %}
-                                  <ul>
-                                    <table>
-                                      <tr>
-                                        <td class="govuk-item">
-                                          <a class="govuk-link" href="/import/commodity/codes/{{ commodity.code }}/child" aria-label="{{ commodity.code }}" aria-current="page">
-                                            {{ commodity.code }}
+                    {% for commodity in commodityCodesTree %}
+                    <ul style="list-style-type:none;">
+                      <li>
+                        <details>
+                          <summary>
+                            <a class="govuk-link" href="/import/commodity/codes/{{ commodity.code }}/child">
+                              {{ commodity.code }} <small>{{ commodity.description }}</small>
+                            </a>
+                            {% if commodityCodeNodeDetails %}
+                              {% for node in commodityCodeNodeDetails %}
+                                {% if node.parentCode == commodity.code %}
+                                  <ul style="list-style-type:none;">
+                                    <li>
+                                      <details open>
+                                        <summary>
+                                          <a href="/import/commodity/codes/{{ node.displayCode }}{{ node.parentCode }}/child" class="govuk-link">
+                                            {{ node.displayCode }} {{ node.parentCode }} - {{ node.description }}
                                           </a>
-                                        </td>
-                                        <td>
-                                          <a class="govuk-link" href="/import/commodity/codes/{{ commodity.code }}/child" aria-label="{{ commodity.code }}" aria-current="page">
-                                            <small>{{ commodity.description }}</small>
-                                          </a>
-                                        </td>
-                                      </tr>
-                                    </table>
+                                        </summary>
+                                      </details>
+                                    </li>
                                   </ul>
-                                {% endfor %}
-                              </div>
-                            </div>
-                          </div>
-                        </fieldset>
-                      </div>
-                    {% endif %}
+                                {% endif %}
+                              {% endfor %}
+                            {% endif %}
+                          </summary>
+                        </details>
+                      </li>
+                    </ul>
+                    {% endfor %}
                   </div>
+                  {% endif %}
                 </div>
 
                 <!-- Species search tab -->
@@ -140,6 +139,48 @@
                     </div>
                     <input class="govuk-input" id="species-code" name="species-code" type="text">
                   </div>
+
+                  {% if speciesSearchTab == 'selected' %}
+                  <!-- commodity codes tree -->
+                  <div>
+                    <h1 class="govuk-label-wrapper">
+                      <label class="govuk-label govuk-label--m" for="event-name">
+                        Find the commodity in the commodity tree
+                      </label>
+                    </h1>
+
+                    {% for commodity in commodityCodesTree %}
+                      <ul style="list-style-type:none;">
+                        <li>
+                          <details>
+                            <summary>
+                              <a class="govuk-link" href="/import/commodity/codes/{{ commodity.code }}/child?tab=species-search">
+                                {{ commodity.code }} <small>{{ commodity.description }}</small>
+                              </a>
+                              {% if commodityCodeNodeDetails %}
+                                {% for node in commodityCodeNodeDetails %}
+                                  {% if node.parentCode == commodity.code %}
+                                    <ul style="list-style-type:none;">
+                                      <li>
+                                        <details open>
+                                          <summary>
+                                            <a href="/import/commodity/codes/{{ node.displayCode }}{{ node.parentCode }}/child?tab=speciesTab" class="govuk-link">
+                                              {{ node.displayCode }} {{ node.parentCode }} - {{ node.description }}
+                                            </a>
+                                          </summary>
+                                        </details>
+                                      </li>
+                                    </ul>
+                                  {% endif %}
+                                {% endfor %}
+                              {% endif %}
+                            </summary>
+                          </details>
+                        </li>
+                      </ul>
+                    {% endfor %}
+                  </div>
+                  {% endif %}
                 </div>
               </div>
             </fieldset>
