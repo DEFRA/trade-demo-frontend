@@ -100,9 +100,23 @@
       {% else %}
         <form action="/import/commodity/codes/select" method="get" novalidate>
           <input type="hidden" name="crumb" value="{{ crumb }}"/>
+          {% if commodityTypes[0].text  %}
+          <div class="govuk-form-group">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+              <h1 class="govuk-fieldset__heading">
+                Type of commodity
+              </h1>
+            </legend>
+            <select class="govuk-select" id="commodityType" name="commodityType">
+              {% for type in commodityTypes %}
+                <option value="{{ type.text }}">{{ type.text }}</option>
+              {%  endfor %}
+            </select>
+          </div>
+          {% endif %}
           <div class="govuk-form-group">
             <fieldset class="govuk-fieldset" aria-describedby="waste-hint">
-              <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+              <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
                 <h1 class="govuk-fieldset__heading">
                   Select species of commodity
                 </h1>

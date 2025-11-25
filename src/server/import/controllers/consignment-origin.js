@@ -37,6 +37,8 @@ export const consignmentOriginController = {
 
       // Store in session
       setSessionValue(request, 'origin-country', originCountry.trim())
+      setSessionValue(request, 'commodity-selected-tab', '')
+      setSessionValue(request, 'species-selected-tab', '')
 
       // Redirect to next step (purpose screen)
       return h.redirect('/import/commodity/codes')

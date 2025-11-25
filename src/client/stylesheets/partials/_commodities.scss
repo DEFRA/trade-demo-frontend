@@ -1,0 +1,154 @@
+@import "../../../../node_modules/govuk-frontend";
+@import "variables";
+
+.commodity-selection-breadcrumb {
+  @include govuk-font($size: 16);
+
+  // position: relative;
+  // padding: 1em;
+
+  &::after {
+    content: "";
+    display: block;
+    clear: both;
+  }
+
+  nav .commodity-list ul {
+    position: relative;
+    list-style: none;
+    padding-left: 42px;
+  }
+
+  nav .commodity-list ul li {
+    position: relative;
+    display: block;
+    line-height: 25px;
+    padding-top: 5px;
+    word-wrap: break-word;
+  }
+
+  nav .commodity-list ul li::before, nav .commodity-list ul li::after {
+    content: "";
+    position: absolute;
+    left: -23px;
+  }
+
+  nav .commodity-list ul li::before {
+    border-top: 1px solid 0;
+    top: 24px;
+    width: 21px;
+    height: 0;
+  }
+
+  nav .commodity-list ul li::after {
+    border-left: 1px solid 0;
+    height: 100%;
+    width: 0;
+    top: 2px;
+  }
+
+  nav .commodity-list ul li:last-child::after {
+    height: 22px;
+  }
+
+  nav .commodity-list ul li strong input,
+  nav .commodity-list ul li strong button {
+    color: 90;
+    text-decoration: none;
+  }
+
+  nav .commodity-list ul li span {
+    line-height: 38px;
+  }
+}
+
+// Commodity selector css
+
+.commodity-tree {
+  margin-top: 0;
+  margin-bottom: 0;
+
+  details {
+    summary {
+      display: inline-block;
+      color: $endeavour;
+      cursor: pointer;
+      position: relative;
+      margin-bottom: 0;
+    }
+  }
+}
+
+.commodity-description-links-container {
+  width: 75%;
+  display: inline-block;
+
+  .commodity-description-link {
+    @include govuk-font($size: 16);
+
+    overflow-wrap: break-word;
+    white-space: normal;
+    text-align: left;
+    display: contents;
+  }
+}
+
+.commodity-link-button-no-boxes {
+  @include govuk-link-common;
+  @include govuk-link-style-default;
+  @include govuk-font($size: 16);
+  overflow-wrap: break-word;
+  white-space: normal;
+  text-align: left;
+  background: none;
+  border: 0;
+  color: $govuk-link-colour;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+}
+
+.parent-commodity-description-link-container {
+  display: inline-block;
+}
+
+.commodity-code-box {
+  display: inline-block;
+  margin: 0 2px;
+  padding: 8px 5px 5px;
+  font-family: $font-family-nta;
+  font-weight: $font-weight-bold;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: $white;
+  background-color: $endeavour;
+  width: 25px;
+  text-align: center;
+  vertical-align: top;
+
+  button {
+    @include govuk-font($size: 16, $weight: bold);
+  }
+}
+
+.link-button {
+  font-family: "GDS Transport", arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 400;
+  font-size: 16px;
+  font-size: 1rem;
+  line-height: 1.25;
+  text-decoration: underline;
+  background: none;
+  border: 0;
+  color: #1d70b8;
+  cursor: pointer;
+  padding: 0;
+}
+
+.commodity-code-link {
+  font-family: "GDS Transport", arial, sans-serif;
+  text-decoration: none;
+}
+
