@@ -125,6 +125,36 @@ export function buildPurposeViewModel(
 }
 
 /**
+ * Build view model for transport screen
+ * @param {Object} sessionData - Session data containing transport
+ * @param {Object} validationError - Optional Joi validation error
+ * @returns {Object} View model for template
+ */
+export function buildTransportViewModel(
+  sessionData = {},
+  validationError = null
+) {
+  const formattedErrors = validationError
+    ? formatValidationErrors(validationError)
+    : null
+
+  const viewModel = {
+    pageTitle: 'Transport to the BCP or Port of Entry (PoE)',
+    heading: 'Where will you be inspected?',
+    originCountry: sessionData['transport'] || ''
+  }
+
+  if (formattedErrors) {
+    viewModel.errorList = formattedErrors.errorList
+    viewModel.formError = {
+      text: formattedErrors.errorList[0].text
+    }
+  }
+
+  return viewModel
+}
+
+/**
  * Build view model for review screen
  * @param {Object} sessionData - Session data containing all journey data
  * @param {Object} validationError - Optional Joi validation error
@@ -226,6 +256,27 @@ export function buildReviewViewModel(sessionData = {}, validationError = null) {
             href: '/import/consignment/purpose',
             text: 'Change',
             visuallyHiddenText: 'internal market purpose'
+          }
+        ]
+      }
+    })
+  }
+
+  // Transport BCP or PoE (conditional)
+  if (sessionData['transport']) {
+    summaryRows.push({
+      key: {
+        text: 'Transport BCP or PoE'
+      },
+      value: {
+        text: sessionData['transport']
+      },
+      actions: {
+        items: [
+          {
+            href: '/import/transport/details',
+            text: 'Change',
+            visuallyHiddenText: 'transport BCP or PoE'
           }
         ]
       }

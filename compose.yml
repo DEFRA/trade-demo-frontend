@@ -59,7 +59,7 @@ services:
     environment:
       DEBUG: ${DEBUG:-1}
       LS_LOG: WARN # Localstack DEBUG Level
-      SERVICES: s3,sqs,sns,firehose
+      SERVICES: s3,sqs,sns,cloudwatch
       LOCALSTACK_HOST: 127.0.0.1
     volumes:
       - localstack-data:/var/lib/localstack
@@ -135,35 +135,60 @@ services:
 
   postgres:
     profiles: ["postgres"]
-    image: postgres:16-alpine
-    ports:
-      - '5432:5432'
-    networks:
-      - cdp-tenant
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
+    image: postgres:16
+    container_name: trade-commodity-codes-db
+    restart: always
     environment:
-      POSTGRES_DB: trade_demo_postgres_backend
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    restart: always
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
-      interval: 5s
-      start_period: 10s
-      retries: 3
-
-  trade-demo-postgres-backend:
-    profiles: ["postgres"]
-    build:
-      context: ../trade-demo-postgres-backend
-      target: development
+      POSTGRES_DB: trade-commodity-codes
     ports:
-      - '8085:8085'
-      - '5005:5005' # Java debug port
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+    networks:
+      - cdp-tenant
+
+  liquibase:
+    profiles: ["postgres"]
+    image: liquibase/liquibase:4.32.0
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - ../trade-commodity-codes/changelog:/liquibase/changelog
+    command: >
+      --driver=org.postgresql.Driver
+      --changelog-file=changelog/db.changelog.xml
+      --url=jdbc:postgresql://postgres:5432/trade-commodity-codes
+      --username=postgres
+      --password=postgres
+      update
+    networks:
+      - cdp-tenant
+
+  trade-commodity-codes:
+    profiles: ["postgres"]
+    build:
+      context: ../trade-commodity-codes
+      target: development
+    ports:
+      - '8085'
+      - '5005:5005' # Java debug port
+    links:
+      - 'localstack:localstack'
+      - 'postgres:postgres'
+    depends_on:
+      localstack:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      liquibase:
+        condition: service_completed_successfully
+    volumes:
+      - './trade-commodity-codes/changelog:/app/changelog'
     env_file:
       - 'compose/aws.env'
     environment:
@@ -174,27 +199,32 @@ services:
       SERVICE_VERSION: 0.0.0-local
       ENVIRONMENT: local
 
-      # PostgreSQL
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_DATABASE: trade_demo_postgres_backend
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      DB_SSL: false
-      DB_SSL_MODE: disable
+      # Postgres
+      POSTGRES_URI: jdbc:postgresql://postgres:5432/trade-commodity-codes
+      POSTGRES_DATABASE: trade-commodity-codes
 
       # AWS (via LocalStack)
       LOCALSTACK_ENDPOINT: http://localstack:4566
       AWS_REGION: eu-west-2
+      AWS_EMF_ENVIRONMENT: Local
+      AWS_EMF_NAMESPACE: trade-commodity-codes
+      AWS_EMF_SERVICE_TYPE: SpringBootApp
+      AWS_EMF_WRITE_TO_STDOUT: true
 
       # Logging
       LOG_LEVEL: DEBUG
 
       # Metrics (disabled locally)
-      ENABLE_METRICS: false
+      ENABLE_METRICS: true
 
       # Spring profile (dev = exposes debugging actuator endpoints)
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: local
+
+      # Liquibase configuration for dev profile
+      LIQUIBASE_CHANGELOG_PATH: changelog/db.changelog.xml
+
+      # Java Debug (optional - uncomment to enable remote debugging)
+      # JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     networks:
       - cdp-tenant
     healthcheck:

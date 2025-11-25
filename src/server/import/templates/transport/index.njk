@@ -1,0 +1,123 @@
+{% extends "layouts/page.njk" %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block beforeContent %}
+  {{ govukBackLink({
+    text: "Back",
+    href: "/import/consignment/purpose"
+  }) }}
+{% endblock %}
+
+{% block content %}
+  {% if errorSummary %}
+    {{ govukErrorSummary(errorSummary) }}
+  {% endif %}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <input type="hidden" name="crumb" value="{{ crumb }}"/>
+
+      <form method="post" novalidate>
+        <h1 class="govuk-heading-xl">{{ heading }}</h1>
+
+        <div class="govuk-form-group{% if bcpError %} govuk-form-group--error{% endif %}">
+          {{ govukInput({
+            label: {
+              text: "BCP or Port of Entry",
+              classes: "govuk-label--m"
+            },
+            hint: {
+              text: "Start typing to search for a Border Control Post or Port of Entry (minimum 3 characters)"
+            },
+            id: "bcp-search",
+            name: "bcp",
+            value: formData.bcp if formData.bcp,
+            errorMessage: bcpError,
+            attributes: {
+              "data-autocomplete": "true",
+              "autocomplete": "off"
+            }
+          }) }}
+
+          <div id="bcp-suggestions" class="autocomplete-suggestions" style="display: none;"></div>
+        </div>
+
+        <div class="govuk-button-group">
+          {{ govukButton({
+            text: "Continue"
+          }) }}
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block pageScripts %}
+  <script src="{{ assetPath }}/javascripts/application.js"></script>
+  <script>
+    {% include "../../../controllers/transport.js" %}
+  </script>
+
+  <style>
+    .autocomplete-suggestions {
+      border: 1px solid #b1b4b6;
+      background: white;
+      max-height: 300px;
+      overflow-y: auto;
+      position: absolute;
+      z-index: 1000;
+      width: calc(100% - 2px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      margin-top: -1px;
+    }
+
+    .autocomplete-suggestion {
+      padding: 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #f3f2f1;
+    }
+
+    .autocomplete-suggestion:last-child {
+      border-bottom: none;
+    }
+
+    .autocomplete-suggestion:hover,
+    .autocomplete-suggestion-active {
+      background-color: #1d70b8;
+      color: white;
+    }
+
+    .autocomplete-suggestion.no-results {
+      cursor: default;
+      color: #505a5f;
+      font-style: italic;
+    }
+
+    .autocomplete-suggestion.no-results:hover {
+      background-color: transparent;
+      color: #505a5f;
+    }
+
+    .bcp-name {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .bcp-code {
+      font-size: 14px;
+      color: #626a6e;
+    }
+
+    .autocomplete-suggestion:hover .bcp-code,
+    .autocomplete-suggestion-active .bcp-code {
+      color: #b1b4b6;
+    }
+
+    .govuk-form-group {
+      position: relative;
+    }
+  </style>
+{% endblock %}
