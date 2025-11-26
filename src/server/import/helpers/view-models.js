@@ -30,6 +30,7 @@ export function buildOriginViewModel(sessionData = {}, validationError = null) {
 }
 
 export async function buildCommodityCodeViewModel(
+  certType,
   commodityCode,
   traceId,
   request,
@@ -40,6 +41,7 @@ export async function buildCommodityCodeViewModel(
     await commodityCodeApi.findCommodityByCode(commodityCode, traceId)
   )
   const commodityCategoryResponse = await commodityCodeApi.getCommodityCategory(
+    certType,
     commodityCode,
     traceId
   )
@@ -48,9 +50,10 @@ export async function buildCommodityCodeViewModel(
     _.get(commodityCategoryResponse, 'data', '')
   )
 
-  if (!commodityCategory.species.length > 0) {
-    request.payload.hasSpecies = true
-  }
+  // if (!commodityCategory.species.length > 0) {
+  //   request.payload.hasSpecies = true
+  // }
+  const commodityTypes = _.uniqBy(commodityCategory.types, 'text')
   const speciesLst = _.uniqBy(commodityCategory.species, 'text')
   speciesLst.forEach((s) => {
     s.selected = false
@@ -59,38 +62,55 @@ export async function buildCommodityCodeViewModel(
   return {
     commodityCodeDetails: commodityCodesResponse,
     speciesLst,
+    commodityTypes,
     isChecked: false
   }
 }
 
-export async function getCommodityCodeTree(
-  commodityCode,
+export async function getCommodityCodesTreeData(
+  certType,
   traceId,
   request,
   sessionData = {}
 ) {
-  const commodityCodeTree = await commodityCodeApi.getTopLevelCommodityTree(
-    commodityCode,
+  const commodityCodesTree = await commodityCodeApi.getTopLevelCommodityTree(
+    certType,
     traceId
   )
 
-  return Object.values(commodityCodeTree)
+  return Object.values(commodityCodesTree)
 }
 
 export async function getCommodityCodeChildNode(
+  certType,
   parentCode,
   traceId,
   request,
   sessionData = {}
 ) {
   const commodityCodeNodeDetails = await commodityCodeApi.getByParentCode(
-    'CVEDA',
+    certType,
     parentCode,
     request,
     sessionData
   )
 
   return Object.values(commodityCodeNodeDetails)
+}
+
+export async function getAllParentCodes(
+  certType,
+  commodityCode,
+  traceId,
+  sessionData = {}
+) {
+  const allParentCodes = await commodityCodeApi.getAllParents(
+    certType,
+    traceId,
+    sessionData
+  )
+
+  return Object.values(allParentCodes)
 }
 
 /**

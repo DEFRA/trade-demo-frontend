@@ -20,6 +20,8 @@ describe('context and cache', () => {
     mockReadFileSync.mockReset()
     mockLoggerError.mockReset()
     vi.resetModules()
+
+    process.env.ASSET_PATH = '/public'
   })
 
   describe('#context', () => {
@@ -45,7 +47,7 @@ describe('context and cache', () => {
 
       test('Should provide expected context', () => {
         expect(contextResult).toEqual({
-          assetPath: '/public/assets',
+          assetPath: '/assets',
           breadcrumbs: [],
           getAssetPath: expect.any(Function),
           navigation: [
@@ -76,7 +78,7 @@ describe('context and cache', () => {
       describe('With valid asset path', () => {
         test('Should provide expected asset path', () => {
           expect(contextResult.getAssetPath('application.js')).toBe(
-            '/public/javascripts/application.js'
+            '/javascripts/application.js'
           )
         })
       })
@@ -84,7 +86,7 @@ describe('context and cache', () => {
       describe('With invalid asset path', () => {
         test('Should provide expected asset', () => {
           expect(contextResult.getAssetPath('an-image.png')).toBe(
-            '/public/an-image.png'
+            '/an-image.png'
           )
         })
       })

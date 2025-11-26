@@ -30,9 +30,6 @@
         }) }}
       {% endif %}
 
-      <form action="/import/commodity/codes/search" method="get" novalidate>
-        <input type="hidden" name="crumb" value="{{ crumb }}"/>
-
         <span class="govuk-caption-xl">Description of the goods</span>
         <h1 class="govuk-heading-xl">Commodity</h1>
 
@@ -55,139 +52,64 @@
           </details>
         </div>
 
-        <div class="search-panel govuk-!-margin-bottom-6">
-          <div class="govuk-form-group">
-            <fieldset class="govuk-fieldset">
-              <div class="govuk-tabs" data-module="govuk-tabs">
-                <h2 class="govuk-tabs__title">
-                  Contents
-                </h2>
-                <ul class="govuk-tabs__list">
-                  <li class="govuk-tabs__list-item govuk-tabs__list-item--{{ commoditySearchTab }}">
-                    <a class="govuk-tabs__tab"  href="/import/commodity/codes?tab=commodities-search">
-                      Commodity code search
-                    </a>
-                  </li>
-                  <li class="govuk-tabs__list-item govuk-tabs__list-item--{{ speciesSearchTab }}">
-                    <a class="govuk-tabs__tab" href="/import/commodity/codes?tab=species-search">
-                      Species search
-                    </a>
-                  </li>
-                </ul>
-                <div class="govuk-tabs__panel govuk-tabs__panel--{{ commoditySearchTab }}" id="commodity-code-search">
-                  <h2 class="govuk-heading-m">Search commodities</h2>
-                  <div class="govuk-form-group">
-                    <div id="more-detail-hint" class="govuk-hint">
-                      Enter commodity code
-                    </div>
-                    <input class="govuk-input" id="commodity-code" name="commodity-code" type="text">
-                  </div>
-                  <div>
-                    <button type="submit" class="govuk-button" data-module="govuk-button">
-                      Search
-                    </button>
-                  </div>
-                  <!-- commodity codes tree -->
-                  {% if commoditySearchTab == 'selected' %}
-                  <div>
-                    <h1 class="govuk-label-wrapper">
-                      <label class="govuk-label govuk-label--m" for="event-name">
-                        Find the commodity in the commodity tree
-                      </label>
-                    </h1>
-
-                    {% for commodity in commodityCodesTree %}
-                    <ul style="list-style-type:none;">
-                      <li>
-                        <details>
-                          <summary>
-                            <a class="govuk-link" href="/import/commodity/codes/{{ commodity.code }}/child">
-                              {{ commodity.code }} <small>{{ commodity.description }}</small>
-                            </a>
-                            {% if commodityCodeNodeDetails %}
-                              {% for node in commodityCodeNodeDetails %}
-                                {% if node.parentCode == commodity.code %}
-                                  <ul style="list-style-type:none;">
-                                    <li>
-                                      <details open>
-                                        <summary>
-                                          <a href="/import/commodity/codes/{{ node.displayCode }}{{ node.parentCode }}/child" class="govuk-link">
-                                            {{ node.displayCode }} {{ node.parentCode }} - {{ node.description }}
-                                          </a>
-                                        </summary>
-                                      </details>
-                                    </li>
-                                  </ul>
-                                {% endif %}
-                              {% endfor %}
-                            {% endif %}
-                          </summary>
-                        </details>
-                      </li>
-                    </ul>
-                    {% endfor %}
-                  </div>
-                  {% endif %}
-                </div>
-
-                <!-- Species search tab -->
-                <div class="govuk-tabs__panel govuk-tabs__panel--{{ speciesSearchTab }}" id="species-search">
-                  <h2 class="govuk-heading-m">Species search</h2>
-                  <div class="govuk-form-group">
-                    <div id="more-detail-hint" class="govuk-hint">
-                      Enter species code
-                    </div>
-                    <input class="govuk-input" id="species-code" name="species-code" type="text">
-                  </div>
-
-                  {% if speciesSearchTab == 'selected' %}
-                  <!-- commodity codes tree -->
-                  <div>
-                    <h1 class="govuk-label-wrapper">
-                      <label class="govuk-label govuk-label--m" for="event-name">
-                        Find the commodity in the commodity tree
-                      </label>
-                    </h1>
-
-                    {% for commodity in commodityCodesTree %}
-                      <ul style="list-style-type:none;">
-                        <li>
-                          <details>
-                            <summary>
-                              <a class="govuk-link" href="/import/commodity/codes/{{ commodity.code }}/child?tab=species-search">
-                                {{ commodity.code }} <small>{{ commodity.description }}</small>
-                              </a>
-                              {% if commodityCodeNodeDetails %}
-                                {% for node in commodityCodeNodeDetails %}
-                                  {% if node.parentCode == commodity.code %}
-                                    <ul style="list-style-type:none;">
-                                      <li>
-                                        <details open>
-                                          <summary>
-                                            <a href="/import/commodity/codes/{{ node.displayCode }}{{ node.parentCode }}/child?tab=speciesTab" class="govuk-link">
-                                              {{ node.displayCode }} {{ node.parentCode }} - {{ node.description }}
-                                            </a>
-                                          </summary>
-                                        </details>
-                                      </li>
-                                    </ul>
-                                  {% endif %}
-                                {% endfor %}
-                              {% endif %}
-                            </summary>
-                          </details>
-                        </li>
-                      </ul>
-                    {% endfor %}
-                  </div>
-                  {% endif %}
-                </div>
+        <div class="govuk-tabs" data-module="govuk-tabs">
+          <h2 class="govuk-tabs__title">
+            Contents
+          </h2>
+          <ul class="govuk-tabs__list">
+            <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
+              <a class="govuk-tabs__tab" href="#commodity-code-tab">
+                Commodity code search
+              </a>
+            </li>
+            <li class="govuk-tabs__list-item">
+              <a class="govuk-tabs__tab" href="#species-tab">
+                Species search
+              </a>
+            </li>
+          </ul>
+          <div class="govuk-tabs__panel" id="commodity-code-tab">
+            <form action="/import/commodity/codes/search" method="get" novalidate>
+              <input type="hidden" name="crumb" value="{{ crumb }}"/>
+            <h2 class="govuk-heading-m">Search commodities</h2>
+            <div class="govuk-form-group">
+              <div id="more-detail-hint" class="govuk-hint">
+                Enter commodity code
               </div>
-            </fieldset>
+              <input class="govuk-input" id="commodity-code" name="commodity-code" type="text">
+            </div>
+            <div>
+              <button type="submit" class="govuk-button" data-module="govuk-button">
+                Search
+              </button>
+            </div>
+            </form>
+            <!-- commodity tree -->
+            {% include "commodity-codes/commodityTree.njk" %}
+          </div>
+          <div class="govuk-tabs__panel govuk-tabs__panel--hidden" id="species-tab">
+            <h2 class="govuk-heading-m">Search species of commodity</h2>
+            <div class="govuk-form-group">
+              <div id="more-detail-hint" class="govuk-hint">
+                Enter scientific (Latin) name of species
+                For example:
+                <ul>
+                  <li>for cattle, enter Bos taurus</li>
+                  <li>for sheep, enter Ovis aries</li>
+                  <li>for dogs, enter Canis familiaris</li>
+                </ul>
+              </div>
+              <form action="/import/commodity/species/search" method="get" novalidate>
+                <input type="hidden" name="crumb" value="{{ crumb }}"/>
+                <input class="govuk-input js-hidden" id="species-code" name="species-code" type="text">
+                <div id="suggestions"></div>
+              </form>
+            </div>
+            <!-- commodity codes tree -->
+            {% include "commodity-codes/commodityTree.njk" %}
           </div>
         </div>
 
-      </form>
     </div>
   </div>
 {% endblock %}
