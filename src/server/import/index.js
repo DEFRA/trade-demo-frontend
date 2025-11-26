@@ -6,7 +6,7 @@
 import { consignmentOriginController } from './controllers/consignment-origin.js'
 import { consignmentPurposeController } from './controllers/consignment-purpose.js'
 import { commodityCodesController } from './controllers/commodity-codes.js'
-import { transportDetailsController } from './controllers/bcp.js'
+import { transportDetailsController } from './controllers/transport.js'
 import { reviewController } from './controllers/review.js'
 import { confirmationController } from './controllers/confirmation.js'
 
@@ -105,7 +105,7 @@ export const importJourney = {
         // Screen 4: Transportation BCP & PoE details
         {
           method: 'GET',
-          path: '/import/transportation/details',
+          path: '/import/transport',
           ...transportDetailsController.get,
           options: {
             ...transportDetailsController.get.options,
@@ -114,10 +114,10 @@ export const importJourney = {
         },
         {
           method: 'POST',
-          path: '/import/transportation/details',
-          ...transportDetailsController.get,
+          path: '/import/transport',
+          ...transportDetailsController.post,
           options: {
-            ...transportDetailsController.get.options,
+            ...transportDetailsController.post.options,
             auth: 'session'
           }
         },

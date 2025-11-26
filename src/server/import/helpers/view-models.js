@@ -139,9 +139,11 @@ export function buildTransportViewModel(
     : null
 
   const viewModel = {
-    pageTitle: 'Transport to the BCP or Port of Entry (PoE)',
-    heading: 'Where will you be inspected?',
-    originCountry: sessionData['transport'] || ''
+    pageTitle: 'Transport to the BCP or Port of Entry',
+    heading: 'Transport to the BCP or Port of Entry',
+    bcp: sessionData.bcp || '',
+    transportMeansBefore: sessionData['transport-means-before'] || '',
+    vehicleIdentifier: sessionData['vehicle-identifier'] || ''
   }
 
   if (formattedErrors) {
@@ -262,19 +264,19 @@ export function buildReviewViewModel(sessionData = {}, validationError = null) {
     })
   }
 
-  // Transport BCP or PoE (conditional)
-  if (sessionData['transport']) {
+  // Transport BCP or PoE
+  if (sessionData['bcp']) {
     summaryRows.push({
       key: {
         text: 'Transport BCP or PoE'
       },
       value: {
-        text: sessionData['transport']
+        text: sessionData['bcp']
       },
       actions: {
         items: [
           {
-            href: '/import/transport/details',
+            href: '/import/transport',
             text: 'Change',
             visuallyHiddenText: 'transport BCP or PoE'
           }

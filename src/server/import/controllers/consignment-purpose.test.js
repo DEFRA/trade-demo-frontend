@@ -138,7 +138,7 @@ describe('consignmentPurposeController', () => {
           'internal-market-purpose',
           'breeding'
         )
-        expect(mockH.redirect).toHaveBeenCalledWith('/import/review')
+        expect(mockH.redirect).toHaveBeenCalledWith('/import/transport')
       })
 
       test('Should save valid re-entry purpose and redirect', () => {
@@ -153,7 +153,7 @@ describe('consignmentPurposeController', () => {
           'purpose',
           're-entry'
         )
-        expect(mockH.redirect).toHaveBeenCalledWith('/import/review')
+        expect(mockH.redirect).toHaveBeenCalledWith('/import/transport')
       })
 
       test('Should clear internal-market-purpose when purpose is re-entry', () => {

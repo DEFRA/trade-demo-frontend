@@ -49,7 +49,7 @@ services:
       start_period: 10s
 
   localstack:
-    profiles: ["mongo", "postgres"]
+    profiles: ["mongo", "postgres", "world"]
     image: localstack/localstack:3.0.2
     ports:
       - '4566:4566' # LocalStack Gateway
@@ -79,7 +79,7 @@ services:
 ################################################################################
 
   mongodb:
-    profiles: ["mongo"]
+    profiles: ["mongo", "world"]
     image: mongo:6.0.13
     networks:
       - cdp-tenant
@@ -94,7 +94,7 @@ services:
       start_period: 20s
 
   trade-demo-backend:
-    profiles: ["mongo"]
+    profiles: ["mongo", "world"]
     build:
       context: ../trade-demo-backend
       target: development
@@ -134,7 +134,7 @@ services:
 ################################################################################
 
   postgres:
-    profiles: ["postgres"]
+    profiles: ["postgres", "world"]
     image: postgres:16
     container_name: trade-commodity-codes-db
     restart: always
@@ -151,8 +151,8 @@ services:
     networks:
       - cdp-tenant
 
-  liquibase:
-    profiles: ["postgres"]
+  liquibase-schema:
+    profiles: ["postgres", "world"]
     image: liquibase/liquibase:4.32.0
     depends_on:
       postgres:
@@ -169,13 +169,33 @@ services:
     networks:
       - cdp-tenant
 
+  liquibase-data:
+    profiles: ["postgres", "world"]
+    image: liquibase/liquibase:4.32.0
+    depends_on:
+      liquibase-schema:
+        condition: service_completed_successfully
+    volumes:
+      - ../trade-commodity-codes/data:/liquibase/data
+      - ../trade-commodity-codes/data/csv:/liquibase/data/csv
+    command: >
+      --driver=org.postgresql.Driver
+      --changelog-file=data/db.changelog.xml
+      --url=jdbc:postgresql://postgres:5432/trade-commodity-codes
+      --username=postgres
+      --password=postgres
+      --log-level=debug
+      update
+    networks:
+      - cdp-tenant
+
   trade-commodity-codes:
-    profiles: ["postgres"]
+    profiles: ["postgres", "world"]
     build:
       context: ../trade-commodity-codes
       target: development
     ports:
-      - '8085'
+      - '8086:8085'
       - '5005:5005' # Java debug port
     links:
       - 'localstack:localstack'
@@ -185,7 +205,9 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
-      liquibase:
+      liquibase-schema:
+        condition: service_completed_successfully
+      liquibase-data:
         condition: service_completed_successfully
     volumes:
       - './trade-commodity-codes/changelog:/app/changelog'
@@ -215,13 +237,13 @@ services:
       LOG_LEVEL: DEBUG
 
       # Metrics (disabled locally)
-      ENABLE_METRICS: true
+      ENABLE_METRICS: false
 
       # Spring profile (dev = exposes debugging actuator endpoints)
       SPRING_PROFILES_ACTIVE: local
-
-      # Liquibase configuration for dev profile
-      LIQUIBASE_CHANGELOG_PATH: changelog/db.changelog.xml
+#
+#      # Liquibase configuration for dev profile
+#      LIQUIBASE_CHANGELOG_PATH: changelog/db.changelog.xml
 
       # Java Debug (optional - uncomment to enable remote debugging)
       # JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
