@@ -56,10 +56,28 @@ export const importJourney = {
         },
         {
           method: 'GET',
+          path: '/import/commodity/species/search',
+          ...commodityCodesController.speciesSearch,
+          options: {
+            ...commodityCodesController.speciesSearch.options,
+            auth: 'session'
+          }
+        },
+        {
+          method: 'GET',
           path: '/import/commodity/codes/select',
           ...commodityCodesController.select,
           options: {
             ...commodityCodesController.select.options,
+            auth: 'session'
+          }
+        },
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/{commodityCode}/child',
+          ...commodityCodesController.search,
+          options: {
+            ...commodityCodesController.search.options,
             auth: 'session'
           }
         },
@@ -74,7 +92,7 @@ export const importJourney = {
         },
         {
           method: 'GET',
-          path: '/import/commodity/codes/{parentCode}/child',
+          path: '/import/commodity/codes/{parentCode}/parent',
           ...commodityCodesController.tree,
           options: {
             ...commodityCodesController.tree.options,

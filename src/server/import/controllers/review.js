@@ -98,6 +98,10 @@ export const reviewController = {
       setSessionValue(request, 'commodity-codes', '')
       setSessionValue(request, 'commodity-code-details', '')
       setSessionValue(request, 'commodity-selected-species', '')
+      setSessionValue(request, 'commodity-type', '')
+      setSessionValue(request, 'commodity-selected-tab', '')
+      setSessionValue(request, 'species-selected-tab', '')
+      
       setSessionValue(request, 'bcp', '')
       setSessionValue(request, 'transport-means-before', '')
       setSessionValue(request, 'vehicle-identifier', '')

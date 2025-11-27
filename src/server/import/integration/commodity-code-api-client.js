@@ -22,9 +22,9 @@ export const commodityCodeApi = {
     return response
   },
 
-  async getCommodityCategory(commodityCode, traceId) {
+  async getCommodityCategory(certType, commodityCode, traceId) {
     const response = await GET({
-      url: `${commodityCodeBaseUrl}/commodity-categories/CVEDA-${commodityCode}`,
+      url: `${commodityCodeBaseUrl}/commodity-categories/${certType}-${commodityCode}`,
       headers: {
         [tracingHeader]: traceId
       }
@@ -35,7 +35,7 @@ export const commodityCodeApi = {
 
   async getTopLevelCommodityTree(certType, traceId) {
     const response = await GET({
-      url: `${commodityCodeBaseUrl}/commodity-codes/CVEDA/top-level`,
+      url: `${commodityCodeBaseUrl}/commodity-codes/${certType}/top-level`,
       headers: {
         [tracingHeader]: traceId
       }
@@ -46,7 +46,7 @@ export const commodityCodeApi = {
 
   async getByParentCode(certType, parentCode, traceId) {
     const response = await GET({
-      url: `${commodityCodeBaseUrl}/commodity-codes/CVEDA/parent-code/${parentCode}`,
+      url: `${commodityCodeBaseUrl}/commodity-codes/${certType}/parent-code/${parentCode}`,
       headers: {
         [tracingHeader]: traceId
       }
@@ -57,7 +57,18 @@ export const commodityCodeApi = {
 
   async getAllParents(certType, commodityCode, traceId) {
     const response = await GET({
-      url: `${commodityCodeBaseUrl}/commodity-codes/CVEDA/all-parents/${commodityCode}`,
+      url: `${commodityCodeBaseUrl}/commodity-codes/${certType}/all-parents/${commodityCode}`,
+      headers: {
+        [tracingHeader]: traceId
+      }
+    })
+
+    return response
+  },
+
+  async getSpecies(certType, traceId) {
+    const response = await GET({
+      url: `${commodityCodeBaseUrl}/species/${certType}`,
       headers: {
         [tracingHeader]: traceId
       }
