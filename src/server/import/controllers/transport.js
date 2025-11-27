@@ -4,7 +4,7 @@ import {
 } from '../../common/helpers/session-helpers.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { buildTransportViewModel } from '../helpers/view-models.js'
-import fetch from 'node-fetch'
+import { GET } from '../integration/http_client.js'
 import { config } from '../../../config/config.js'
 
 const backendBaseUrl = config.get('backendApi.baseUrl')
@@ -79,18 +79,12 @@ export const transportDetailsController = {
       const traceId = request.headers[tracingHeader] || 'no-trace-id'
 
       try {
-        const response = await fetch(`${backendBaseUrl}/mdm/bcps`, {
-          method: 'GET',
+        const bcps = await GET({
+          url: `${backendBaseUrl}/border-entities/testbcps`,
           headers: {
             [tracingHeader]: traceId
           }
         })
-
-        if (!response.ok) {
-          throw new Error(`Backend API error: ${response.status}`)
-        }
-
-        const bcps = await response.json()
 
         // Filter based on query parameter if provided
         if (query && query.length >= 3) {

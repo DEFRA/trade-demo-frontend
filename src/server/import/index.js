@@ -121,6 +121,16 @@ export const importJourney = {
             auth: 'session'
           }
         },
+        
+        // BCP Autocomplete API
+        {
+          method: 'GET',
+          path: '/import/transport/api',
+          ...transportDetailsController.api,
+          options: {
+            auth: 'session'
+          }
+        },
 
         // Screen 5: Review and submit
         {
