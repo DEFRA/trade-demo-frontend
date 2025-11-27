@@ -121,7 +121,7 @@ export const importJourney = {
             auth: 'session'
           }
         },
-        
+
         // BCP Autocomplete API
         {
           method: 'GET',

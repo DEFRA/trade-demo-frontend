@@ -80,7 +80,7 @@ export const transportDetailsController = {
 
       try {
         const bcps = await GET({
-          url: `${backendBaseUrl}/border-entities/testbcps`,
+          url: `${backendBaseUrl}/border-entities/bcps`,
           headers: {
             [tracingHeader]: traceId
           }
