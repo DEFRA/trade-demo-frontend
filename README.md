@@ -34,6 +34,7 @@ Node.js/Hapi.js frontend demonstrating CDP platform integration with a Java Spri
 
 ```bash
 make start              # Start MongoDB backend stack + frontend with hot reload
+make restart            # Restart the frontend
 make debug              # Start in debug mode (debugger on port 9229)
 make stop               # Stop all services
 make test               # Run unit tests
@@ -45,7 +46,7 @@ make help               # Show all commands
 
 `make start` launches:
 
-- **Docker**: Redis, DEFRA ID stub (port 3200), LocalStack, MongoDB, Backend (port 8085)
+- **Docker**: Redis, DEFRA ID stub (port 3200), LocalStack, MongoDB, Backend (port 8085), postgres (with liquibase schema and data), trade-commodity-codes (port 8086)
 - **Native**: Frontend with hot reload (port 3000)
 
 Access at http://localhost:3000
@@ -80,6 +81,7 @@ The frontend expects:
 
 - Backend at `http://localhost:8085` (override with `BACKEND_API_URL`)
 - DEFRA ID stub at `http://localhost:3200` (override with `DEFRA_ID_OIDC_CONFIGURATION_URL`)
+- Commodity codes at `http://localhost:8086` (override with `COMMODITY_CODES_API_URL`)
 
 ### Testing
 
