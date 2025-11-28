@@ -101,7 +101,7 @@ export const reviewController = {
       setSessionValue(request, 'commodity-type', '')
       setSessionValue(request, 'commodity-selected-tab', '')
       setSessionValue(request, 'species-selected-tab', '')
-      
+      // Clear transport details
       setSessionValue(request, 'bcp', '')
       setSessionValue(request, 'transport-means-before', '')
       setSessionValue(request, 'vehicle-identifier', '')
