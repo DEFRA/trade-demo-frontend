@@ -33,6 +33,9 @@
               text: "BCP or Port of Entry",
               classes: "govuk-label--m"
             },
+            hint: {
+              text: "Start typing to search for a Border Control Post or Port of Entry (minimum 3 characters)"
+            },
             id: "bcp",
             name: "bcp",
             value: bcp if bcp
@@ -41,7 +44,7 @@
           {{ govukSelect({
             label: {
               text: "Means of transport to BCP or Port of Entry",
-              classes: "govuk-label--l",
+              classes: "govuk-label--m",
               isPageHeading: true
             },
             id: "transport-means-before",
