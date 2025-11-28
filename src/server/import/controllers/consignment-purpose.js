@@ -72,7 +72,7 @@ export const consignmentPurposeController = {
       }
 
       // Redirect to review screen
-      return h.redirect('/import/review')
+      return h.redirect('/import/transport')
     }
   }
 }

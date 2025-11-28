@@ -6,6 +6,7 @@
 import { consignmentOriginController } from './controllers/consignment-origin.js'
 import { consignmentPurposeController } from './controllers/consignment-purpose.js'
 import { commodityCodesController } from './controllers/commodity-codes.js'
+import { transportDetailsController } from './controllers/transport.js'
 import { reviewController } from './controllers/review.js'
 import { confirmationController } from './controllers/confirmation.js'
 
@@ -119,7 +120,37 @@ export const importJourney = {
           }
         },
 
-        // Screen 4: Review and submit
+        // Screen 4: Transportation BCP & PoE details
+        {
+          method: 'GET',
+          path: '/import/transport',
+          ...transportDetailsController.get,
+          options: {
+            ...transportDetailsController.get.options,
+            auth: 'session'
+          }
+        },
+        {
+          method: 'POST',
+          path: '/import/transport',
+          ...transportDetailsController.post,
+          options: {
+            ...transportDetailsController.post.options,
+            auth: 'session'
+          }
+        },
+
+        // BCP Autocomplete API
+        {
+          method: 'GET',
+          path: '/import/transport/api',
+          ...transportDetailsController.api,
+          options: {
+            auth: 'session'
+          }
+        },
+
+        // Screen 5: Review and submit
         {
           method: 'GET',
           path: '/import/review',
@@ -139,7 +170,7 @@ export const importJourney = {
           }
         },
 
-        // Screen 4: Confirmation
+        // Screen 6: Confirmation
         {
           method: 'GET',
           path: '/import/confirmation',

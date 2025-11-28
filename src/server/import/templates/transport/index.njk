@@ -1,0 +1,89 @@
+{% extends "layouts/page.njk" %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block beforeContent %}
+  {{ govukBackLink({
+    text: "Back",
+    href: "/import/consignment/purpose"
+  }) }}
+{% endblock %}
+
+{% block content %}
+  {% if errorSummary %}
+    {{ govukErrorSummary(errorSummary) }}
+  {% endif %}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+
+      <form method="post" novalidate>
+
+        <input type="hidden" name="crumb" value="{{ crumb }}"/>
+
+        <h1 class="govuk-heading-xl">{{ heading }}</h1>
+
+        <div class="govuk-form-group{% if bcpError %} govuk-form-group--error{% endif %}">
+          {{ govukInput({
+            label: {
+              text: "BCP or Port of Entry",
+              classes: "govuk-label--m"
+            },
+            hint: {
+              text: "Start typing to search for a Border Control Post or Port of Entry (minimum 3 characters)"
+            },
+            id: "bcp",
+            name: "bcp",
+            value: bcp if bcp
+          }) }}
+
+          {{ govukSelect({
+            label: {
+              text: "Means of transport to BCP or Port of Entry",
+              classes: "govuk-label--m",
+              isPageHeading: true
+            },
+            id: "transport-means-before",
+            name: "transport-means-before",
+            value: transportMeansBefore,
+            items: [
+              { value: "", text: "Select means of transport to BCP or Port of Entry" },
+              { value: "Airplane", text: "Airplane" },
+              { value: "Railway", text: "Railway" },
+              { value: "Road Vehicle", text: "Road Vehicle" },
+              { value: "Vessel", text: "Vessel" }
+            ]
+          }) }}
+
+          <p class="govuk-body govuk-label--m">Vehicle Identification</p>
+          <div id="vehicle-identifier-hint" class="govuk-hint">
+            To identify the means of transport, enter (one of the following):
+            <ul>
+              <li>flight number</li>
+              <li>train number</li>
+              <li>road vehicle registration number</li>
+              <li>vessel name (for ferries, also the road vehicle registration number)</li>
+            </ul>
+          </div>
+          <input class="govuk-input" id="vehicle-identifier" name="vehicle-identifier" type="text" value="{{ vehicleIdentifier if vehicleIdentifier }}"/>
+
+        </div>
+
+        <div class="govuk-button-group">
+          {{ govukButton({
+            text: "Continue"
+          }) }}
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block bodyEnd %}
+  {{ super() }}
+  <script type="module" src="{{ getAssetPath('transport.js') }}"></script>
+{% endblock %}

@@ -6,7 +6,7 @@ help: ## Show available commands
 
 start: ## Start MongoDB backend stack (Redis + DEFRA ID stub + LocalStack + MongoDB + Backend)
 	@echo "Starting MongoDB backend stack..."
-	docker compose --profile mongo up redis defra-id-stub localstack mongodb trade-demo-backend -d --wait
+	docker compose --profile world up redis defra-id-stub localstack mongodb trade-demo-backend trade-commodity-codes -d --wait
 	@echo ""
 	@echo "✓ All services ready:"
 	@echo "  - Backend: http://localhost:8085"
@@ -19,7 +19,7 @@ start: ## Start MongoDB backend stack (Redis + DEFRA ID stub + LocalStack + Mong
 
 debug: ## Start MongoDB backend stack in debug mode (debugger pauses on startup)
 	@echo "Starting MongoDB backend stack..."
-	docker compose --profile mongo up redis defra-id-stub localstack mongodb trade-demo-backend -d --wait
+	docker compose --profile world up redis defra-id-stub localstack mongodb trade-demo-backend trade-commodity-codes -d --wait
 	@echo ""
 	@echo "✓ All services ready:"
 	@echo "  - Backend: http://localhost:8085"

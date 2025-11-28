@@ -1,0 +1,46 @@
+.autocomplete-suggestions {
+  border: 1px solid #b1b4b6;
+  background: #ffffff;
+  max-height: 300px;
+  overflow-y: auto;
+  position: absolute;
+  z-index: 1000;
+  width: calc(100% - 2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-top: -1px;
+}
+
+.autocomplete-suggestion {
+  padding: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f2f1;
+}
+
+.autocomplete-suggestion:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-suggestion:hover,
+.autocomplete-suggestion-active {
+  background-color: #1d70b8;
+  color: #ffffff;
+}
+
+.autocomplete-suggestion.no-results {
+  cursor: default;
+  color: #505a5f;
+  font-style: italic;
+}
+
+.autocomplete-suggestion.no-results:hover {
+  background-color: transparent;
+  color: #505a5f;
+}
+
+.bcp-name {
+  font-weight: normal;
+}
+
+.govuk-form-group {
+  position: relative;
+}

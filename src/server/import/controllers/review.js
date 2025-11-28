@@ -27,6 +27,7 @@ export const reviewController = {
         'commodity-code-details'
       )
       const purpose = getSessionValue(request, 'purpose')
+      const bcp = getSessionValue(request, 'bcp')
 
       if (!originCountry || !purpose) {
         return h.redirect('/import/consignment/origin')
@@ -44,7 +45,8 @@ export const reviewController = {
         'commodity-selected-species': getSessionValue(
           request,
           'commodity-selected-species'
-        )
+        ),
+        bcp
       }
 
       const viewModel = buildReviewViewModel(sessionData)
@@ -99,6 +101,10 @@ export const reviewController = {
       setSessionValue(request, 'commodity-type', '')
       setSessionValue(request, 'commodity-selected-tab', '')
       setSessionValue(request, 'species-selected-tab', '')
+      // Clear transport details
+      setSessionValue(request, 'bcp', '')
+      setSessionValue(request, 'transport-means-before', '')
+      setSessionValue(request, 'vehicle-identifier', '')
 
       // Store CHED reference in session for confirmation page
       setSessionValue(request, 'chedReference', chedReference)
