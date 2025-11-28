@@ -38,6 +38,15 @@ export const importJourney = {
         // Screen 2: Search for commodity codes
         {
           method: 'GET',
+          path: '/imports/commodity/codes/toggle',
+          ...commodityCodesController.switchTab,
+          options: {
+            ...commodityCodesController.switchTab.options,
+            auth: 'session'
+          }
+        },
+        {
+          method: 'GET',
           path: '/import/commodity/codes',
           ...commodityCodesController.get,
           options: {
@@ -56,10 +65,28 @@ export const importJourney = {
         },
         {
           method: 'GET',
-          path: '/import/commodity/species/search',
+          path: '/import/commodity/codes/species-autofill',
           ...commodityCodesController.speciesSearch,
           options: {
             ...commodityCodesController.speciesSearch.options,
+            auth: 'session'
+          }
+        },
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/{commodityCode}/search',
+          ...commodityCodesController.search,
+          options: {
+            ...commodityCodesController.search.options,
+            auth: 'session'
+          }
+        },
+        {
+          method: 'GET',
+          path: '/import/commodity/species/search',
+          ...commodityCodesController.speciesSearchTree,
+          options: {
+            ...commodityCodesController.speciesSearchTree.options,
             auth: 'session'
           }
         },
@@ -74,28 +101,46 @@ export const importJourney = {
         },
         {
           method: 'GET',
-          path: '/import/commodity/codes/{commodityCode}/child',
-          ...commodityCodesController.search,
+          path: '/import/commodity/codes/save',
+          ...commodityCodesController.post,
           options: {
-            ...commodityCodesController.search.options,
+            ...commodityCodesController.post.options,
             auth: 'session'
           }
         },
         {
           method: 'GET',
-          path: '/import/commodity/codes/build',
-          ...commodityCodesController.build,
+          path: '/import/commodity/codes/{parentCode}/first',
+          ...commodityCodesController.getFirstChild,
           options: {
-            ...commodityCodesController.build.options,
+            ...commodityCodesController.getFirstChild.options,
             auth: 'session'
           }
         },
         {
           method: 'GET',
-          path: '/import/commodity/codes/{parentCode}/parent',
-          ...commodityCodesController.tree,
+          path: '/import/commodity/codes/{parentCode}/{childCode}/second',
+          ...commodityCodesController.getSecondChild,
           options: {
-            ...commodityCodesController.tree.options,
+            ...commodityCodesController.getSecondChild.options,
+            auth: 'session'
+          }
+        },
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/{parentCode}/{firstChild}/{secondChild}/third',
+          ...commodityCodesController.getThirdChild,
+          options: {
+            ...commodityCodesController.getThirdChild.options,
+            auth: 'session'
+          }
+        },
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/{parentCode}/{firstChild}/{secondChild}/{leafCode}/third',
+          ...commodityCodesController.getThirdChild,
+          options: {
+            ...commodityCodesController.getThirdChild.options,
             auth: 'session'
           }
         },

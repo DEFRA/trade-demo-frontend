@@ -33,9 +33,16 @@ export const commodityCodeApi = {
     return response
   },
 
-  async getTopLevelCommodityTree(certType, traceId) {
+  async getTopLevelCommodityTree(certType, species, traceId) {
+    const params = encodeURIComponent({
+      species
+    })
+
+    const url = species
+      ? `${commodityCodeBaseUrl}/commodity-codes/${certType}/top-level?${params}`
+      : `${commodityCodeBaseUrl}/commodity-codes/${certType}/top-level`
     const response = await GET({
-      url: `${commodityCodeBaseUrl}/commodity-codes/${certType}/top-level`,
+      url,
       headers: {
         [tracingHeader]: traceId
       }
@@ -66,9 +73,11 @@ export const commodityCodeApi = {
     return response
   },
 
-  async getSpecies(certType, traceId) {
+  async getSpecies(certType, traceId, species) {
+    const filter = encodeURIComponent(species)
+
     const response = await GET({
-      url: `${commodityCodeBaseUrl}/species/${certType}`,
+      url: `${commodityCodeBaseUrl}/species/${certType}?filter=${filter}`,
       headers: {
         [tracingHeader]: traceId
       }

@@ -25,6 +25,9 @@ export default {
     },
     transport: {
       import: './javascripts/bcp-autocomplete.js'
+    },
+    species: {
+      import: './javascripts/species-autocomplete.js'
     }
   },
   experiments: {

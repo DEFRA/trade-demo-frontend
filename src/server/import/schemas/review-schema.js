@@ -9,5 +9,9 @@ export const reviewSchema = Joi.object({
     'string.base':
       'Confirm that the information you have provided is correct to the best of your knowledge'
   }),
+  isCommodityCodeFlowComplete: Joi.boolean().valid(true).required().messages({
+    'any.only': 'Complete commodity codes flow',
+    'any.required': 'Complete commodity codes flow'
+  }),
   crumb: Joi.string().optional()
 })

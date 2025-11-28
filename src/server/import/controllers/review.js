@@ -1,10 +1,12 @@
 import {
   setSessionValue,
-  getSessionValue
+  getSessionValue,
+  clearSessionValue
 } from '../../common/helpers/session-helpers.js'
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { reviewSchema } from '../schemas/review-schema.js'
 import { buildReviewViewModel } from '../helpers/view-models.js'
+import { formatValidationErrors } from '../helpers/validation-helpers.js'
 
 /**
  * Generate a mock CHED reference
@@ -65,6 +67,11 @@ export const reviewController = {
         return h.redirect('/import/consignment/origin')
       }
 
+      request.payload.isCommodityCodeFlowComplete = getSessionValue(
+        request,
+        'isCommodityCodeFlowComplete'
+      )
+
       // Validate confirmation checkbox
       const { error } = reviewSchema.validate(request.payload, {
         abortEarly: false
@@ -78,9 +85,27 @@ export const reviewController = {
           'internal-market-purpose': getSessionValue(
             request,
             'internal-market-purpose'
+          ),
+          'commodity-code-details': getSessionValue(
+            request,
+            'commodity-code-details'
+          ),
+          'commodity-selected-species': getSessionValue(
+            request,
+            'commodity-selected-species'
           )
         }
-        const viewModel = buildReviewViewModel(sessionData, error)
+
+        const formattedErrors = error ? formatValidationErrors(error) : null
+
+        const viewModel = buildReviewViewModel(sessionData)
+        if (formattedErrors) {
+          viewModel.errorList = formattedErrors.errorList
+          viewModel.formError = {
+            text: formattedErrors.errorList[0].text
+          }
+        }
+
         return h
           .view('import/templates/review/index', viewModel)
           .code(statusCodes.badRequest)
@@ -95,12 +120,12 @@ export const reviewController = {
       setSessionValue(request, 'internal-market-purpose', '')
       setSessionValue(request, 'internal-market-purpose', '')
       // clear commodity code details
-      setSessionValue(request, 'commodity-codes', '')
-      setSessionValue(request, 'commodity-code-details', '')
-      setSessionValue(request, 'commodity-selected-species', '')
-      setSessionValue(request, 'commodity-type', '')
-      setSessionValue(request, 'commodity-selected-tab', '')
-      setSessionValue(request, 'species-selected-tab', '')
+      clearSessionValue(request, 'commodity-codes')
+      clearSessionValue(request, 'commodity-code-details')
+      clearSessionValue(request, 'commodity-selected-species')
+      clearSessionValue(request, 'commodity-type')
+      clearSessionValue(request, 'isCommodityCodeFlowComplete')
+
       // Clear transport details
       setSessionValue(request, 'bcp', '')
       setSessionValue(request, 'transport-means-before', '')
