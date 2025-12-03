@@ -90,11 +90,22 @@
           ]
         }) }}
 
-        {{ govukButton({
-          text: "Save and continue"
-        }) }}
+        <div class="govuk-button-group">
+          {{ govukButton({
+            text: "Save and continue"
+          }) }}
+
+          <button type="button" id="save-as-draft-button" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+            Save as draft
+          </button>
+        </div>
       </form>
 
     </div>
   </div>
+{% endblock %}
+
+{% block bodyEnd %}
+  {{ super() }}
+  <script type="module" src="{{ getAssetPath('save-as-draft.js') }}"></script>
 {% endblock %}

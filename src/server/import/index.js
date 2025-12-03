@@ -9,6 +9,7 @@ import { commodityCodesController } from './controllers/commodity-codes.js'
 import { transportDetailsController } from './controllers/transport.js'
 import { reviewController } from './controllers/review.js'
 import { confirmationController } from './controllers/confirmation.js'
+import { saveAsDraftController } from './controllers/save-as-draft.js'
 
 export const importJourney = {
   plugin: {
@@ -177,6 +178,17 @@ export const importJourney = {
           ...confirmationController.get,
           options: {
             ...confirmationController.get.options,
+            auth: 'session'
+          }
+        },
+
+        // Save as Draft - available from any page in journey
+        {
+          method: 'POST',
+          path: '/import/save-as-draft',
+          ...saveAsDraftController.post,
+          options: {
+            ...saveAsDraftController.post.options,
             auth: 'session'
           }
         }

@@ -27,11 +27,12 @@ export const csrf = {
         return true
       }
 
-      // Skip CSRF for health check and static assets
+      // Skip CSRF for health check, static assets, and AJAX endpoints
       return (
         request.path.startsWith('/health') ||
         request.path.startsWith('/assets') ||
-        request.path.startsWith('/public')
+        request.path.startsWith('/public') ||
+        request.path === '/import/save-as-draft' // Skip CSRF for save-as-draft AJAX
       )
     }
   }

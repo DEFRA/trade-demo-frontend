@@ -92,9 +92,15 @@
               </tbody>
             </table>
           {% endfor %}
-          <button type="submit" class="govuk-button" data-module="govuk-button">
-            Save and continue
-          </button>
+          <div class="govuk-button-group">
+            <button type="submit" class="govuk-button" data-module="govuk-button">
+              Save and continue
+            </button>
+
+            <button type="button" id="save-as-draft-button" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+              Save as draft
+            </button>
+          </div>
         </div>
       </form>
       {% else %}
@@ -137,11 +143,22 @@
               </div>
             </fieldset>
           </div>
-          <button class="govuk-button" data-module="govuk-button">
-            Save and continue
-          </button>
+          <div class="govuk-button-group">
+            <button class="govuk-button" data-module="govuk-button">
+              Save and continue
+            </button>
+
+            <button type="button" id="save-as-draft-button" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+              Save as draft
+            </button>
+          </div>
         </form>
       {% endif %}
     </div>
   </div>
+{% endblock %}
+
+{% block bodyEnd %}
+  {{ super() }}
+  <script type="module" src="{{ getAssetPath('save-as-draft.js') }}"></script>
 {% endblock %}
