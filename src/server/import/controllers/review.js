@@ -90,6 +90,7 @@ export const reviewController = {
       const chedReference = generateChedReference()
 
       // Clear journey data
+      setSessionValue(request, 'draft-notification-id', '')
       setSessionValue(request, 'origin-country', '')
       setSessionValue(request, 'purpose', '')
       setSessionValue(request, 'internal-market-purpose', '')

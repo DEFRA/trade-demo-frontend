@@ -143,6 +143,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Capture current form values
     const formData = captureFormData()
 
+    // Get CSRF token from meta tag
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+
     // Debug logging
     console.log('Captured form data:', formData)
 
@@ -150,7 +153,8 @@ document.addEventListener('DOMContentLoaded', function () {
       const response = await fetch('/import/save-as-draft', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
         },
         credentials: 'same-origin', // Include session cookie
         body: JSON.stringify({ formData })

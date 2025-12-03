@@ -189,7 +189,12 @@ export const importJourney = {
           ...saveAsDraftController.post,
           options: {
             ...saveAsDraftController.post.options,
-            auth: 'session'
+            auth: 'session',
+            plugins: {
+              crumb: {
+                restful: true // Enable header-based CSRF validation for this AJAX endpoint
+              }
+            }
           }
         }
       ])

@@ -168,7 +168,7 @@ export const saveAsDraftController = {
       }
     },
     options: {
-      // CSRF is skipped for this route via csrf.js plugin configuration
+      // CSRF protection enabled via X-CSRF-Token header
     }
   }
 }

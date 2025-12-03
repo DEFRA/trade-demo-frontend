@@ -11,12 +11,16 @@ import { config } from '../config/config.js'
  * - Secure, HttpOnly, SameSite=Strict cookies
  * - Disabled during test runs (for simpler test setup)
  * - Skips health checks and static assets
+ * - Default: validates tokens in form payload (for HTML forms)
+ * - Per-route: can enable restful mode for header-based validation (AJAX)
  *
  * @see https://hapi.dev/module/crumb/ for Crumb documentation
  */
 export const csrf = {
   plugin: Crumb,
   options: {
+    // Default: validate CSRF tokens in payload (works for HTML forms)
+    // Individual routes can override with restful: true for header validation
     cookieOptions: {
       isSecure: config.get('csrf.cookie.secure'),
       isHttpOnly: true,
@@ -27,12 +31,11 @@ export const csrf = {
         return true
       }
 
-      // Skip CSRF for health check, static assets, and AJAX endpoints
+      // Skip CSRF for health check and static assets only
       return (
         request.path.startsWith('/health') ||
         request.path.startsWith('/assets') ||
-        request.path.startsWith('/public') ||
-        request.path === '/import/save-as-draft' // Skip CSRF for save-as-draft AJAX
+        request.path.startsWith('/public')
       )
     }
   }

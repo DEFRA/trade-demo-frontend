@@ -11,6 +11,7 @@
 {% set mainClasses = "app-main-wrapper" %}
 
 {% block head %}
+  <meta name="csrf-token" content="{{ crumb }}">
   <link href="{{ getAssetPath('stylesheets/application.scss') }}" rel="stylesheet">
 {% endblock %}
 
