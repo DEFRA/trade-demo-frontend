@@ -6,6 +6,14 @@
       </label>
     </h1>
 
+    {{ tabSelected }}
+    {% if tabs.commoditySearchTab == 'selected' %}
+      {% set tabSelected = 'commoditySearchTab' %}
+    {% else %}
+      {% set tabSelected = 'speciesSearchTab' %}
+    {% endif %}
+
+
     <!-- Begin Tree -->
     <div class="search-panel">
       <div class="commodity-selection-breadcrumb">
@@ -16,106 +24,123 @@
 
           <div class="commodity-list">
             <ul>
-              {% for commodity in commodityCodesParent %}
-                <li id="commodity-{{ code }}">
-                  <p class="box-margin">
-                    <strong>
-                      <a class="commodity-code-box govuk-link"
-                         href="/import/commodity/codes/{{ commodity.code }}/parent">
-                        {{ commodity.code }}
-                      </a>
-                    </strong>
-                    <span>
-                    <a class="govuk-link" href="/import/commodity/codes/{{ commodity.code }}/parent">
-                      <small>{{ commodity.description }}</small>
-                    </a>
-                  </span>
-                  </p>
-                  <!-- child nodes -->
-                  <ul>
-                    {% if commodityCodesParent.commodityCodesChild %}
-                      {% for node in commodityCodesParent.commodityCodesChild %}
-                        {% if node.parentCode == commodity.code %}
-                          <li id="commodity-{{ code }}">
-                            <p class="box-margin">
-                              <strong>
-                                {% if node.displayCodeFull %}
-                                <a
-                                  href="/import/commodity/codes/{{ node.code }}/child?parent-code={{ node.parentCode }}"
-                                  class="commodity-code-box govuk-link">
-                                  {{ node.displayCodeFull | first }}
-                                </a>
-                                <a
-                                  href="/import/commodity/codes/{{ node.code }}/child?parent-code={{ node.parentCode }}"
-                                  class="commodity-code-box govuk-link">
-                                  {{ node.displayCodeFull | last }}
-                                </a>
-                              </strong>
-                              <span>
-                                <a
-                                  href="/import/commodity/codes/{{ node.code }}/child?parent-code={{ node.parentCode }}">
-                                  <small>{{ node.description }}</small>
-                                </a>
-                              </span>
-                              {% else %}
-                                <span>
-                                <a
-                                  href="/import/commodity/codes/{{ node.code }}/child?parent-code={{ node.parentCode }}">
-                                description text
-                              </a>
-                              </span>
-                              {% endif %}
-                            </p>
-                          </li>
+              {% for commodity in treeParent %}
+              <li>
+                <strong class="commodity-code-box">
+                  <a class="govuk-link cc-box"
+                     href="/import/commodity/codes/{{ commodity.code }}/first?tab={{ tabSelected }}">
+                    {{ commodity.code }}
+                  </a>
+                </strong>
+                <span  class="commodity-description-links-container">
+                  <a class="govuk-link" href="/import/commodity/codes/{{ commodity.code }}/first?tab={{ tabSelected }}">
+                      {{ commodity.description }}
+                </a>
+                </span>
 
-                          {% if commodityCodesParent.commodityCodesChild.children %}
-                            {% for children in commodityCodesParent.commodityCodesChild.children %}
-                              <ul>
-                                <li>
-                                  <p class="box-margin">
-                                    {% if children.displayCodeFull %}
-                                      {% set leafCommodityCode = children.displayCodeFull %}
-                                      <strong>
-                                        <a
-                                          href="/import/commodity/codes/{{ children.code }}/child?parent-code={{ children.parentCode }}"
-                                          class="commodity-code-box govuk-link">
-                                          {{ leafCommodityCode[0] }}
-                                        </a>
-                                        <a
-                                          href="/import/commodity/codes/{{ children.code }}/child?parent-code={{ children.parentCode }}"
-                                          class="commodity-code-box govuk-link">
-                                          {{ leafCommodityCode[1] }}
-                                        </a>
-                                        <a
-                                          href="/import/commodity/codes/{{ children.code }}/child?parent-code={{ children.parentCode }}"
-                                          class="commodity-code-box govuk-link">
-                                          {{ leafCommodityCode[2] }}
+                <!-- First child -->
+                <ul>
+                  {% if treeParent.firstChild %}
+                    {% for node in treeParent.firstChild %}
+                      {% if node.parentCode == commodity.code %}
+                      <li>
+                        <strong class="commodity-code-box">
+                          {% if node.displayCodeFull %}
+                          <a href="/import/commodity/codes/{{ commodity.code }}/{{ node.code }}/second?parent-code={{ node.parentCode }}&tab={{ tabSelected }}"
+                                  class="govuk-link cc-box">
+                            {{ node.displayCodeFull | first }}
+                          </a>
+                        </strong>
+                        <strong class="commodity-code-box">
+                          <a href="/import/commodity/codes/{{ commodity.code }}/{{ node.code }}/second?parent-code={{ node.parentCode }}&tab={{ tabSelected }}"
+                                  class="govuk-link cc-box">
+                            {{ node.displayCodeFull | last }}
+                          </a>
+                        </strong>
+                        <span>
+                          <a href="/import/commodity/codes/{{ commodity.code }}/{{ node.code }}/second?parent-code={{ node.parentCode }}&tab={{ tabSelected }}">
+                            {{ node.description }}
+                          </a>
+                        </span>
+                        {% else %}
+                          <span>
+                            <a href="/import/commodity/codes/{{ commodity.code }}/{{ node.code }}/second?parent-code={{ node.parentCode }}&tab={{ tabSelected }}">
+                              {{ node.description }}
+                            </a>
+                          </span>
+                        {% endif %}
+
+                        <!-- Second child -->
+                        {% if treeParent.firstChild.secondChild %}
+                          {% for children in treeParent.firstChild.secondChild %}
+                            <ul>
+                              <li>
+                                {% if children.displayCodeFull %}
+                                  {% set scCommodityCode = children.displayCodeFull %}
+                                  {% for scCode in scDisplayCode %}
+                                    <strong class="commodity-code-box ">
+                                      <a href="/import/commodity/codes/{{ commodity.code }}/{{ node.code }}/{{ children.code }}/third?parent-code={{ children.parentCode }}&tab={{ tabSelected }}"
+                                         class="govuk-link cc-box">
+                                        {{ scCode }}
+                                      </a>
+                                    </strong>
+                                  {% endfor %}
+                                  <span>
+                                    <a href="/import/commodity/codes/{{ commodity.code }}/{{ node.code }}/{{ children.code }}/third?parent-code={{ children.parentCode }}&tab={{ tabSelected }}">
+                                      {{ children.description }}
+                                    </a>
+                                </span>
+                                {% else %}
+                                <span>
+                                  <a href="/import/commodity/codes/{{ commodity.code }}/{{ node.code }}/{{ children.code }}/third?parent-code={{ children.parentCode }}&tab={{ tabSelected }}">
+                                    {{ children.description }}
+                                  </a>
+                                </span>
+                                {% endif %}
+                              </li>
+
+                              <!-- leaf nodes -->
+                              {% if treeParent.firstChild.secondChild.leaf %}
+                                {% for leaf in treeParent.firstChild.secondChild.leaf %}
+                                  <ul>
+                                    <li>
+                                    {% if leaf.displayCodeFull %}
+                                    {% set leafCommodityCode = leaf.displayCodeFull %}
+                                      {% for leafCode in leafCommodityCode %}
+                                      <strong class="commodity-code-box ">
+                                        <a href="/import/commodity/codes/{{ commodity.code }}/{{ node.code }}/{{ children.code }}/{{ leafCommodityCode | join }}/third?parent-code={{ children.parentCode }}"
+                                           class="govuk-link cc-box">
+                                          {{ leafCode }}
                                         </a>
                                       </strong>
+                                      {% endfor %}
                                       <span>
-                                    <a
-                                      href="/import/commodity/codes/{{ children.code }}/child?parent-code={{ children.parentCode }}">
-                                      <small>{{ children.description }}</small>
-                                    </a>
-                                  </span>
-                                    {% else %}
-                                      <a
-                                        href="/import/commodity/codes/{{ children.code }}/child?parent-code={{ children.parentCode }}">
-                                        <small>{{ children.description }}</small>
-                                      </a>
-                                    {% endif %}
-                                  </p>
-                                </li>
-                              </ul>
-                            {% endfor %}
-
-                          {% endif %}
-
+                                        <a href="/import/commodity/codes/{{ commodity.code }}/{{ node.code }}/{{ children.code }}/{{ leafCommodityCode | join }}/third?parent-code={{ children.parentCode }}">
+                                          {{ leaf.description }}
+                                        </a>
+                                      </span>
+                                      {% else %}
+                                        <span>
+                                          <a href="/import/commodity/codes/{{ commodity.code }}/{{ node.code }}/{{ children.code }}/{{ leafCommodityCode | join }}/third?parent-code={{ children.parentCode }}">
+                                            {{ leaf.description }}
+                                          </a>
+                                        </span>
+                                      {% endif %}
+                                    </li>
+                                  </ul>
+                                {% endfor %}
+                              {% endif %}
+                            </ul>
+                          {% endfor %}
                         {% endif %}
-                      {% endfor %}
-                    {% endif %}
-                  </ul>
-                </li>
+
+                      </li>
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                </ul>
+
+              </li>
               {% endfor %}
             </ul>
           </div>

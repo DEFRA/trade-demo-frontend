@@ -89,7 +89,7 @@ export const config = convict({
   assetPath: {
     doc: 'Asset path',
     format: String,
-    default: '',
+    default: '/public',
     env: 'ASSET_PATH'
   },
   isLocal: {

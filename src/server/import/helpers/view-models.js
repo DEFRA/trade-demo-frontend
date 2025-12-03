@@ -69,12 +69,13 @@ export async function buildCommodityCodeViewModel(
 
 export async function getCommodityCodesTreeData(
   certType,
+  species,
   traceId,
-  request,
-  sessionData = {}
+  request
 ) {
   const commodityCodesTree = await commodityCodeApi.getTopLevelCommodityTree(
     certType,
+    species,
     traceId
   )
 
@@ -85,14 +86,12 @@ export async function getCommodityCodeChildNode(
   certType,
   parentCode,
   traceId,
-  request,
-  sessionData = {}
+  request
 ) {
   const commodityCodeNodeDetails = await commodityCodeApi.getByParentCode(
     certType,
     parentCode,
-    request,
-    sessionData
+    request
   )
 
   return Object.values(commodityCodeNodeDetails)
@@ -183,10 +182,6 @@ export function buildTransportViewModel(
  * @returns {Object} View model for template
  */
 export function buildReviewViewModel(sessionData = {}, validationError = null) {
-  const formattedErrors = validationError
-    ? formatValidationErrors(validationError)
-    : null
-
   // Build summary list rows
   const summaryRows = []
 
@@ -219,7 +214,7 @@ export function buildReviewViewModel(sessionData = {}, validationError = null) {
     let isComplete = false
     if (speciesLst) {
       speciesLst.forEach((species) => {
-        isComplete = !(!species.noOfAnimals || !species.noOfPacks)
+        isComplete = !!species.noOfAnimals
       })
     }
 
@@ -310,13 +305,6 @@ export function buildReviewViewModel(sessionData = {}, validationError = null) {
     heading: 'Check your answers before submitting',
     summaryList: {
       rows: summaryRows
-    }
-  }
-
-  if (formattedErrors) {
-    viewModel.errorList = formattedErrors.errorList
-    viewModel.formError = {
-      text: formattedErrors.errorList[0].text
     }
   }
 
