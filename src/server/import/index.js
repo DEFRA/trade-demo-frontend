@@ -42,6 +42,15 @@ export const importJourney = {
         // 2a. Show search page
         {
           method: 'GET',
+          path: '/imports/commodity/codes/toggle',
+          ...commoditySearchController.switchTab,
+          options: {
+            ...commoditySearchController.switchTab.options,
+            auth: 'session'
+          }
+        },
+        {
+          method: 'GET',
           path: '/import/commodity/codes',
           ...commoditySearchController.showSearchPage,
           options: {
@@ -60,6 +69,14 @@ export const importJourney = {
         // 2c. Tree navigation - search by child code
         {
           method: 'GET',
+          path: '/import/commodity/codes/species-autofill',
+          ...commoditySearchController.speciesSearch,
+          options: {
+            auth: 'session'
+          }
+        },
+        {
+          method: 'GET',
           path: '/import/commodity/codes/{commodityCode}/child',
           ...commoditySearchController.search,
           options: {
@@ -67,6 +84,23 @@ export const importJourney = {
           }
         },
         // 2d. Tree navigation - parent hierarchy
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/{commodityCode}/search',
+          ...commoditySearchController.search,
+          options: {
+            auth: 'session'
+          }
+        },
+        {
+          method: 'GET',
+          path: '/import/commodity/species/search',
+          ...commoditySearchController.speciesSearchTree,
+          options: {
+            ...commoditySearchController.speciesSearchTree.options,
+            auth: 'session'
+          }
+        },
         {
           method: 'GET',
           path: '/import/commodity/codes/{parentCode}/parent',
@@ -84,7 +118,25 @@ export const importJourney = {
             auth: 'session'
           }
         },
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/{parentCode}/first',
+          ...commoditySearchController.getFirstChild,
+          options: {
+            ...commoditySearchController.getFirstChild.options,
+            auth: 'session'
+          }
+        },
         // 2f. Show quantities entry form
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/{parentCode}/{childCode}/second',
+          ...commoditySearchController.getSecondChild,
+          options: {
+            ...commoditySearchController.getSecondChild.options,
+            auth: 'session'
+          }
+        },
         {
           method: 'GET',
           path: '/import/commodity/codes/quantities',
@@ -96,9 +148,27 @@ export const importJourney = {
         // 2g. Save quantities and continue
         {
           method: 'GET',
+          path: '/import/commodity/codes/{parentCode}/{firstChild}/{secondChild}/third',
+          ...commoditySearchController.getThirdChild,
+          options: {
+            ...commoditySearchController.getThirdChild.options,
+            auth: 'session'
+          }
+        },
+        {
+          method: 'GET',
           path: '/import/commodity/codes/quantities/save',
           ...commodityQuantitiesController.saveQuantities,
           options: {
+            auth: 'session'
+          }
+        },
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/{parentCode}/{firstChild}/{secondChild}/{leafCode}/third',
+          ...commoditySearchController.getThirdChild,
+          options: {
+            ...commoditySearchController.getThirdChild.options,
             auth: 'session'
           }
         },

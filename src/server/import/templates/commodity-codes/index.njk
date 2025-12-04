@@ -11,6 +11,7 @@
 {% from "govuk/components/accordion/macro.njk" import govukAccordion %}
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 
 {% block beforeContent %}
   {{ govukBackLink({
@@ -30,52 +31,70 @@
         }) }}
       {% endif %}
 
-        <span class="govuk-caption-xl">Description of the goods</span>
-        <h1 class="govuk-heading-xl">Commodity</h1>
+      {% if errorBanner %}
+        <div id="error-banner" class="govuk-notification-banner" role="alert" aria-labelledby="error-banner-title" data-module="govuk-notification-banner" style="border-color: #d4351c;">
+          <div class="govuk-notification-banner__header" style="background-color: #d4351c;">
+            <h2 class="govuk-notification-banner__title" id="error-banner-title">
+              Error
+            </h2>
+          </div>
+          <div class="govuk-notification-banner__content">
+            <p class="govuk-notification-banner__heading">
+              {{ errorBanner.text }}
+            </p>
+          </div>
+        </div>
+      {% endif %}
 
-        <div>
-          <details class="govuk-details">
-            <summary class="govuk-details__summary">
+      <span class="govuk-caption-xl">Description of the goods</span>
+      <h1 class="govuk-heading-xl">Commodity</h1>
+
+      <div>
+        <details class="govuk-details">
+          <summary class="govuk-details__summary">
               <span class="govuk-details__summary-text">
                 If you need help with finding an animal
               </span>
-            </summary>
-            <div class="govuk-details__text">
-              You can:
-              <ul>
-                <li>use the Species search to find an animal using its scientific (Latin) species name</li>
-                <li><a href='https://www.gov.uk/trade-tariff' class='govuk-link--no-visited-state' target='_blank'
-                       rel='noopener noreferrer'> look up commodity codes for animals using the Trade Tariff tool (opens
-                    in new tab)</a></li>
-              </ul>
-            </div>
-          </details>
-        </div>
+          </summary>
+          <div class="govuk-details__text">
+            You can:
+            <ul>
+              <li>use the Species search to find an animal using its scientific (Latin) species name</li>
+              <li><a href='https://www.gov.uk/trade-tariff' class='govuk-link--no-visited-state' target='_blank'
+                     rel='noopener noreferrer'> look up commodity codes for animals using the Trade Tariff tool (opens
+                  in new tab)</a></li>
+            </ul>
+          </div>
+        </details>
+      </div>
 
-        <div class="govuk-tabs" data-module="govuk-tabs">
-          <h2 class="govuk-tabs__title">
-            Contents
-          </h2>
-          <ul class="govuk-tabs__list">
-            <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
-              <a class="govuk-tabs__tab" href="#commodity-code-tab">
-                Commodity code search
-              </a>
-            </li>
-            <li class="govuk-tabs__list-item">
-              <a class="govuk-tabs__tab" href="#species-tab">
-                Species search
-              </a>
-            </li>
-          </ul>
-          <div class="govuk-tabs__panel" id="commodity-code-tab">
-            <form action="/import/commodity/codes/search" method="get" novalidate>
-              <input type="hidden" name="crumb" value="{{ crumb }}"/>
+      <div class="govuk-tabs">
+        <h2 class="govuk-tabs__title">
+          Contents
+        </h2>
+        <ul class="govuk-tabs__list">
+          <li class="govuk-tabs__list-item govuk-tabs__list-item--{{ tabs.commoditySearchTab }}">
+            <a class="govuk-tabs__tab" href="/imports/commodity/codes/toggle?tab=commoditySearchTab">
+              Commodity code search
+            </a>
+          </li>
+          <li class="govuk-tabs__list-item govuk-tabs__list-item--{{ tabs.speciesSearchTab }}">
+            <a class="govuk-tabs__tab" href="/imports/commodity/codes/toggle?tab=speciesSearchTab">
+              Species search
+            </a>
+          </li>
+        </ul>
+        <div class="govuk-tabs__panel govuk-tabs__panel--{{ tabs.commoditySearchTab }}" id="commodity-code-tab">
+          <form action="/import/commodity/codes/search?tab=commodity-search" method="get" novalidate>
+            <input type="hidden" name="crumb" value="{{ crumb }}"/>
             <h2 class="govuk-heading-m">Search commodities</h2>
             <div class="govuk-form-group">
               <div id="more-detail-hint" class="govuk-hint">
                 Enter commodity code
               </div>
+              <p id="no-commodity-code-error" class="govuk-error-message">
+                <span class="govuk-visually-hidden">Error:</span> {{ errorList[0].text }}
+              </p>
               <input class="govuk-input" id="commodity-code" name="commodity-code" type="text">
             </div>
             <div>
@@ -83,33 +102,66 @@
                 Search
               </button>
             </div>
-            </form>
-            <!-- commodity tree -->
-            {% include "commodity-codes/commodityTree.njk" %}
-          </div>
-          <div class="govuk-tabs__panel govuk-tabs__panel--hidden" id="species-tab">
-            <h2 class="govuk-heading-m">Search species of commodity</h2>
-            <div class="govuk-form-group">
-              <div id="more-detail-hint" class="govuk-hint">
-                Enter scientific (Latin) name of species
-                For example:
-                <ul>
-                  <li>for cattle, enter Bos taurus</li>
-                  <li>for sheep, enter Ovis aries</li>
-                  <li>for dogs, enter Canis familiaris</li>
-                </ul>
-              </div>
-              <form action="/import/commodity/species/search" method="get" novalidate>
-                <input type="hidden" name="crumb" value="{{ crumb }}"/>
-                <input class="govuk-input js-hidden" id="species-code" name="species-code" type="text">
-                <div id="suggestions"></div>
-              </form>
-            </div>
-            <!-- commodity codes tree -->
-            {% include "commodity-codes/commodityTree.njk" %}
-          </div>
+          </form>
+          <!-- commodity tree -->
+          {% include "commodity-codes/commodityTree.njk" %}
         </div>
+        <div class="govuk-tabs__panel govuk-tabs__panel--{{ tabs.speciesSearchTab }}" id="species-tab">
+          <h2 class="govuk-heading-m">Search species of commodity</h2>
+          <div class="govuk-form-group">
+            <div id="more-detail-hint" class="govuk-hint">
+              Enter scientific (Latin) name of species
+              For example:
+              <ul>
+                <li>for cattle, enter Bos taurus</li>
+                <li>for sheep, enter Ovis aries</li>
+                <li>for dogs, enter Canis familiaris</li>
+              </ul>
+            </div>
+            <form id="species-search-form" action="/import/commodity/species/search?tab=species-search" method="GET" novalidate>
+              <input type="hidden" name="crumb" value="{{ crumb }}"/>
+              <input type="hidden" name="tab" value="speciesSearchTab">
+              <div class="govuk-!-width-one-third autocomplete-container" id="autocomplete-container">
+                <input class="govuk-input" id="species-search" name="species-text-input" value="{{ speciesTextInput }}">
+                <div id="suggestions"></div>
+              </div>
+              <!-- Hidden submit button prevents Enter key issues -->
+              <button type="submit" class="hide-element"></button>
+            </form>
+          </div>
+          <!-- commodity codes tree -->
+          {% include "commodity-codes/commodityTree.njk" %}
+        </div>
+      </div>
 
     </div>
   </div>
+
+
+{% endblock %}
+
+{% block bodyEnd %}
+  {{ super() }}
+  <script type="module" src="{{ getAssetPath('species.js') }}"></script>
+  {% if errorBanner %}
+  <script>
+    (function() {
+      // Auto-hide the error banner after 5 seconds
+      var banner = document.getElementById('error-banner');
+      if (banner) {
+        setTimeout(function() {
+          banner.style.transition = 'opacity 0.5s ease-out';
+          banner.style.opacity = '0';
+          setTimeout(function() {
+            banner.style.display = 'none';
+            // Remove error parameter from URL to prevent banner showing on refresh
+            var url = new URL(window.location);
+            url.searchParams.delete('error');
+            window.history.replaceState({}, '', url);
+          }, 500);
+        }, 5000);
+      }
+    })();
+  </script>
+  {% endif %}
 {% endblock %}

@@ -1,4 +1,6 @@
 // import custom partial styles
 
+@forward "../../../server/common/components/heading/heading";
+@forward "../../../server/common/components/service-header/service-header";
 @forward "commodities";
 @forward "utilities";

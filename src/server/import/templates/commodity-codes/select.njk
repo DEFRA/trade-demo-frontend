@@ -31,8 +31,6 @@
         }) }}
       {% endif %}
 
-      <input type="hidden" name="crumb" value="{{ crumb }}"/>
-
       <span class="govuk-caption-xl">Description of the goods</span>
       <h1 class="govuk-heading-xl">Commodity</h1>
 
@@ -129,6 +127,9 @@
               </legend>
               <div id="waste-hint" class="govuk-hint">
                 Select all that apply.
+                <p id="no-commodity-code-error" class="govuk-error-message">
+                  <span class="govuk-visually-hidden">Error:</span> {{ errorList[0].text }}
+                </p>
               </div>
               <div class="govuk-checkboxes" data-module="govuk-checkboxes">
                 {% for species in speciesLst %}

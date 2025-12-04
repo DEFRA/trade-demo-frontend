@@ -1,65 +1,58 @@
-@import "../../../../node_modules/govuk-frontend";
-@import "variables";
+/* stylelint-disable */
+@use "govuk-frontend" as *;
+@use "variables" as *;
 
 .commodity-selection-breadcrumb {
-  @include govuk-font($size: 16);
+  position: relative;
+  padding: 1em;
+}
 
-  // position: relative;
-  // padding: 1em;
+.commodity-selection-breadcrumb nav .commodity-list ul {
+  position: relative;
+  list-style: none;
+  padding-left: 42px;
+}
 
-  &::after {
-    content: "";
-    display: block;
-    clear: both;
-  }
+.commodity-selection-breadcrumb nav .commodity-list ul li {
+  position: relative;
+  display: block;
+  line-height: 25px;
+  padding-top: 5px;
+  word-wrap: break-word;
+}
 
-  nav .commodity-list ul {
-    position: relative;
-    list-style: none;
-    padding-left: 42px;
-  }
+.commodity-selection-breadcrumb nav .commodity-list ul li:before, .commodity-selection-breadcrumb nav .commodity-list ul li:after {
+  content: "";
+  position: absolute;
+  left: -23px;
+}
 
-  nav .commodity-list ul li {
-    position: relative;
-    display: block;
-    line-height: 25px;
-    padding-top: 5px;
-    word-wrap: break-word;
-  }
+.commodity-selection-breadcrumb nav .commodity-list ul li:before {
+  border-top: 1px solid black;
+  top: 24px;
+  width: 21px;
+  height: 0;
+}
 
-  nav .commodity-list ul li::before, nav .commodity-list ul li::after {
-    content: "";
-    position: absolute;
-    left: -23px;
-  }
+.commodity-selection-breadcrumb nav .commodity-list ul li:after {
+  border-left: 1px solid black;
+  height: 100%;
+  width: 0;
+  top: 2px;
+}
 
-  nav .commodity-list ul li::before {
-    border-top: 1px solid 0;
-    top: 24px;
-    width: 21px;
-    height: 0;
-  }
+.commodity-selection-breadcrumb nav .commodity-list ul li:last-child:after {
+  height: 22px;
+}
 
-  nav .commodity-list ul li::after {
-    border-left: 1px solid 0;
-    height: 100%;
-    width: 0;
-    top: 2px;
-  }
+.commodity-selection-breadcrumb nav .commodity-list ul li strong input,
+.commodity-selection-breadcrumb nav .commodity-list ul li strong button {
+  color: $white;
+  text-decoration: none;
+}
 
-  nav .commodity-list ul li:last-child::after {
-    height: 22px;
-  }
-
-  nav .commodity-list ul li strong input,
-  nav .commodity-list ul li strong button {
-    color: 90;
-    text-decoration: none;
-  }
-
-  nav .commodity-list ul li span {
-    line-height: 38px;
-  }
+.commodity-selection-breadcrumb nav .commodity-list ul li span {
+  line-height: 38px;
 }
 
 // Commodity selector css
@@ -84,8 +77,6 @@
   display: inline-block;
 
   .commodity-description-link {
-    @include govuk-font($size: 16);
-
     overflow-wrap: break-word;
     white-space: normal;
     text-align: left;
@@ -94,9 +85,9 @@
 }
 
 .commodity-link-button-no-boxes {
-  @include govuk-link-common;
-  @include govuk-link-style-default;
-  @include govuk-font($size: 16);
+  //@include govuk-link-common;
+  //@include govuk-link-style-default;
+  //@include govuk-font($size: 16);
   overflow-wrap: break-word;
   white-space: normal;
   text-align: left;
@@ -132,19 +123,13 @@
 }
 
 .link-button {
-  font-family: "GDS Transport", arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-weight: 400;
-  font-size: 16px;
-  font-size: 1rem;
-  line-height: 1.25;
-  text-decoration: underline;
+
   background: none;
   border: 0;
-  color: #1d70b8;
+  color: $govuk-link-colour;
   cursor: pointer;
   padding: 0;
+  text-decoration: underline;
 }
 
 .commodity-code-link {
@@ -152,3 +137,58 @@
   text-decoration: none;
 }
 
+
+.cc-box {
+  color: white !important;
+  text-decoration: none;
+}
+
+.autocomplete-container {
+  position: relative; /* Critical: Parent must be relative */
+  display: inline-block;
+  width: 300px;
+}
+
+#autocomplete {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#suggestions {
+  position: absolute;        /* Critical: Absolute positioning */
+  top: 100%;                 /* Position below input */
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10000;            /* Critical: High z-index */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.suggestion {
+  padding: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.suggestion:hover {
+  background-color: #f5f5f5;
+}
+
+.suggestion:last-child {
+  border-bottom: none;
+}
+
+/* Hide when empty */
+#suggestions:empty {
+  display: none;
+}
+
+
+.hide-element { display: none; }

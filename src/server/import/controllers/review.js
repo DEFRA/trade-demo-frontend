@@ -7,6 +7,7 @@ import { reviewSchema } from '../schemas/review-schema.js'
 import { buildReviewViewModel } from '../helpers/view-models.js'
 import { buildNotificationDto } from '../helpers/notification-builder.js'
 import { notificationApi } from '../../common/helpers/api-client.js'
+import { formatValidationErrors } from '../helpers/validation-helpers.js'
 
 export const reviewController = {
   get: {
@@ -63,6 +64,11 @@ export const reviewController = {
         return h.redirect('/import/consignment/origin')
       }
 
+      request.payload.isCommodityCodeFlowComplete = getSessionValue(
+        request,
+        'isCommodityCodeFlowComplete'
+      )
+
       // Validate confirmation checkbox
       const { error } = reviewSchema.validate(request.payload, {
         abortEarly: false
@@ -92,7 +98,17 @@ export const reviewController = {
           ),
           bcp: getSessionValue(request, 'bcp')
         }
-        const viewModel = buildReviewViewModel(sessionData, error)
+
+        const formattedErrors = error ? formatValidationErrors(error) : null
+
+        const viewModel = buildReviewViewModel(sessionData)
+        if (formattedErrors) {
+          viewModel.errorList = formattedErrors.errorList
+          viewModel.formError = {
+            text: formattedErrors.errorList[0].text
+          }
+        }
+
         return h
           .view('import/templates/review/index', viewModel)
           .code(statusCodes.badRequest)
@@ -157,8 +173,10 @@ export const reviewController = {
         setSessionValue(request, 'commodity-codes', '')
         setSessionValue(request, 'commodity-code-details', '')
         setSessionValue(request, 'commodity-code-description', '')
+        setSessionValue(request, 'commodity-code-species', '')
         setSessionValue(request, 'commodity-selected-species', '')
         setSessionValue(request, 'commodity-type', '')
+        setSessionValue(request, 'commodity-code-tree', '')
         setSessionValue(request, 'commodity-selected-tab', '')
         setSessionValue(request, 'species-selected-tab', '')
         // Clear transport details
