@@ -12,7 +12,7 @@ export const consignmentOriginController = {
       // Check if this is a "New Import" request from dashboard
       if (request.query?.new === 'true') {
         // Clear all journey data to start fresh
-        setSessionValue(request, 'draft-notification-id', '')
+        setSessionValue(request, 'notification-id', '')
         setSessionValue(request, 'origin-country', '')
         setSessionValue(request, 'purpose', '')
         setSessionValue(request, 'internal-market-purpose', '')

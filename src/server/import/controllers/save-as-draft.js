@@ -49,35 +49,63 @@ export const saveAsDraftController = {
         )
       }
 
-      // Process commodity data if present (species quantities)
+      // Process commodity data if present (species selection and/or quantities)
       // Check for species selection OR quantity fields (ending with -noOfAnimals or -noOfPacks)
       const hasQuantityFields = Object.keys(formData).some(
         (key) => key.endsWith('-noOfAnimals') || key.endsWith('-noOfPacks')
       )
 
       if (formData.species || formData.commodityType || hasQuantityFields) {
-        const existingSelectedSpecies =
+        let selectedSpecies =
           getSessionValue(request, 'commodity-selected-species') || []
 
-        // Update quantities for existing selected species
-        existingSelectedSpecies.forEach((species) => {
-          const noOfAnimalsKey = `${species.value}-noOfAnimals`
-          const noOfPacksKey = `${species.value}-noOfPacks`
+        // Handle species selection from checkboxes (species selection page)
+        if (formData.species) {
+          const availableSpecies = getSessionValue(
+            request,
+            'commodity-code-species'
+          )
 
-          if (formData[noOfAnimalsKey]) {
-            species.noOfAnimals = parseInt(formData[noOfAnimalsKey], 10)
+          if (availableSpecies) {
+            // Normalize species parameter to array
+            const selectedSpeciesCodes = Array.isArray(formData.species)
+              ? formData.species
+              : [formData.species]
+
+            // Find full species objects from available species list
+            selectedSpecies = selectedSpeciesCodes
+              .map((code) =>
+                availableSpecies.find((species) => species.value === code)
+              )
+              .filter((species) => species !== undefined)
           }
-          if (formData[noOfPacksKey]) {
-            species.noOfPacks = parseInt(formData[noOfPacksKey], 10)
-          }
-        })
+        }
 
-        setSessionValue(
-          request,
-          'commodity-selected-species',
-          existingSelectedSpecies
-        )
+        // Update quantities for selected species (quantities page)
+        if (hasQuantityFields && selectedSpecies.length > 0) {
+          selectedSpecies.forEach((species) => {
+            const noOfAnimalsKey = `${species.value}-noOfAnimals`
+            const noOfPacksKey = `${species.value}-noOfPacks`
 
+            if (formData[noOfAnimalsKey]) {
+              species.noOfAnimals = parseInt(formData[noOfAnimalsKey], 10)
+            }
+            if (formData[noOfPacksKey]) {
+              species.noOfPacks = parseInt(formData[noOfPacksKey], 10)
+            }
+          })
+        }
+
+        // Save selected species to session
+        if (selectedSpecies.length > 0) {
+          setSessionValue(
+            request,
+            'commodity-selected-species',
+            selectedSpecies
+          )
+        }
+
+        // Save commodity type if present
         if (formData.commodityType) {
           setSessionValue(request, 'commodity-type', formData.commodityType)
         }
@@ -103,10 +131,7 @@ export const saveAsDraftController = {
 
       // Now collect all session data for notification (including newly saved data)
       const sessionData = {
-        'draft-notification-id': getSessionValue(
-          request,
-          'draft-notification-id'
-        ),
+        'notification-id': getSessionValue(request, 'notification-id'),
         'origin-country': getSessionValue(request, 'origin-country'),
         'commodity-code': getSessionValue(request, 'commodity-code'),
         'commodity-code-details': getSessionValue(
@@ -117,6 +142,7 @@ export const saveAsDraftController = {
           request,
           'commodity-code-description'
         ),
+        'commodity-type': getSessionValue(request, 'commodity-type'),
         'commodity-selected-species': getSessionValue(
           request,
           'commodity-selected-species'
@@ -139,8 +165,8 @@ export const saveAsDraftController = {
         `Session data after save: ${JSON.stringify(sessionData)}`
       )
 
-      // Build notification DTO from session
-      const notificationDto = buildNotificationDto(sessionData)
+      // Build notification DTO from session with DRAFT status
+      const notificationDto = buildNotificationDto(sessionData, 'DRAFT')
 
       // Debug logging - check built notification
       request.logger.info(
@@ -170,11 +196,7 @@ export const saveAsDraftController = {
 
         // Store the notification ID from backend response
         if (savedNotification.id) {
-          setSessionValue(
-            request,
-            'draft-notification-id',
-            savedNotification.id
-          )
+          setSessionValue(request, 'notification-id', savedNotification.id)
         }
 
         request.logger.info(

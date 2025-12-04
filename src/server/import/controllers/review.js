@@ -5,17 +5,8 @@ import {
 import { statusCodes } from '../../common/constants/status-codes.js'
 import { reviewSchema } from '../schemas/review-schema.js'
 import { buildReviewViewModel } from '../helpers/view-models.js'
-
-/**
- * Generate a mock CHED reference
- * In production, this would be returned from the IPAFFS API
- * @returns {string} CHED reference in format CHEDP.GB.YYYY.NNNNNNN
- */
-function generateChedReference() {
-  const year = new Date().getFullYear()
-  const randomNumber = Math.floor(1000000 + Math.random() * 9000000)
-  return `CHEDP.GB.${year}.${randomNumber}`
-}
+import { buildNotificationDto } from '../helpers/notification-builder.js'
+import { notificationApi } from '../../common/helpers/api-client.js'
 
 export const reviewController = {
   get: {
@@ -36,7 +27,12 @@ export const reviewController = {
       // Load all journey data from session
       const sessionData = {
         'origin-country': originCountry,
+        'commodity-code': getSessionValue(request, 'commodity-code'),
         'commodity-code-details': commodityCodeDetails,
+        'commodity-code-description': getSessionValue(
+          request,
+          'commodity-code-description'
+        ),
         purpose,
         'internal-market-purpose': getSessionValue(
           request,
@@ -56,7 +52,9 @@ export const reviewController = {
   },
 
   post: {
-    handler(request, h) {
+    async handler(request, h) {
+      const traceId = request.headers['x-cdp-request-id'] || 'no-trace-id'
+
       // Guard: ensure required fields from previous steps are set
       const originCountry = getSessionValue(request, 'origin-country')
       const purpose = getSessionValue(request, 'purpose')
@@ -74,11 +72,25 @@ export const reviewController = {
         // Re-render with validation errors
         const sessionData = {
           'origin-country': originCountry,
+          'commodity-code': getSessionValue(request, 'commodity-code'),
+          'commodity-code-details': getSessionValue(
+            request,
+            'commodity-code-details'
+          ),
+          'commodity-code-description': getSessionValue(
+            request,
+            'commodity-code-description'
+          ),
           purpose,
           'internal-market-purpose': getSessionValue(
             request,
             'internal-market-purpose'
-          )
+          ),
+          'commodity-selected-species': getSessionValue(
+            request,
+            'commodity-selected-species'
+          ),
+          bcp: getSessionValue(request, 'bcp')
         }
         const viewModel = buildReviewViewModel(sessionData, error)
         return h
@@ -86,34 +98,91 @@ export const reviewController = {
           .code(statusCodes.badRequest)
       }
 
-      // Generate CHED reference (mock implementation)
-      const chedReference = generateChedReference()
+      // Collect all session data for submission
+      const sessionData = {
+        'notification-id': getSessionValue(request, 'notification-id'),
+        'origin-country': originCountry,
+        'commodity-code': getSessionValue(request, 'commodity-code'),
+        'commodity-code-details': getSessionValue(
+          request,
+          'commodity-code-details'
+        ),
+        'commodity-code-description': getSessionValue(
+          request,
+          'commodity-code-description'
+        ),
+        'commodity-type': getSessionValue(request, 'commodity-type'),
+        'commodity-selected-species': getSessionValue(
+          request,
+          'commodity-selected-species'
+        ),
+        purpose,
+        'internal-market-purpose': getSessionValue(
+          request,
+          'internal-market-purpose'
+        ),
+        bcp: getSessionValue(request, 'bcp'),
+        'transport-means-before': getSessionValue(
+          request,
+          'transport-means-before'
+        ),
+        'vehicle-identifier': getSessionValue(request, 'vehicle-identifier')
+      }
 
-      // Clear journey data
-      setSessionValue(request, 'draft-notification-id', '')
-      setSessionValue(request, 'origin-country', '')
-      setSessionValue(request, 'purpose', '')
-      setSessionValue(request, 'internal-market-purpose', '')
-      setSessionValue(request, 'internal-market-purpose', '')
-      // clear commodity code details
-      setSessionValue(request, 'commodity-code', '')
-      setSessionValue(request, 'commodity-codes', '')
-      setSessionValue(request, 'commodity-code-details', '')
-      setSessionValue(request, 'commodity-code-description', '')
-      setSessionValue(request, 'commodity-selected-species', '')
-      setSessionValue(request, 'commodity-type', '')
-      setSessionValue(request, 'commodity-selected-tab', '')
-      setSessionValue(request, 'species-selected-tab', '')
-      // Clear transport details
-      setSessionValue(request, 'bcp', '')
-      setSessionValue(request, 'transport-means-before', '')
-      setSessionValue(request, 'vehicle-identifier', '')
+      // Build notification DTO with SUBMITTED status
+      const notificationDto = buildNotificationDto(sessionData, 'SUBMITTED')
 
-      // Store CHED reference in session for confirmation page
-      setSessionValue(request, 'chedReference', chedReference)
+      request.logger.info(
+        `Submitting notification: ${JSON.stringify(notificationDto)}`
+      )
 
-      // Redirect to confirmation page
-      return h.redirect('/import/confirmation')
+      try {
+        // Submit notification to backend
+        const submittedNotification = await notificationApi.saveDraft(
+          notificationDto,
+          traceId
+        )
+
+        request.logger.info(
+          `Notification submitted successfully: ${submittedNotification.id}`
+        )
+
+        // Clear journey data
+        setSessionValue(request, 'notification-id', '')
+        setSessionValue(request, 'origin-country', '')
+        setSessionValue(request, 'purpose', '')
+        setSessionValue(request, 'internal-market-purpose', '')
+        // clear commodity code details
+        setSessionValue(request, 'commodity-code', '')
+        setSessionValue(request, 'commodity-codes', '')
+        setSessionValue(request, 'commodity-code-details', '')
+        setSessionValue(request, 'commodity-code-description', '')
+        setSessionValue(request, 'commodity-selected-species', '')
+        setSessionValue(request, 'commodity-type', '')
+        setSessionValue(request, 'commodity-selected-tab', '')
+        setSessionValue(request, 'species-selected-tab', '')
+        // Clear transport details
+        setSessionValue(request, 'bcp', '')
+        setSessionValue(request, 'transport-means-before', '')
+        setSessionValue(request, 'vehicle-identifier', '')
+
+        // Store notification ID in session for confirmation page
+        setSessionValue(request, 'notification-id', submittedNotification.id)
+
+        // Redirect to confirmation page
+        return h.redirect('/import/confirmation')
+      } catch (error) {
+        request.logger.error(`Failed to submit notification: ${error.message}`)
+
+        // Re-render review page with error
+        const viewModel = buildReviewViewModel(sessionData)
+        viewModel.submissionError =
+          'Failed to submit notification. Please try again.'
+
+        return h
+          .view('import/templates/review/index', viewModel)
+          .code(statusCodes.internalServerError)
+      }
     },
     options: {}
   }

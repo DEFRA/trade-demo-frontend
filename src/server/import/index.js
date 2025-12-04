@@ -5,7 +5,9 @@
 
 import { consignmentOriginController } from './controllers/consignment-origin.js'
 import { consignmentPurposeController } from './controllers/consignment-purpose.js'
-import { commodityCodesController } from './controllers/commodity-codes.js'
+import { commoditySearchController } from './controllers/commodity-search.js'
+import { commoditySelectionController } from './controllers/commodity-selection.js'
+import { commodityQuantitiesController } from './controllers/commodity-quantities.js'
 import { transportDetailsController } from './controllers/transport.js'
 import { reviewController } from './controllers/review.js'
 import { confirmationController } from './controllers/confirmation.js'
@@ -36,67 +38,67 @@ export const importJourney = {
           }
         },
 
-        // Screen 2: Search for commodity codes
+        // Screen 2: Commodity code search, selection, and quantities
+        // 2a. Show search page
         {
           method: 'GET',
           path: '/import/commodity/codes',
-          ...commodityCodesController.get,
+          ...commoditySearchController.showSearchPage,
           options: {
-            ...commodityCodesController.get.options,
             auth: 'session'
           }
         },
+        // 2b. Search for commodity and show species selection
         {
           method: 'GET',
           path: '/import/commodity/codes/search',
-          ...commodityCodesController.search,
+          ...commoditySearchController.search,
           options: {
-            ...commodityCodesController.search.options,
             auth: 'session'
           }
         },
-        {
-          method: 'GET',
-          path: '/import/commodity/species/search',
-          ...commodityCodesController.speciesSearch,
-          options: {
-            ...commodityCodesController.speciesSearch.options,
-            auth: 'session'
-          }
-        },
-        {
-          method: 'GET',
-          path: '/import/commodity/codes/select',
-          ...commodityCodesController.select,
-          options: {
-            ...commodityCodesController.select.options,
-            auth: 'session'
-          }
-        },
+        // 2c. Tree navigation - search by child code
         {
           method: 'GET',
           path: '/import/commodity/codes/{commodityCode}/child',
-          ...commodityCodesController.search,
+          ...commoditySearchController.search,
           options: {
-            ...commodityCodesController.search.options,
             auth: 'session'
           }
         },
-        {
-          method: 'GET',
-          path: '/import/commodity/codes/build',
-          ...commodityCodesController.build,
-          options: {
-            ...commodityCodesController.build.options,
-            auth: 'session'
-          }
-        },
+        // 2d. Tree navigation - parent hierarchy
         {
           method: 'GET',
           path: '/import/commodity/codes/{parentCode}/parent',
-          ...commodityCodesController.tree,
+          ...commoditySearchController.tree,
           options: {
-            ...commodityCodesController.tree.options,
+            auth: 'session'
+          }
+        },
+        // 2e. Save selected species
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/select',
+          ...commoditySelectionController.saveSelectedSpecies,
+          options: {
+            auth: 'session'
+          }
+        },
+        // 2f. Show quantities entry form
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/quantities',
+          ...commodityQuantitiesController.showQuantitiesForm,
+          options: {
+            auth: 'session'
+          }
+        },
+        // 2g. Save quantities and continue
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/quantities/save',
+          ...commodityQuantitiesController.saveQuantities,
+          options: {
             auth: 'session'
           }
         },

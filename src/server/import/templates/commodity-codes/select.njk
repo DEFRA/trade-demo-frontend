@@ -55,7 +55,7 @@
       </table>
 
       {% if action === 'edit' %}
-      <form action="/import/commodity/codes/build" method="get" novalidate>
+      <form action="/import/commodity/codes/quantities/save" method="get" novalidate>
         <input type="hidden" name="crumb" value="{{ crumb }}"/>
         <div class="govuk-form-group">
           {% for commodity in commodityCodeDetails %}

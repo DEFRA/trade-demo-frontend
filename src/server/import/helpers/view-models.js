@@ -223,12 +223,20 @@ export function buildReviewViewModel(sessionData = {}, validationError = null) {
       })
     }
 
+    // Build commodity display text: "code - description"
+    const commodityCode = sessionData['commodity-code'] || ''
+    const commodityDescription = sessionData['commodity-code-description'] || ''
+    const commodityText =
+      commodityCode && commodityDescription
+        ? `${commodityCode} - ${commodityDescription}`
+        : commodityCode || commodityDescription || ''
+
     summaryRows.push({
       key: {
         text: 'Commodity'
       },
       value: {
-        text: ''
+        text: commodityText
       },
       actions: {
         items: [
