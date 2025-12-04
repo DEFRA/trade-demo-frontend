@@ -48,6 +48,41 @@ export const saveAsDraftController = {
           formData['internal-market-purpose']
         )
       }
+
+      // Process commodity data if present (species quantities)
+      // Check for species selection OR quantity fields (ending with -noOfAnimals or -noOfPacks)
+      const hasQuantityFields = Object.keys(formData).some(
+        (key) => key.endsWith('-noOfAnimals') || key.endsWith('-noOfPacks')
+      )
+
+      if (formData.species || formData.commodityType || hasQuantityFields) {
+        const existingSelectedSpecies =
+          getSessionValue(request, 'commodity-selected-species') || []
+
+        // Update quantities for existing selected species
+        existingSelectedSpecies.forEach((species) => {
+          const noOfAnimalsKey = `${species.value}-noOfAnimals`
+          const noOfPacksKey = `${species.value}-noOfPacks`
+
+          if (formData[noOfAnimalsKey]) {
+            species.noOfAnimals = parseInt(formData[noOfAnimalsKey], 10)
+          }
+          if (formData[noOfPacksKey]) {
+            species.noOfPacks = parseInt(formData[noOfPacksKey], 10)
+          }
+        })
+
+        setSessionValue(
+          request,
+          'commodity-selected-species',
+          existingSelectedSpecies
+        )
+
+        if (formData.commodityType) {
+          setSessionValue(request, 'commodity-type', formData.commodityType)
+        }
+      }
+
       if (formData.bcp) {
         setSessionValue(request, 'bcp', formData.bcp)
       }
@@ -77,6 +112,10 @@ export const saveAsDraftController = {
         'commodity-code-details': getSessionValue(
           request,
           'commodity-code-details'
+        ),
+        'commodity-code-description': getSessionValue(
+          request,
+          'commodity-code-description'
         ),
         'commodity-selected-species': getSessionValue(
           request,

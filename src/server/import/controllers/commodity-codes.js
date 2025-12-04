@@ -131,6 +131,17 @@ export const commodityCodesController = {
         'commodity-code-details',
         viewModel.commodityCodeDetails
       )
+      // Store description separately for easy access
+      if (
+        viewModel.commodityCodeDetails &&
+        viewModel.commodityCodeDetails.length > 0
+      ) {
+        setSessionValue(
+          request,
+          'commodity-code-description',
+          viewModel.commodityCodeDetails[0].description
+        )
+      }
       viewModel.commodityType = sessionData['commodity-type']
       setSessionValue(request, 'commodity-code-species', viewModel.speciesLst)
 
@@ -166,7 +177,7 @@ export const commodityCodesController = {
         selectedSpeciesLst.flat()
       )
 
-      return h.redirect('/import/consignment/purpose')
+      return h.redirect('/import/commodity/codes')
     }
   },
 

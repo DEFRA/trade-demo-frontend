@@ -133,9 +133,9 @@
               <div class="govuk-checkboxes" data-module="govuk-checkboxes">
                 {% for species in speciesLst %}
                   <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="{{ species.text }}-checkbox" name="species"
+                    <input class="govuk-checkboxes__input" id="{{ species.value }}-checkbox" name="species"
                            type="checkbox" value="{{ species.value }}" {% if isChecked %}checked{% endif %}>
-                    <label class="govuk-label govuk-checkboxes__label" for="{{ species.eppoCode }}-checkbox">
+                    <label class="govuk-label govuk-checkboxes__label" for="{{ species.value }}-checkbox">
                       {{ species.text }}
                     </label>
                   </div>

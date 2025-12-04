@@ -25,7 +25,7 @@ export function buildNotificationDto(sessionData) {
   if (sessionData['commodity-code']) {
     notification.commodity = {
       code: sessionData['commodity-code'],
-      description: sessionData['commodity-code-details']?.description || null,
+      description: sessionData['commodity-code-description'] || null,
       species: []
     }
 
@@ -34,7 +34,6 @@ export function buildNotificationDto(sessionData) {
     notification.commodity.species = selectedSpecies.map((species) => ({
       name: species.text || null, // Scientific (Latin) name
       code: species.value || null, // Short code (e.g., "BOT")
-      eppoCode: species.eppoCode || null, // EPPO standard code
       noOfAnimals: species.noOfAnimals
         ? parseInt(species.noOfAnimals, 10)
         : null,

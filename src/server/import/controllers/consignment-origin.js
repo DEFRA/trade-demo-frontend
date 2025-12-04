@@ -19,6 +19,7 @@ export const consignmentOriginController = {
         setSessionValue(request, 'commodity-code', '')
         setSessionValue(request, 'commodity-codes', '')
         setSessionValue(request, 'commodity-code-details', '')
+        setSessionValue(request, 'commodity-code-description', '')
         setSessionValue(request, 'commodity-selected-species', '')
         setSessionValue(request, 'commodity-type', '')
         setSessionValue(request, 'commodity-selected-tab', '')
