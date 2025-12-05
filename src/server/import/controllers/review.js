@@ -64,10 +64,13 @@ export const reviewController = {
         return h.redirect('/import/consignment/origin')
       }
 
-      request.payload.isCommodityCodeFlowComplete = getSessionValue(
+      const isCommodityCodeFlowComplete = getSessionValue(
         request,
         'isCommodityCodeFlowComplete'
       )
+      request.payload.isCommodityCodeFlowComplete =
+        isCommodityCodeFlowComplete === true ||
+        isCommodityCodeFlowComplete === 'true'
 
       // Validate confirmation checkbox
       const { error } = reviewSchema.validate(request.payload, {
@@ -176,6 +179,7 @@ export const reviewController = {
         setSessionValue(request, 'commodity-code-species', '')
         setSessionValue(request, 'commodity-selected-species', '')
         setSessionValue(request, 'commodity-type', '')
+        setSessionValue(request, 'isCommodityCodeFlowComplete', '')
         setSessionValue(request, 'commodity-code-tree', '')
         setSessionValue(request, 'commodity-selected-tab', '')
         setSessionValue(request, 'species-selected-tab', '')

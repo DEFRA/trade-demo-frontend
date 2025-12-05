@@ -89,6 +89,7 @@ export const commodityQuantitiesController = {
 
       // Save updated species back to session
       setSessionValue(request, 'commodity-selected-species', selectedSpecies)
+      setSessionValue(request, 'isCommodityCodeFlowComplete', true)
 
       // Redirect to next step in journey
       return h.redirect('/import/consignment/purpose')

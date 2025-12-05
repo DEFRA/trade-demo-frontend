@@ -109,7 +109,25 @@ export const importJourney = {
             auth: 'session'
           }
         },
-        // 2e. Save selected species
+        // 2e. Back to commodity search (clears selection)
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/species/back',
+          ...commoditySelectionController.backToCommoditySearch,
+          options: {
+            auth: 'session'
+          }
+        },
+        // 2f. Show species selection from session (for back navigation)
+        {
+          method: 'GET',
+          path: '/import/commodity/codes/species',
+          ...commoditySelectionController.showSpeciesSelection,
+          options: {
+            auth: 'session'
+          }
+        },
+        // 2g. Save selected species
         {
           method: 'GET',
           path: '/import/commodity/codes/select',
@@ -127,7 +145,6 @@ export const importJourney = {
             auth: 'session'
           }
         },
-        // 2f. Show quantities entry form
         {
           method: 'GET',
           path: '/import/commodity/codes/{parentCode}/{childCode}/second',
@@ -137,6 +154,7 @@ export const importJourney = {
             auth: 'session'
           }
         },
+        // 2h. Show quantities entry form
         {
           method: 'GET',
           path: '/import/commodity/codes/quantities',
@@ -145,7 +163,7 @@ export const importJourney = {
             auth: 'session'
           }
         },
-        // 2g. Save quantities and continue
+        // 2i. Save quantities and continue
         {
           method: 'GET',
           path: '/import/commodity/codes/{parentCode}/{firstChild}/{secondChild}/third',

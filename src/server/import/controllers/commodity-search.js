@@ -47,31 +47,22 @@ export const commoditySearchController = {
         return h.redirect('/import/commodity/codes/quantities')
       }
 
-      // Load or initialize commodity tree
-      const sessionData = getSessionValue(request, 'commodity-code-tree')
-      let treeParent
-
-      if (!sessionData) {
-        // First time loading - fetch from API
-        treeParent = await getCommodityCodesTreeData(
-          CERT_TYPE,
-          '',
-          traceId,
-          request
-        )
-        // Store in session with treeParent structure for tree navigation handlers
-        const commodityCodeTree = {}
-        commodityCodeTree.treeParent = treeParent
-        setSessionValue(
-          request,
-          'commodity-code-tree',
-          flatten(commodityCodeTree)
-        )
-      } else {
-        // Loading from session - unflatten it
-        const commodityCodeTree = unflatten(sessionData)
-        treeParent = commodityCodeTree.treeParent
-      }
+      // Always fetch the full (unfiltered) commodity tree
+      // This ensures users see the complete tree when navigating to the main page
+      const treeParent = await getCommodityCodesTreeData(
+        CERT_TYPE,
+        '',
+        traceId,
+        request
+      )
+      // Store in session with treeParent structure for tree navigation handlers
+      const commodityCodeTree = {}
+      commodityCodeTree.treeParent = treeParent
+      setSessionValue(
+        request,
+        'commodity-code-tree',
+        flatten(commodityCodeTree)
+      )
 
       // Determine which tab is active using getSelectedTabDetails helper
       const tabs = getSelectedTabDetails(request)
