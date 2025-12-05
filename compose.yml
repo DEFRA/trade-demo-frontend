@@ -86,6 +86,8 @@ services:
     volumes:
       - mongodb-data:/data
     restart: always
+    ports:
+      - '27017:27017'
     healthcheck:
       test: ['CMD', 'mongosh', '--eval', 'db.adminCommand("ping")']
       interval: 10s
@@ -169,25 +171,25 @@ services:
     networks:
       - cdp-tenant
 
-  liquibase-data:
-    profiles: ["postgres", "world"]
-    image: liquibase/liquibase:4.32.0
-    depends_on:
-      liquibase-schema:
-        condition: service_completed_successfully
-    volumes:
-      - ../trade-commodity-codes/data:/liquibase/data
-      - ../trade-commodity-codes/data/csv:/liquibase/data/csv
-    command: >
-      --driver=org.postgresql.Driver
-      --changelog-file=data/db.changelog.xml
-      --url=jdbc:postgresql://postgres:5432/trade-commodity-codes
-      --username=postgres
-      --password=postgres
-      --log-level=debug
-      update
-    networks:
-      - cdp-tenant
+#  liquibase-data:
+#    profiles: ["postgres", "world"]
+#    image: liquibase/liquibase:4.32.0
+#    depends_on:
+#      liquibase-schema:
+#        condition: service_completed_successfully
+#    volumes:
+#      - ../trade-commodity-codes/data:/liquibase/data
+#      - ../trade-commodity-codes/data/csv:/liquibase/data/csv
+#    command: >
+#      --driver=org.postgresql.Driver
+#      --changelog-file=data/db.changelog.xml
+#      --url=jdbc:postgresql://postgres:5432/trade-commodity-codes
+#      --username=postgres
+#      --password=postgres
+#      --log-level=debug
+#      update
+#    networks:
+#      - cdp-tenant
 
   trade-commodity-codes:
     profiles: ["postgres", "world"]
@@ -207,8 +209,8 @@ services:
         condition: service_healthy
       liquibase-schema:
         condition: service_completed_successfully
-      liquibase-data:
-        condition: service_completed_successfully
+#      liquibase-data:
+#        condition: service_completed_successfully
     volumes:
       - './trade-commodity-codes/changelog:/app/changelog'
     env_file:

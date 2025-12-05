@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   input.addEventListener('input', () => {
     const query = input.value.trim().toLowerCase()
 
-    if (query.length > 3) {
+    if (query.length < 3) {
       suggestions.innerHTML = ''
       return
     }

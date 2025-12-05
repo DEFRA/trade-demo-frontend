@@ -11,6 +11,7 @@
 {% from "govuk/components/accordion/macro.njk" import govukAccordion %}
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 
 {% block beforeContent %}
   {{ govukBackLink({
@@ -28,6 +29,21 @@
           titleText: "There is a problem",
           errorList: errorList
         }) }}
+      {% endif %}
+
+      {% if errorBanner %}
+        <div id="error-banner" class="govuk-notification-banner" role="alert" aria-labelledby="error-banner-title" data-module="govuk-notification-banner" style="border-color: #d4351c;">
+          <div class="govuk-notification-banner__header" style="background-color: #d4351c;">
+            <h2 class="govuk-notification-banner__title" id="error-banner-title">
+              Error
+            </h2>
+          </div>
+          <div class="govuk-notification-banner__content">
+            <p class="govuk-notification-banner__heading">
+              {{ errorBanner.text }}
+            </p>
+          </div>
+        </div>
       {% endif %}
 
       <span class="govuk-caption-xl">Description of the goods</span>
@@ -127,4 +143,25 @@
 {% block bodyEnd %}
   {{ super() }}
   <script type="module" src="{{ getAssetPath('species.js') }}"></script>
+  {% if errorBanner %}
+  <script>
+    (function() {
+      // Auto-hide the error banner after 5 seconds
+      var banner = document.getElementById('error-banner');
+      if (banner) {
+        setTimeout(function() {
+          banner.style.transition = 'opacity 0.5s ease-out';
+          banner.style.opacity = '0';
+          setTimeout(function() {
+            banner.style.display = 'none';
+            // Remove error parameter from URL to prevent banner showing on refresh
+            var url = new URL(window.location);
+            url.searchParams.delete('error');
+            window.history.replaceState({}, '', url);
+          }, 500);
+        }, 5000);
+      }
+    })();
+  </script>
+  {% endif %}
 {% endblock %}

@@ -141,3 +141,37 @@ export const exampleApi = {
     // DELETE returns 204 No Content, no body to parse
   }
 }
+
+/**
+ * Notification API client
+ * Provides draft save/update operations for import notifications
+ */
+export const notificationApi = {
+  /**
+   * Save or update a draft notification
+   * Backend will:
+   * - Generate ID on first save if notification.id is null
+   * - Update existing notification if ID is provided
+   * - Return full notification with ID in response
+   *
+   * @param {Object} notificationDto - NotificationDto (id can be null for first save)
+   * @param {string} traceId - Request trace ID (x-cdp-request-id)
+   * @returns {Promise<Object>} Complete notification with backend-generated ID
+   */
+  async saveDraft(notificationDto, traceId) {
+    const response = await fetch(`${baseUrl}/notifications`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        [tracingHeader]: traceId
+      },
+      body: JSON.stringify(notificationDto)
+    })
+
+    if (!response.ok) {
+      throw createError(response)
+    }
+
+    return response.json()
+  }
+}

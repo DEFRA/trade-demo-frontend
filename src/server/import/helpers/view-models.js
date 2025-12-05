@@ -46,15 +46,14 @@ export async function buildCommodityCodeViewModel(
     traceId
   )
 
-  const commodityCategory = JSON.parse(
-    _.get(commodityCategoryResponse, 'data', '')
-  )
+  const dataString = _.get(commodityCategoryResponse, 'data', '{}')
+  const commodityCategory = JSON.parse(dataString || '{}')
 
   // if (!commodityCategory.species.length > 0) {
   //   request.payload.hasSpecies = true
   // }
-  const commodityTypes = _.uniqBy(commodityCategory.types, 'text')
-  const speciesLst = _.uniqBy(commodityCategory.species, 'text')
+  const commodityTypes = _.uniqBy(commodityCategory.types || [], 'text')
+  const speciesLst = _.uniqBy(commodityCategory.species || [], 'text')
   speciesLst.forEach((s) => {
     s.selected = false
   })
@@ -218,12 +217,20 @@ export function buildReviewViewModel(sessionData = {}, validationError = null) {
       })
     }
 
+    // Build commodity display text: "code - description"
+    const commodityCode = sessionData['commodity-code'] || ''
+    const commodityDescription = sessionData['commodity-code-description'] || ''
+    const commodityText =
+      commodityCode && commodityDescription
+        ? `${commodityCode} - ${commodityDescription}`
+        : commodityCode || commodityDescription || ''
+
     summaryRows.push({
       key: {
         text: 'Commodity'
       },
       value: {
-        text: ''
+        text: commodityText
       },
       actions: {
         items: [

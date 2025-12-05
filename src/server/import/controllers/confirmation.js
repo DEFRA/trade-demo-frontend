@@ -6,21 +6,21 @@ import {
 export const confirmationController = {
   get: {
     handler(request, h) {
-      // Get CHED reference from session
-      const chedReference = getSessionValue(request, 'chedReference')
+      // Get notification ID from session
+      const notificationId = getSessionValue(request, 'notification-id')
 
-      // Guard: redirect to start if no reference in session
-      if (!chedReference) {
+      // Guard: redirect to start if no notification ID in session
+      if (!notificationId) {
         return h.redirect('/import/consignment/origin')
       }
 
-      // Clear the CHED reference from session after displaying
-      setSessionValue(request, 'chedReference', '')
+      // Clear the notification ID from session after displaying
+      setSessionValue(request, 'notification-id', '')
 
       const viewModel = {
         pageTitle: 'Import notification submitted',
         heading: 'Import notification submitted',
-        chedReference
+        notificationId
       }
 
       return h.view('import/templates/confirmation/index', viewModel)

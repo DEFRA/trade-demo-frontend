@@ -77,6 +77,10 @@
           {{ govukButton({
             text: "Continue"
           }) }}
+
+          <button type="button" id="save-as-draft-button" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+            Save as draft
+          </button>
         </div>
       </form>
     </div>
@@ -86,4 +90,5 @@
 {% block bodyEnd %}
   {{ super() }}
   <script type="module" src="{{ getAssetPath('transport.js') }}"></script>
+  <script type="module" src="{{ getAssetPath('save-as-draft.js') }}"></script>
 {% endblock %}

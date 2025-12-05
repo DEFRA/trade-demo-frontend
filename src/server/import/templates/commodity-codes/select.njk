@@ -16,7 +16,7 @@
 {% block beforeContent %}
   {{ govukBackLink({
     text: "Back",
-    href: "/import/commodity/codes"
+    href: "/import/commodity/codes/species" if action === 'edit' else "/import/commodity/codes/species/back"
   }) }}
 {% endblock %}
 
@@ -53,7 +53,7 @@
       </table>
 
       {% if action === 'edit' %}
-      <form action="/import/commodity/codes/save" method="get" novalidate>
+      <form action="/import/commodity/codes/quantities/save" method="get" novalidate>
         <input type="hidden" name="crumb" value="{{ crumb }}"/>
         <div class="govuk-form-group">
           {% for commodity in commodityCodeDetails %}
@@ -90,9 +90,15 @@
               </tbody>
             </table>
           {% endfor %}
-          <button type="submit" class="govuk-button" data-module="govuk-button">
-            Save and continue
-          </button>
+          <div class="govuk-button-group">
+            <button type="submit" class="govuk-button" data-module="govuk-button">
+              Save and continue
+            </button>
+
+            <button type="button" id="save-as-draft-button" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+              Save as draft
+            </button>
+          </div>
         </div>
       </form>
       {% else %}
@@ -128,9 +134,9 @@
               <div class="govuk-checkboxes" data-module="govuk-checkboxes">
                 {% for species in speciesLst %}
                   <div class="govuk-checkboxes__item">
-                    <input class="govuk-checkboxes__input" id="{{ species.text }}-checkbox" name="species"
+                    <input class="govuk-checkboxes__input" id="{{ species.value }}-checkbox" name="species"
                            type="checkbox" value="{{ species.value }}" {% if isChecked %}checked{% endif %}>
-                    <label class="govuk-label govuk-checkboxes__label" for="{{ species.eppoCode }}-checkbox">
+                    <label class="govuk-label govuk-checkboxes__label" for="{{ species.value }}-checkbox">
                       {{ species.text }}
                     </label>
                   </div>
@@ -138,11 +144,22 @@
               </div>
             </fieldset>
           </div>
-          <button class="govuk-button" data-module="govuk-button">
-            Save and continue
-          </button>
+          <div class="govuk-button-group">
+            <button class="govuk-button" data-module="govuk-button">
+              Save and continue
+            </button>
+
+            <button type="button" id="save-as-draft-button" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+              Save as draft
+            </button>
+          </div>
         </form>
       {% endif %}
     </div>
   </div>
+{% endblock %}
+
+{% block bodyEnd %}
+  {{ super() }}
+  <script type="module" src="{{ getAssetPath('save-as-draft.js') }}"></script>
 {% endblock %}

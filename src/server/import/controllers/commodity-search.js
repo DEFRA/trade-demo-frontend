@@ -1,10 +1,9 @@
+/**
+ * Commodity Search Controller
+ * Handles commodity code search and tree navigation
+ */
 import { flatten, unflatten } from 'flat'
-
-import { commodityCodeSchema } from '../schemas/commodity-code-schema.js'
-import { statusCodes } from '../../common/constants/status-codes.js'
-import { formatValidationErrors } from '../helpers/validation-helpers.js'
 import {
-  clearSessionValue,
   getSessionValue,
   setSessionValue
 } from '../../common/helpers/session-helpers.js'
@@ -14,84 +13,96 @@ import {
   getCommodityCodesTreeData
 } from '../helpers/view-models.js'
 import { commodityCodeApi } from '../integration/commodity-code-api-client.js'
+import { commodityCodeSchema } from '../schemas/commodity-code-schema.js'
+import { statusCodes } from '../../common/constants/status-codes.js'
+import { formatValidationErrors } from '../helpers/validation-helpers.js'
 
-export const commodityCodesController = {
-  get: {
+const CERT_TYPE = 'CVEDA'
+
+/**
+ * Helper to get commodity-related session data
+ */
+function getCommoditySessionKeys(request, keys) {
+  return keys.reduce((acc, key) => {
+    acc[key] = getSessionValue(request, key)
+    return acc
+  }, {})
+}
+
+export const commoditySearchController = {
+  /**
+   * GET /import/commodity/codes
+   * Shows the commodity search page with search form and tree
+   */
+  showSearchPage: {
     handler: async (request, h) => {
       const traceId = request.headers['x-cdp-request-id']
-      const sessionData = {
-        'commodity-code-tree': getSessionValue(request, 'commodity-code-tree'),
-        'commodity-code-details': getSessionValue(
-          request,
-          'commodity-code-details'
-        ),
-        'commodity-selected-species': unflatten(
-          getSessionValue(request, 'commodity-selected-species')
-        )
+
+      // Check if user has already selected species - if so, redirect to quantities
+      const hasSelectedSpecies =
+        getSessionValue(request, 'commodity-selected-species') &&
+        getSessionValue(request, 'commodity-code-details')
+
+      if (hasSelectedSpecies) {
+        return h.redirect('/import/commodity/codes/quantities')
       }
 
-      // tab selection
-      const tabs = getSelectedTabDetails(request)
-
-      // if species selection exists
-      if (
-        sessionData['commodity-code-details'] &&
-        sessionData['commodity-selected-species']
-      ) {
-        let totalAnimals = 0
-        let totalPacks = 0
-
-        const speciesLst = Object.values(
-          sessionData['commodity-selected-species']
-        )
-        speciesLst.forEach((species) => {
-          totalAnimals += species.noOfAnimals ? Number(species.noOfAnimals) : 0
-          totalPacks += species.noOfPacks ? Number(species.noOfPacks) : 0
-        })
-
-        const viewModel = {
-          action: 'edit',
-          tabs,
-          commodityCodeDetails: sessionData['commodity-code-details'],
-          speciesLst,
-          totalAnimals,
-          totalPacks
-        }
-
-        return h.view('import/templates/commodity-codes/select', viewModel)
-      }
-
-      const commodityCodeRoot = await getCommodityCodesTreeData(
-        'CVEDA',
+      // Always fetch the full (unfiltered) commodity tree
+      // This ensures users see the complete tree when navigating to the main page
+      const treeParent = await getCommodityCodesTreeData(
+        CERT_TYPE,
         '',
-        traceId
+        traceId,
+        request
+      )
+      // Store in session with treeParent structure for tree navigation handlers
+      const commodityCodeTree = {}
+      commodityCodeTree.treeParent = treeParent
+      setSessionValue(
+        request,
+        'commodity-code-tree',
+        flatten(commodityCodeTree)
       )
 
-      const commodityCodeTree = {}
-      commodityCodeTree.treeParent = commodityCodeRoot
-      setSessionValue(request, 'commodity-code-tree', commodityCodeTree)
+      // Determine which tab is active using getSelectedTabDetails helper
+      const tabs = getSelectedTabDetails(request)
+
+      setSessionValue(request, 'commodity-search-tab', tabs.commoditySearchTab)
+      setSessionValue(request, 'species-search-tab', tabs.speciesSearchTab)
 
       const viewModel = {
         tabs,
-        treeParent: commodityCodeRoot,
+        treeParent,
         traceId
       }
+
+      // Check for error query parameter
+      if (request.query.error === 'commodity-not-found') {
+        viewModel.errorBanner = {
+          text: 'Commodity code could not be found. Please try another code.',
+          type: 'error'
+        }
+      }
+
       return h.view('import/templates/commodity-codes/index', viewModel)
     }
   },
 
+  /**
+   * GET /import/commodity/codes/search?commodity-code=X
+   * Searches for a commodity code and shows species selection form
+   */
   search: {
     handler: async (request, h) => {
       const traceId = request.headers['x-cdp-request-id']
-      const commodityCode = request.query['commodity-code']
-        ? request.query['commodity-code']
-        : request.params['commodityCode']
+      const commodityCode =
+        request.query['commodity-code'] || request.params.commodityCode
 
-      // tab selected
+      // Get tab details
       const tabs = getSelectedTabDetails(request)
 
-      // No commodity code
-      if (!request.params['commodityCode']) {
+      // Validate commodity code input from search form (not tree navigation)
+      if (!request.params.commodityCode) {
         const { error } = commodityCodeSchema.commodityCode.validate(
           request.query,
           {
@@ -102,7 +113,19 @@ export const commodityCodesController = {
         if (error) {
           const formattedErrors = error ? formatValidationErrors(error) : null
 
-          const viewModel = {}
+          // Load tree from session to display with error
+          const sessionData = getSessionValue(request, 'commodity-code-tree')
+          let treeParent = []
+          if (sessionData) {
+            const commodityCodeTree = unflatten(sessionData)
+            treeParent = commodityCodeTree.treeParent || []
+          }
+
+          const viewModel = {
+            tabs,
+            treeParent
+          }
+
           if (formattedErrors) {
             viewModel.errorList = formattedErrors.errorList
             viewModel.formError = {
@@ -110,181 +133,176 @@ export const commodityCodesController = {
             }
           }
 
-          viewModel.treeParent = getSessionValue(
-            request,
-            'commodity-code-tree'
-          ).treeParent
-          viewModel.tabs = tabs
-
           return h
             .view('import/templates/commodity-codes/index', viewModel)
             .code(statusCodes.badRequest)
         }
       }
 
+      if (!commodityCode) {
+        return h.redirect('/import/commodity/codes')
+      }
+
+      // Save the commodity code
       setSessionValue(request, 'commodity-code', commodityCode)
 
+      const sessionData = getCommoditySessionKeys(request, [
+        'commodity-code-details',
+        'commodity-type',
+        'species-quantities'
+      ])
+
+      // Fetch commodity details and species
       const viewModel = await buildCommodityCodeViewModel(
-        'CVEDA',
+        CERT_TYPE,
         commodityCode,
-        traceId
+        traceId,
+        request,
+        sessionData
       )
 
+      // Check if this commodity has child nodes (tree navigation)
+      if (request.params.commodityCode) {
+        const commodityCodeNodeDetails = await getCommodityCodeChildNode(
+          CERT_TYPE,
+          request.params.commodityCode,
+          traceId,
+          sessionData
+        )
+
+        if (commodityCodeNodeDetails.length > 0) {
+          const parentCode = request.query['parent-code']
+          setSessionValue(
+            request,
+            'commodity-codes-child',
+            commodityCodeNodeDetails
+          )
+          return h.redirect(
+            `/import/commodity/codes/${commodityCode}/parent?parent-code=${parentCode}`
+          )
+        }
+      }
+
+      // Check if commodity code was found and has valid data
+      if (
+        !viewModel.commodityCodeDetails ||
+        viewModel.commodityCodeDetails.length === 0 ||
+        !viewModel.speciesLst ||
+        viewModel.speciesLst.length === 0
+      ) {
+        // Commodity code not found or has no species - redirect back with error
+        const tabParam =
+          tabs.commoditySearchTab === 'selected'
+            ? 'commoditySearchTab'
+            : 'speciesSearchTab'
+        return h.redirect(
+          `/import/commodity/codes?error=commodity-not-found&tab=${tabParam}`
+        )
+      }
+
+      // Save commodity details to session
       setSessionValue(
         request,
         'commodity-code-details',
         viewModel.commodityCodeDetails
       )
+
+      // Store description separately for easy access
+      if (
+        viewModel.commodityCodeDetails &&
+        viewModel.commodityCodeDetails.length > 0
+      ) {
+        setSessionValue(
+          request,
+          'commodity-code-description',
+          viewModel.commodityCodeDetails[0].description
+        )
+      }
+
+      // Save species list for selection
       setSessionValue(request, 'commodity-code-species', viewModel.speciesLst)
-      setSessionValue(request, 'isCommodityCodeFlowComplete', false)
 
       return h.view('import/templates/commodity-codes/select', viewModel)
     }
   },
 
-  select: {
+  /**
+   * GET /import/commodity/codes/{parentCode}/parent?parent-code=X
+   * Navigates commodity tree hierarchy
+   */
+  tree: {
     handler: async (request, h) => {
-      const sessionData = {
-        'commodity-code': getSessionValue(request, 'commodity-code'),
-        'commodity-code-details': getSessionValue(
-          request,
-          'commodity-code-details'
-        ),
-        'commodity-code-species': getSessionValue(
-          request,
-          'commodity-code-species'
-        )
-      }
+      const traceId = request.headers['x-cdp-request-id']
 
-      // if no species selected
-      if (!request.query['species']) {
-        const { error } = commodityCodeSchema.species.validate(request.query, {
-          abortEarly: false
-        })
-
-        if (error) {
-          const formattedErrors = error ? formatValidationErrors(error) : null
-
-          const viewModel = {}
-          if (formattedErrors) {
-            viewModel.errorList = Array.of(formattedErrors.errorList[0])
-            viewModel.formError = {
-              text: formattedErrors.errorList[0].text
-            }
-          }
-
-          viewModel.speciesLst = getSessionValue(
-            request,
-            'commodity-code-species'
-          )
-
-          setSessionValue(
-            request,
-            'commodity-code-species',
-            viewModel.speciesLst
-          )
-
-          return h.view('import/templates/commodity-codes/select', viewModel)
-        }
-      }
-
-      const selectedSpeciesLst = []
-      const selectedSpecies = Array.isArray(request.query['species'])
-        ? request.query['species']
-        : [request.query['species']]
-      const speciesLst = Object.values(sessionData['commodity-code-species'])
-      selectedSpecies.forEach((code) => {
-        selectedSpeciesLst.push(
-          speciesLst.filter((species) => species.value === code)
-        )
-      })
-
-      setSessionValue(
-        request,
+      const sessionData = getCommoditySessionKeys(request, [
+        'commodity-code',
+        'commodity-codes',
+        'commodity-code-details',
         'commodity-selected-species',
-        selectedSpeciesLst.flat()
-      )
-      setSessionValue(request, 'isCommodityCodeFlowComplete', false)
+        'commodity-code-tree'
+      ])
 
-      return h.redirect('/import/consignment/purpose')
+      const parentCode =
+        request.query['parent-code'] || request.params.parentCode
+
+      // Get child nodes for this parent
+      const commodityCodesChild = await getCommodityCodeChildNode(
+        CERT_TYPE,
+        parentCode,
+        traceId,
+        sessionData
+      )
+
+      // Get full tree and filter to current parent
+      const tmpCommodityCodesParent = await getCommodityCodesTreeData(
+        CERT_TYPE,
+        '',
+        traceId,
+        request
+      )
+      const commodityCodesParent = tmpCommodityCodesParent.filter(
+        (commodity) => commodity.code === parentCode
+      )
+
+      // Build child node structure
+      const childRoot = commodityCodesChild.filter(
+        (commodity) =>
+          request.params.parentCode === commodity.code &&
+          commodity.parent === true
+      )
+
+      if (childRoot.length > 0) {
+        const childNodes = getSessionValue(request, 'commodity-codes-child')
+        childRoot.children = childNodes
+      }
+
+      // Restore tab state
+      const commoditySearchTab = getSessionValue(
+        request,
+        'commodity-search-tab'
+      )
+      const speciesSearchTab = getSessionValue(request, 'species-search-tab')
+
+      commodityCodesParent.commodityCodesChild =
+        childRoot.length > 0 ? childRoot : commodityCodesChild
+
+      const viewModel = {
+        commodityCodesParent,
+        commoditySearchTab,
+        speciesSearchTab,
+        traceId,
+        request,
+        sessionData
+      }
+
+      return h.view('import/templates/commodity-codes/index', viewModel)
     }
   },
 
-  post: {
-    handler(request, h) {
-      const sessionData = {
-        'commodity-code': getSessionValue(request, 'commodity-code'),
-        'commodity-code-details': getSessionValue(
-          request,
-          'commodity-code-details'
-        ),
-        'commodity-selected-species': getSessionValue(
-          request,
-          'commodity-selected-species'
-        )
-      }
-
-      // get quantities
-      const speciesLst = Object.values(
-        sessionData['commodity-selected-species']
-      )
-
-      speciesLst.forEach((species) => {
-        species.noOfAnimals = Number(
-          request.query[species.value + '-noOfAnimals']
-        )
-        species.noOfPacks = Number(request.query[species.value + '-noOfPacks'])
-      })
-
-      // If no animals quantities entered
-      const invalidQuantity = speciesLst.find(
-        (species) => Number(request.query[species.value + '-noOfAnimals']) === 0
-      )
-      if (invalidQuantity) {
-        // invalidQuantity.noOfAnimals = invalidQuantity.noOfAnimals
-        //   ? invalidQuantity.noOfAnimals
-        //   : 0
-        const { error } = commodityCodeSchema.noOfAnimals.validate(
-          invalidQuantity,
-          {
-            abortEarly: false
-          }
-        )
-
-        if (error) {
-          const formattedErrors = error ? formatValidationErrors(error) : null
-
-          const viewModel = {}
-          viewModel.action = 'edit'
-          if (formattedErrors) {
-            viewModel.errorList = Array.of(formattedErrors.errorList[0])
-            viewModel.formError = {
-              text: formattedErrors.errorList[0].text
-            }
-          }
-
-          viewModel.commodityCodeDetails = getSessionValue(
-            request,
-            'commodity-code-details'
-          )
-          viewModel.speciesLst = getSessionValue(
-            request,
-            'commodity-selected-species'
-          )
-          // setSessionValue(request, 'commodity-code-species', viewModel.speciesLst)
-
-          return h.view('import/templates/commodity-codes/select', viewModel)
-        }
-      }
-
-      setSessionValue(request, 'commodity-code-species', speciesLst.flat())
-      clearSessionValue(request, 'commodity-code-tree')
-      setSessionValue(request, 'isCommodityCodeFlowComplete', true)
-
-      return h.redirect('/import/consignment/purpose')
-    }
-  },
-
+  /**
+   * GET /import/commodity/codes/{parentCode}/first
+   * Navigate to first level of commodity tree
+   */
   getFirstChild: {
     handler: async (request, h) => {
       const traceId = request.headers['x-cdp-request-id']
@@ -306,7 +324,7 @@ export const commodityCodesController = {
       )
 
       treeParent.firstChild = await getCommodityCodeChildNode(
-        'CVEDA',
+        CERT_TYPE,
         parentCode,
         traceId,
         request
@@ -325,9 +343,14 @@ export const commodityCodesController = {
         traceId
       }
       return h.view('import/templates/commodity-codes/index', viewModel)
-    }
+    },
+    options: {}
   },
 
+  /**
+   * GET /import/commodity/codes/{parentCode}/{childCode}/second
+   * Navigate to second level of commodity tree
+   */
   getSecondChild: {
     handler: async (request, h) => {
       const traceId = request.headers['x-cdp-request-id']
@@ -343,7 +366,7 @@ export const commodityCodesController = {
 
       const commodityCode = request.params['childCode']
       const commodityCodesChild = await getCommodityCodeChildNode(
-        'CVEDA',
+        CERT_TYPE,
         commodityCode,
         traceId,
         sessionData
@@ -393,9 +416,14 @@ export const commodityCodesController = {
       }
 
       return h.view('import/templates/commodity-codes/index', viewModel)
-    }
+    },
+    options: {}
   },
 
+  /**
+   * GET /import/commodity/codes/{parentCode}/{firstChild}/{secondChild}/third
+   * Navigate to third level of commodity tree
+   */
   getThirdChild: {
     handler: async (request, h) => {
       const traceId = request.headers['x-cdp-request-id']
@@ -418,7 +446,7 @@ export const commodityCodesController = {
 
       const leafCommodityCode = request.params['secondChild']
       const leafCommodityCodeNodes = await getCommodityCodeChildNode(
-        'CVEDA',
+        CERT_TYPE,
         leafCommodityCode,
         traceId,
         sessionData
@@ -457,9 +485,14 @@ export const commodityCodesController = {
       }
 
       return h.view('import/templates/commodity-codes/index', viewModel)
-    }
+    },
+    options: {}
   },
 
+  /**
+   * GET /imports/commodity/codes/toggle?tab=X
+   * Switch between commodity search and species search tabs
+   */
   switchTab: {
     handler: async (request, h) => {
       const traceId = request.headers['x-cdp-request-id']
@@ -481,9 +514,14 @@ export const commodityCodesController = {
       }
 
       return h.view('import/templates/commodity-codes/index', viewModel)
-    }
+    },
+    options: {}
   },
 
+  /**
+   * GET /import/commodity/species/search?species-text-input=X
+   * Search commodity tree by species name
+   */
   speciesSearchTree: {
     handler: async (request, h) => {
       const traceId = request.headers['x-cdp-request-id']
@@ -494,14 +532,19 @@ export const commodityCodesController = {
       const tabs = getSelectedTabDetails(request)
 
       const commodityCodeRoot = await getCommodityCodesTreeData(
-        'CVEDA',
+        CERT_TYPE,
         speciesTextInput,
-        traceId
+        traceId,
+        request
       )
 
       const commodityCodeTree = {}
       commodityCodeTree.treeParent = commodityCodeRoot
-      setSessionValue(request, 'commodity-code-tree', commodityCodeTree)
+      setSessionValue(
+        request,
+        'commodity-code-tree',
+        flatten(commodityCodeTree)
+      )
 
       const viewModel = {
         treeParent: commodityCodeRoot,
@@ -510,9 +553,14 @@ export const commodityCodesController = {
         traceId
       }
       return h.view('import/templates/commodity-codes/index', viewModel)
-    }
+    },
+    options: {}
   },
 
+  /**
+   * GET /import/commodity/codes/species-autofill?filter=X
+   * Autocomplete API endpoint for species suggestions
+   */
   speciesSearch: {
     handler: async (request, h) => {
       const traceId = request.headers['x-cdp-request-id']
@@ -527,16 +575,20 @@ export const commodityCodesController = {
 
       const searchSpecies = request.query['filter']
       const response = await commodityCodeApi.getSpecies(
-        'CVEDA',
+        CERT_TYPE,
         traceId,
         searchSpecies
       )
 
       return h.response(response).type('application/json')
-    }
+    },
+    options: {}
   }
 }
 
+/**
+ * Helper function to determine selected tab details from query params
+ */
 function getSelectedTabDetails(request) {
   let commoditySearchTab, speciesSearchTab
   if (!request.query['tab']) {
@@ -555,6 +607,9 @@ function getSelectedTabDetails(request) {
   }
 }
 
+/**
+ * Helper function to get the selected tab name
+ */
 function getSelectedTabName(tabs) {
   return tabs.commoditySearchTab === 'selected'
     ? 'commoditySearchTab'

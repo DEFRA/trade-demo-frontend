@@ -26,6 +26,9 @@ export default {
     transport: {
       import: './javascripts/bcp-autocomplete.js'
     },
+    'save-as-draft': {
+      import: './javascripts/save-as-draft.js'
+    },
     species: {
       import: './javascripts/species-autocomplete.js'
     }

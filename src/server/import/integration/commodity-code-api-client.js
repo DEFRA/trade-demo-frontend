@@ -34,9 +34,7 @@ export const commodityCodeApi = {
   },
 
   async getTopLevelCommodityTree(certType, species, traceId) {
-    const params = encodeURIComponent({
-      species
-    })
+    const params = `species=${encodeURIComponent(species)}`
 
     const url = species
       ? `${commodityCodeBaseUrl}/commodity-codes/${certType}/top-level?${params}`
