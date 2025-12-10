@@ -8,14 +8,12 @@
 /**
  * Build NotificationDto from session data
  * @param {Object} sessionData - Session data containing page model
- * @param {String} status - Optional status (e.g., 'DRAFT', 'SUBMITTED')
  * @returns {Object} NotificationDto formatted for backend PUT /notifications
  */
-export function buildNotificationDto(sessionData, status = null) {
+export function buildNotificationDto(sessionData) {
   const notification = {
     id: sessionData['notification-id'] || null,
     chedReference: null, // Nullable for drafts - backend handles generation
-    status: status || null, // Status: DRAFT, SUBMITTED, etc.
     originCountry: sessionData['origin-country'] || null,
     commodity: null,
     importReason: sessionData.purpose || null,

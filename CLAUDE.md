@@ -512,6 +512,48 @@ For multiple parameters, use template literals or URL construction:
 const params = `param1=${encodeURIComponent(val1)}&param2=${encodeURIComponent(val2)}`
 ```
 
+### Notification Submission Patterns
+
+The application uses distinct endpoints for draft and final submission, allowing the backend to infer notification status from the endpoint called.
+
+**Key concepts**:
+
+- `buildNotificationDto(sessionData)` - Builds NotificationDto from session data WITHOUT status field
+- `notificationApi.saveDraft()` - Calls PUT /notifications for draft saving
+- `notificationApi.submitNotification()` - Calls POST /notifications/submit for final submission
+- Backend infers status: PUT = DRAFT, POST /notifications/submit = SUBMITTED
+
+**Draft saving pattern**:
+
+```javascript
+// Build DTO without status parameter
+const notificationDto = buildNotificationDto(sessionData)
+
+// Backend infers DRAFT status from PUT endpoint
+const savedNotification = await notificationApi.saveDraft(
+  notificationDto,
+  traceId
+)
+```
+
+**Final submission pattern**:
+
+```javascript
+// Build DTO without status parameter
+const notificationDto = buildNotificationDto(sessionData)
+
+// Backend infers SUBMITTED status from POST /notifications/submit endpoint
+const submittedNotification = await notificationApi.submitNotification(
+  notificationDto,
+  traceId
+)
+```
+
+**CRITICAL**: Never include `status` field in NotificationDto. The backend determines status based on which endpoint is called:
+
+- PUT /notifications → status = DRAFT
+- POST /notifications/submit → status = SUBMITTED
+
 ## Authentication
 
 DEFRA ID OIDC authentication via @hapi/bell. Session cookie uses `isSameSite: 'Lax'` (CRITICAL for
@@ -553,6 +595,7 @@ Convict-based config in `src/config/config.js`. Environment-based decisions cent
 - `src/server/server.js` - Server factory
 - `src/config/config.js` - Configuration loader
 - `src/server/common/helpers/session-helpers.js` - Session utilities
+- `src/server/common/helpers/api-client.js` - Backend API client (notification submission)
 
 ### Import Journey
 
@@ -561,6 +604,9 @@ Convict-based config in `src/config/config.js`. Environment-based decisions cent
   search
 - `src/server/import/controllers/commodity-selection.js` - Species selection and back navigation
 - `src/server/import/controllers/commodity-quantities.js` - Quantities entry
+- `src/server/import/controllers/review.js` - Review and final submission controller
+- `src/server/import/controllers/save-as-draft.js` - Draft saving controller
+- `src/server/import/helpers/notification-builder.js` - Builds NotificationDto from session data
 - `src/server/import/helpers/view-models.js` - View builders
 - `src/server/import/integration/commodity-code-api-client.js` - Commodity API client
 
