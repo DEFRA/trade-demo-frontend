@@ -77,11 +77,40 @@ describe('reviewController', () => {
     const { notificationApi } = await import(
       '../../common/helpers/api-client.js'
     )
-    notificationApi.saveDraft = vi.fn().mockResolvedValue({ id: '123' })
+    notificationApi.submitNotification = vi
+      .fn()
+      .mockResolvedValue({ id: '123' })
 
     await reviewController.post.handler(mockRequest, mockH)
 
     // Should succeed and redirect
+    expect(mockH.redirect).toHaveBeenCalledWith('/import/confirmation')
+  })
+
+  test('Should call submitNotification (not saveDraft) when submitting', async () => {
+    sessionHelpers.getSessionValue.mockImplementation((req, key) => {
+      if (key === 'origin-country') return 'FR'
+      if (key === 'purpose') return 'commercial'
+      if (key === 'isCommodityCodeFlowComplete') return true
+      return null
+    })
+
+    // Mock the API
+    const { notificationApi } = await import(
+      '../../common/helpers/api-client.js'
+    )
+    notificationApi.submitNotification = vi
+      .fn()
+      .mockResolvedValue({ id: '123', status: 'SUBMITTED' })
+    notificationApi.saveDraft = vi
+      .fn()
+      .mockResolvedValue({ id: '123', status: 'DRAFT' })
+
+    await reviewController.post.handler(mockRequest, mockH)
+
+    // Should call submitNotification, NOT saveDraft
+    expect(notificationApi.submitNotification).toHaveBeenCalledTimes(1)
+    expect(notificationApi.saveDraft).not.toHaveBeenCalled()
     expect(mockH.redirect).toHaveBeenCalledWith('/import/confirmation')
   })
 })

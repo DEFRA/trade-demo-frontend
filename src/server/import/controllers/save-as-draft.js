@@ -165,8 +165,8 @@ export const saveAsDraftController = {
         `Session data after save: ${JSON.stringify(sessionData)}`
       )
 
-      // Build notification DTO from session with DRAFT status
-      const notificationDto = buildNotificationDto(sessionData, 'DRAFT')
+      // Build notification DTO from session (status inferred by backend from endpoint)
+      const notificationDto = buildNotificationDto(sessionData)
 
       // Debug logging - check built notification
       request.logger.info(

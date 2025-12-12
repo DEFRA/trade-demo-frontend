@@ -148,16 +148,16 @@ export const reviewController = {
         'vehicle-identifier': getSessionValue(request, 'vehicle-identifier')
       }
 
-      // Build notification DTO with SUBMITTED status
-      const notificationDto = buildNotificationDto(sessionData, 'SUBMITTED')
+      // Build notification DTO (status inferred by backend from endpoint)
+      const notificationDto = buildNotificationDto(sessionData)
 
       request.logger.info(
         `Submitting notification: ${JSON.stringify(notificationDto)}`
       )
 
       try {
-        // Submit notification to backend
-        const submittedNotification = await notificationApi.saveDraft(
+        // Submit notification to backend (POST /notifications/submit)
+        const submittedNotification = await notificationApi.submitNotification(
           notificationDto,
           traceId
         )

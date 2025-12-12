@@ -173,5 +173,31 @@ export const notificationApi = {
     }
 
     return response.json()
+  },
+
+  /**
+   * Submit a notification for final processing
+   * Calls POST /notifications/submit with NotificationDto
+   * Backend will mark as SUBMITTED and process accordingly
+   *
+   * @param {Object} notificationDto - NotificationDto to submit
+   * @param {string} traceId - Request trace ID (x-cdp-request-id)
+   * @returns {Promise<Object>} Submitted notification with backend status
+   */
+  async submitNotification(notificationDto, traceId) {
+    const response = await fetch(`${baseUrl}/notifications/submit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        [tracingHeader]: traceId
+      },
+      body: JSON.stringify(notificationDto)
+    })
+
+    if (!response.ok) {
+      throw createError(response)
+    }
+
+    return response.json()
   }
 }
