@@ -24,6 +24,13 @@
         }) }}
       {% endif %}
 
+      {% if submissionError %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: [{ text: submissionError }]
+        }) }}
+      {% endif %}
+
       <h1 class="govuk-heading-l">{{ heading }}</h1>
 
       {{ govukSummaryList(summaryList) }}
