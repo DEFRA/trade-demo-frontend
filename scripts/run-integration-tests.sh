@@ -38,8 +38,8 @@ wait_for_health() {
 # Function to cleanup docker services
 cleanup() {
   echo ""
-  echo "Stopping DEFRA ID stub..."
-  docker compose down "$DEFRA_ID_STUB"
+  echo "Stopping DEFRA ID stub and Redis..."
+  docker rm -f cdp-defra-id-stub cdp-redis 2>/dev/null || true
 }
 
 # Main execution
