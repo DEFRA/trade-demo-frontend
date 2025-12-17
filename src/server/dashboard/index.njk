@@ -1,9 +1,10 @@
 {% extends "layouts/page.njk" %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
 
 {% block content %}
   <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
+    <div class="govuk-grid-column-full">
       <h1 class="govuk-heading-xl">{{ heading }}</h1>
 
       <h2 class="govuk-heading-m">Import Live Animals</h2>
@@ -17,6 +18,80 @@
         href: "/import/consignment/origin?new=true",
         isStartButton: true
       }) }}
+
+      <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+
+      <h2 class="govuk-heading-l">Recent Notifications</h2>
+
+      {% if hasNotifications %}
+        <p class="govuk-body">
+          Showing {{ displayedNotifications }} recent notification{% if displayedNotifications > 1 %}s{% endif %}
+        </p>
+
+        <div class="notification-list">
+          {% for notification in notifications %}
+            <dl class="notification-list__row">
+              <div class="notification-list__grid-row">
+                <div class="notification-list__grid-column-30">
+                  <dt class="notification-list__heading">Reference number</dt>
+                  <dd class="notification-list__value">
+                    {{ notification.chedReference or 'DRAFT' }}
+                  </dd>
+                </div>
+                <div class="notification-list__grid-column-25">
+                  <dt class="notification-list__heading">Commodity</dt>
+                  <dd class="notification-list__value">{{ notification.commodityDescription }}</dd>
+                </div>
+                <div class="notification-list__grid-column-25">
+                  <dt class="notification-list__heading">Arrival at BCP or PoE</dt>
+                  <dd class="notification-list__value">{{ notification.arrivalAtBcp }}</dd>
+                </div>
+                <div class="notification-list__grid-column-20">
+                  <dt class="notification-list__heading">CHED status</dt>
+                  <dd class="notification-list__value">
+                    {% if notification.status == 'DRAFT' %}
+                      {{ govukTag({
+                        text: 'DRAFT',
+                        classes: 'govuk-tag--grey'
+                      }) }}
+                    {% else %}
+                      {{ govukTag({
+                        text: notification.status,
+                        classes: 'govuk-tag--green'
+                      }) }}
+                    {% endif %}
+                  </dd>
+                </div>
+              </div>
+              <div class="notification-list__grid-row">
+                <div class="notification-list__grid-column-30">
+                  <dt class="notification-list__heading">Consignee</dt>
+                  <dd class="notification-list__value">{{ notification.consignee }}</dd>
+                </div>
+                <div class="notification-list__grid-column-25">
+                  <dt class="notification-list__heading">Consignor</dt>
+                  <dd class="notification-list__value">{{ notification.consignor }}</dd>
+                </div>
+                <div class="notification-list__grid-column-25">
+                  <dt class="notification-list__heading">Origin</dt>
+                  <dd class="notification-list__value">{{ notification.originCountry }}</dd>
+                </div>
+                <div class="notification-list__grid-column-20">
+                  <dt class="notification-list__heading">Inspection</dt>
+                  <dd class="notification-list__value">{{ notification.inspection }}</dd>
+                </div>
+              </div>
+              <div class="notification-list__links">
+                <a href="#" class="govuk-link">View details</a>
+                <a href="#" class="govuk-link">Amend</a>
+              </div>
+            </dl>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="govuk-body">No notifications have been found</p>
+      {% endif %}
+
     </div>
   </div>
 {% endblock %}
