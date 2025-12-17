@@ -28,60 +28,57 @@ Node.js/Hapi.js frontend demonstrating CDP platform integration with a Java Spri
 
 - Node.js >= v22
 - Docker and Docker Compose
-- Backend repository: `../trade-demo-backend` (MongoDB) or `../trade-demo-postgres-backend` (PostgreSQL)
-
-### Start Services
-
-```bash
-make start              # Start MongoDB backend stack + frontend with hot reload
-make restart            # Restart the frontend
-make debug              # Start in debug mode (debugger on port 9229)
-make stop               # Stop all services
-make test               # Run unit tests
-make test-integration   # Run all tests including integration
-make logs               # Show Docker logs
-make ps                 # Show service status
-make help               # Show all commands
-```
-
-`make start` launches:
-
-- **Docker**: Redis, DEFRA ID stub (port 3200), LocalStack, MongoDB, Backend (port 8085), postgres (with liquibase schema and data), trade-commodity-codes (port 8086)
-- **Native**: Frontend with hot reload (port 3000)
-
-Access at http://localhost:3000
-
-The first time you run the app, you'll need to register a test user:
-
-```bash
-make register-user
-```
+- Infrastructure setup: `../trade-demo-local`
+- Backend repository: `../trade-demo-backend` (MongoDB) or `../trade-demo-postgres-backend` (
+  PostgreSQL)
 
 ## Development Workflow
 
-### Local Development (without Docker)
+### Local Development
 
-If you prefer to run services individually:
+The simplest way to run locally is using the centralized infrastructure:
 
 ```bash
-# Start infrastructure services
-docker compose up redis defra-id-stub -d
+# Terminal 1: Start all infrastructure + backend services
+cd ../trade-demo-local
+docker compose --profile services up -d
 
-# Start your chosen backend from its repository
-cd ../trade-demo-backend && npm run dev           # MongoDB
-# OR
-cd ../trade-demo-postgres-backend && mvn spring-boot:run  # PostgreSQL
-
-# Start frontend
+# Terminal 2: Start frontend
+cd ../trade-demo-frontend
 npm install
 npm run dev  # Runs on http://localhost:3000
 ```
+
+**For faster backend development**, start only infrastructure and run backends natively:
+
+```bash
+# Terminal 1: Start infrastructure only
+cd ../trade-demo-local
+docker compose --profile infra up -d
+
+# Terminal 2: Start backend services natively (hot reload)
+cd ../trade-demo-backend
+mvn spring-boot:run
+
+# Terminal 3: Start commodity codes natively (hot reload)
+cd ../trade-commodity-codes
+mvn spring-boot:run
+
+# Terminal 4: Start frontend
+cd ../trade-demo-frontend
+npm run dev
+```
+
+**To run the frontend using the Intellij IDE**, so you can debug easily, the details are as below:
+![img.png](run_configuration.png)
 
 The frontend expects:
 
 - Backend at `http://localhost:8085` (override with `BACKEND_API_URL`)
 - DEFRA ID stub at `http://localhost:3200` (override with `DEFRA_ID_OIDC_CONFIGURATION_URL`)
 - Commodity codes at `http://localhost:8086` (override with `COMMODITY_CODES_API_URL`)
+
+See `../trade-demo-local/README.md` for more infrastructure management options.
 
 ### Testing
 
@@ -98,12 +95,16 @@ THIS INFORMATION IS LICENSED UNDER THE CONDITIONS OF THE OPEN GOVERNMENT LICENCE
 
 http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3
 
-The following attribution statement MUST be cited in your products and applications when using this information.
+The following attribution statement MUST be cited in your products and applications when using this
+information.
 
 > Contains public sector information licensed under the Open Government license v3
 
 ### About the licence
 
-The Open Government Licence (OGL) was developed by the Controller of Her Majesty's Stationery Office (HMSO) to enable information providers in the public sector to license the use and re-use of their information under a common open licence.
+The Open Government Licence (OGL) was developed by the Controller of Her Majesty's Stationery
+Office (HMSO) to enable information providers in the public sector to license the use and re-use of
+their information under a common open licence.
 
-It is designed to encourage use and re-use of information freely and flexibly, with only a few conditions.
+It is designed to encourage use and re-use of information freely and flexibly, with only a few
+conditions.

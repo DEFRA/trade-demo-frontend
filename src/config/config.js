@@ -112,7 +112,7 @@ export const config = convict({
     level: {
       doc: 'Logging level',
       format: ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'],
-      default: 'info',
+      default: 'debug',
       env: 'LOG_LEVEL'
     },
     format: {
@@ -201,6 +201,12 @@ export const config = convict({
       format: String,
       default: '127.0.0.1',
       env: 'REDIS_HOST'
+    },
+    port: {
+      doc: 'Redis cache port',
+      format: 'port',
+      default: 6379,
+      env: 'REDIS_PORT'
     },
     username: {
       doc: 'Redis cache username',
@@ -306,26 +312,27 @@ export const config = convict({
     oidcDiscoveryUrl: {
       doc: 'DEFRA ID OIDC discovery URL',
       format: String,
-      default: null,
+      default:
+        'http://localhost:3200/cdp-defra-id-stub/.well-known/openid-configuration',
       env: 'DEFRA_ID_OIDC_CONFIGURATION_URL'
     },
     clientId: {
       doc: 'DEFRA ID OAuth client ID',
       format: String,
-      default: null,
+      default: 'test-client',
       env: 'DEFRA_ID_CLIENT_ID'
     },
     clientSecret: {
       doc: 'DEFRA ID OAuth client secret',
       format: String,
-      default: null,
+      default: 'test-secret',
       sensitive: true,
       env: 'DEFRA_ID_CLIENT_SECRET'
     },
     serviceId: {
       doc: 'DEFRA ID service identifier',
       format: String,
-      default: null,
+      default: 'test-service',
       env: 'DEFRA_ID_SERVICE_ID'
     },
     tokenRefreshBufferMinutes: {
@@ -338,9 +345,9 @@ export const config = convict({
   services: {
     commodityCode: {
       baseUrl: {
-        doc: 'Backend API base URL',
+        doc: 'Commodity code API base URL',
         format: String,
-        default: '',
+        default: 'http://localhost:8086',
         env: 'COMMODITY_CODE_API_URL'
       }
     }
