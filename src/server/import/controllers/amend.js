@@ -8,15 +8,6 @@ import { notificationApi } from '../../common/helpers/api-client.js'
 import { setSessionValue } from '../../common/helpers/session-helpers.js'
 
 /**
- * Extract BCP code from transport object
- * @param {Object} transport - Transport object with bcpCode
- * @returns {string} BCP code or empty string
- */
-function extractBcpCode(transport) {
-  return transport?.bcpCode || ''
-}
-
-/**
  * Map notification DTO back to flat session keys
  * (Reverse of buildNotificationDto)
  */
