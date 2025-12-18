@@ -45,6 +45,7 @@ describe('Dashboard View Models', () => {
               bcpCode: 'GBLHR1',
               transportToBcp: 'road'
             },
+            arrivalAtBcp: new Date('2025-08-15T10:00:00Z'),
             created: '2025-12-16T10:30:00Z'
           }
         ]
@@ -59,7 +60,7 @@ describe('Dashboard View Models', () => {
           chedReference: 'CHEDA.2025.12090100',
           status: 'SUBMITTED',
           commodityDescription: 'Live bovine animals',
-          arrivalAtBcp: 'GBLHR1',
+          arrivalAtBcp: '15 Aug 2025',
           consignee: '-',
           consignor: '-',
           originCountry: 'United Kingdom',
@@ -77,6 +78,7 @@ describe('Dashboard View Models', () => {
             originCountry: 'Ireland',
             commodity: { description: 'Live sheep' },
             transport: { bcpCode: 'GBLHR1' },
+            arrivalAtBcp: new Date('2025-09-01T10:00:00Z'),
             created: '2025-12-15T10:00:00Z'
           },
           {
@@ -86,6 +88,7 @@ describe('Dashboard View Models', () => {
             originCountry: 'France',
             commodity: { description: 'Live pigs' },
             transport: { bcpCode: 'GBLHR2' },
+            arrivalAtBcp: new Date('2025-10-01T10:00:00Z'),
             created: '2025-12-14T10:00:00Z'
           }
         ]
@@ -133,7 +136,7 @@ describe('Dashboard View Models', () => {
 
         const viewModel = buildDashboardViewModel(notifications)
 
-        expect(viewModel.notifications[0].chedReference).toBeNull()
+        expect(viewModel.notifications[0].chedReference).toBe('test-id')
       })
 
       test('Should use DRAFT status when status is missing', () => {

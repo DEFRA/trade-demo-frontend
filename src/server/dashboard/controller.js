@@ -40,6 +40,15 @@ export const dashboardController = {
       // Fetch all notifications from backend
       const allNotifications = await notificationApi.findAll(traceId)
 
+      // Set random arrival dates for demo purposes
+      const start = new Date(2025, 7, 1).getTime()
+      const end = new Date(2026, 4, 31).getTime()
+      for (const notification of allNotifications) {
+        notification.arrivalAtBcp = new Date(
+          start + Math.random() * (end - start)
+        )
+      }
+
       // Sort by created date (newest first) and limit in frontend
       const sortedNotifications = sortByCreatedDesc(allNotifications)
       const limitedNotifications = sortedNotifications.slice(0, limit)

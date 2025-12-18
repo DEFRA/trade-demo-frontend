@@ -30,10 +30,10 @@ function formatDateForDisplay(dateString) {
 function buildNotificationCard(notification) {
   return {
     id: notification.id,
-    chedReference: notification.chedReference || null,
+    chedReference: notification.chedReference || notification.id,
     status: notification.status || 'DRAFT',
     commodityDescription: notification.commodity?.description || '-',
-    arrivalAtBcp: notification.transport?.bcpCode || '-',
+    arrivalAtBcp: formatDateForDisplay(notification.arrivalAtBcp),
     consignee: '-', // Placeholder - not in backend model yet
     consignor: '-', // Placeholder - not in backend model yet
     originCountry: notification.originCountry || '-',
