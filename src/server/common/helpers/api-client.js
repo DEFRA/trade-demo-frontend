@@ -199,5 +199,46 @@ export const notificationApi = {
     }
 
     return response.json()
+  },
+
+  /**
+   * Get all notifications
+   * @param {string} traceId - Request trace ID (x-cdp-request-id)
+   * @returns {Promise<Array>} Array of notification objects
+   */
+  async findAll(traceId) {
+    const response = await fetch(`${baseUrl}/notifications`, {
+      method: 'GET',
+      headers: {
+        [tracingHeader]: traceId
+      }
+    })
+
+    if (!response.ok) {
+      throw createError(response)
+    }
+
+    return response.json()
+  },
+
+  /**
+   * Get a notification by ID
+   * @param {string} id - Notification ID
+   * @param {string} traceId - Request trace ID (x-cdp-request-id)
+   * @returns {Promise<Object>} Notification object
+   */
+  async findById(id, traceId) {
+    const response = await fetch(`${baseUrl}/notifications/${id}`, {
+      method: 'GET',
+      headers: {
+        [tracingHeader]: traceId
+      }
+    })
+
+    if (!response.ok) {
+      throw createError(response)
+    }
+
+    return response.json()
   }
 }

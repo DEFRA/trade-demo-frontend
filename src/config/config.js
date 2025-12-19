@@ -302,6 +302,12 @@ export const config = convict({
       env: 'BACKEND_API_URL'
     }
   },
+  dashboardRecordsLimit: {
+    doc: 'Number of recent notifications to display on dashboard',
+    format: Number,
+    default: 10,
+    env: 'DASHBOARD_RECORDS_LIMIT'
+  },
   defraId: {
     oidcDiscoveryUrl: {
       doc: 'DEFRA ID OIDC discovery URL',
