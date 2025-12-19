@@ -12,6 +12,7 @@ import { transportDetailsController } from './controllers/transport.js'
 import { reviewController } from './controllers/review.js'
 import { confirmationController } from './controllers/confirmation.js'
 import { saveAsDraftController } from './controllers/save-as-draft.js'
+import { amendController } from './controllers/amend.js'
 
 export const importJourney = {
   plugin: {
@@ -285,6 +286,16 @@ export const importJourney = {
                 restful: true // Enable header-based CSRF validation for this AJAX endpoint
               }
             }
+          }
+        },
+
+        // Amend - load existing notification for editing
+        {
+          method: 'GET',
+          path: '/import/amend/{id}',
+          ...amendController.handler,
+          options: {
+            auth: 'session'
           }
         }
       ])
