@@ -4,7 +4,6 @@ set -e
 # Configuration
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-readonly ENV_FILE="$PROJECT_ROOT/.env"
 readonly DEFRA_ID_STUB="defra-id-stub"
 readonly HEALTH_URL="http://localhost:3200/health"
 readonly MAX_HEALTH_ATTEMPTS=30
@@ -13,14 +12,6 @@ readonly MAX_HEALTH_ATTEMPTS=30
 readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
 readonly NC='\033[0m' # No Color
-
-# Load environment variables from .env file (without comments)
-if [ -f "$ENV_FILE" ]; then
-  export $(grep -v '^#' "$ENV_FILE" | grep -v '^$' | xargs)
-else
-  echo -e "${RED}ERROR: .env file not found at $ENV_FILE${NC}"
-  exit 1
-fi
 
 # Function to wait for service health check
 wait_for_health() {
@@ -47,13 +38,17 @@ wait_for_health() {
 # Function to cleanup docker services
 cleanup() {
   echo ""
-  echo "Stopping DEFRA ID stub..."
-  docker compose down "$DEFRA_ID_STUB"
+  echo "Stopping DEFRA ID stub and Redis..."
+  docker rm -f cdp-defra-id-stub cdp-redis 2>/dev/null || true
 }
 
 # Main execution
 main() {
-  # Start DEFRA ID stub
+  # Clean up any existing containers first to avoid conflicts
+  echo "Cleaning up any existing containers..."
+  docker rm -f cdp-defra-id-stub cdp-redis 2>/dev/null || true
+
+  # Start DEFRA ID stub (will automatically start redis dependency)
   echo "Starting DEFRA ID stub..."
   docker compose up -d "$DEFRA_ID_STUB"
 
