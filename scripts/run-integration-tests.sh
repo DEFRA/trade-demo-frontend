@@ -4,6 +4,8 @@ set -e
 # Configuration
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+readonly TRADE_ROOT="$(dirname "$PROJECT_ROOT")"
+readonly COMPOSE_FILE="$TRADE_ROOT/trade-demo-local/compose.yml"
 readonly DEFRA_ID_STUB="defra-id-stub"
 readonly HEALTH_URL="http://localhost:3200/health"
 readonly MAX_HEALTH_ATTEMPTS=30
@@ -44,13 +46,20 @@ cleanup() {
 
 # Main execution
 main() {
+  # Check if compose file exists
+  if [ ! -f "$COMPOSE_FILE" ]; then
+    echo -e "${RED}ERROR: Docker compose file not found at $COMPOSE_FILE${NC}"
+    echo "Expected location: $COMPOSE_FILE"
+    exit 1
+  fi
+
   # Clean up any existing containers first to avoid conflicts
   echo "Cleaning up any existing containers..."
   docker rm -f cdp-defra-id-stub cdp-redis 2>/dev/null || true
 
   # Start DEFRA ID stub (will automatically start redis dependency)
   echo "Starting DEFRA ID stub..."
-  docker compose up -d "$DEFRA_ID_STUB"
+  docker compose -f "$COMPOSE_FILE" up -d "$DEFRA_ID_STUB"
 
   # Wait for stub to be ready
   if ! wait_for_health; then
@@ -62,7 +71,7 @@ main() {
   echo ""
   echo "Running integration tests..."
   set +e  # Temporarily disable exit-on-error to capture test exit code
-  vitest run --coverage
+  npx vitest run --coverage
   local test_exit=$?
   set -e
 
